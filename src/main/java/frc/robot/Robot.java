@@ -20,7 +20,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         swerve = new Swerve();
         xbox = new XboxController(0);
-        swerve.setUpAutoBuilder();
+        swerve.setUpPathPlanner();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }

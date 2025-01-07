@@ -42,7 +42,6 @@ public class Swerve extends SubsystemBase {
     private static final double WIDTH = 0.707;
     private static final double LENGTH = 0.702;
     private static final double MAX_SPEED = 4;
-
     private final SwerveDrive swerveDrive;
 
     private final Mechanism2d mechanism;
@@ -168,8 +167,10 @@ public class Swerve extends SubsystemBase {
                     false);
         });
     }
+
     public Pose2d getPose()
     {
+
         return swerveDrive.getPose();
     }
     public void resetOdometry(Pose2d initialHolonomicPose)
