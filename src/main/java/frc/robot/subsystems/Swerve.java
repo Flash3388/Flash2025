@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
+
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -186,49 +187,55 @@ public class Swerve extends SubsystemBase {
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0))
         );
     }
-    public FollowPathHolonomic setUpPathPlanner(){
-
-        resetOdometeryToStart();
-        ReplanningConfig replanningConfig = new ReplanningConfig(
-                false,
-                false);
-        HolonomicPathFollowerConfig holonomicPathFollowerConfig = new HolonomicPathFollowerConfig(
-                new PIDConstants(0.005, 0.00001, 0.00007),
-                new PIDConstants(0.005, 0.00001, 0.00007),
-                4.4169,
-                RobotMap.CHASSIS_RADIUS,
-                replanningConfig
-        );
-        PathPlannerPath pathS = PathPlannerPath.fromPathFile("Path-Stav");
-        FollowPathHolonomic pathHolonomic = new FollowPathHolonomic(
-                pathS,
-                this::getPose,
-                this::getSpeeds,
-                this::drive,
-                holonomicPathFollowerConfig,
-                () -> {
-                    return false;
-                },
-                this);
-        return pathHolonomic;
-
+    public void setUpPathPlanner(){
+        RobotConfig config;
+        try
+        {
+            config = RobotConfig.fromGUISettings();
+            final boolean enableFeedforward = true;
+            AutoBuilder.configure(
+                    this::getPose,
+                    this::resetOdometry,
+                    this::getRobotVelocity,
+                    (speedsRobotRelative, moduleFeedForwards) -> {
+                        if (enableFeedforward)
+                        {
+                            swerveDrive.drive(
+                                    speedsRobotRelative,
+                                    swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                                    moduleFeedForwards.linearForces()
+                            );
+                        }
+                        else
+                        {
+                            swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                        }
+                    },
+                    new PPHolonomicDriveController(
+                            new PIDConstants(5.0, 0.0, 0.0),
+                            new PIDConstants(5.0, 0.0, 0.0)
+                    ),
+                    config,
+                    () -> {
+                        var alliance = DriverStation.getAlliance();
+                        if (alliance.isPresent())
+                        {
+                            return alliance.get() == DriverStation.Alliance.Red;
+                        }
+                        return false;
+                    },
+                    this
+            );
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        PathfindingCommand.warmupCommand().schedule();
     }
-    public void setUpAutoBuilder(){
-        AutoBuilder.configureHolonomic(this::getPose,
-                this::resetOdometry,
-                this::getSpeeds,
-                this::drive,
-                new HolonomicPathFollowerConfig(
-                        new PIDConstants(0.005, 0.00001, 0.00007),
-                        new PIDConstants(0.005, 0.00001, 0.00007),
-                        4.4169,
-                        RobotMap.CHASSIS_RADIUS,
-                        new ReplanningConfig()
-                ),
-                () -> {
-                    var alliance = DriverStation.getAlliance();
-                    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
-                },this);
+    public Command getAutonomousCommand(String pathName)
+    {
+        // Create a path following command using AutoBuilder. This will also trigger event markers.
+        return new PathPlannerAuto(pathName);
     }
     public ChassisSpeeds getSpeeds(){
         return swerveDrive.getRobotVelocity();
