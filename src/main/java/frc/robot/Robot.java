@@ -1,13 +1,28 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Swerve;
 
 public class Robot extends TimedRobot {
 
+    private Swerve swerve;
+    private XboxController xbox;
+    private SendableChooser<Command> autoChooser;
+
     @Override
     public void robotInit() {
-
+        swerve = new Swerve();
+        xbox = new XboxController(0);
+        //swerve.setUpPathPlanner();
+       // autoChooser = AutoBuilder.buildAutoChooser();
+       // SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     @Override
@@ -42,12 +57,16 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        swerve.driveA(
+                ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
+        ).schedule();
     }
 
     @Override
     public void teleopPeriodic() {
-
+        swerve.simpleDrive().schedule();
     }
 
     @Override
@@ -57,7 +76,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-
+        //autoChooser.getSelected().schedule();
     }
 
     @Override
@@ -72,6 +91,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
+        swerve.driveA(()-> 0.0, ()-> 0.0, ()-> -0.6).schedule();
 
     }
 
