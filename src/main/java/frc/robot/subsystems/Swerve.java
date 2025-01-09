@@ -54,7 +54,6 @@ public class Swerve extends SubsystemBase {
         double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(12.8);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
-
         SwerveModuleConfiguration frontLeft = new SwerveModuleConfiguration(
                 new SparkMaxSwerve(31, true, DCMotor.getNEO(1)),
                 new SparkMaxSwerve(32, false,DCMotor.getNEO(1)),
