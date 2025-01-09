@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -31,7 +32,9 @@ import swervelib.math.SwerveMath;
 import swervelib.motors.SparkMaxSwerve;
 import swervelib.parser.*;
 import swervelib.parser.json.MotorConfigDouble;
+import swervelib.parser.json.modules.AngleConversionFactorsJson;
 import swervelib.parser.json.modules.ConversionFactorsJson;
+import swervelib.parser.json.modules.DriveConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
 import java.util.Arrays;
@@ -50,23 +53,41 @@ public class Swerve extends SubsystemBase {
     public Swerve() {
         PIDFConfig drivePidf = new PIDFConfig(0.0020645, 0, 0, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
-        double driveConversionFactor = SwerveMath.calculateMetersPerRotation(0.0508, 6.75);
-        double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(12.8);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
+        conversionFactor.drive.gearRatio =6.75;
+        conversionFactor.drive.factor =0;
+        conversionFactor.drive.diameter=0.0508;
+        conversionFactor.angle.gearRatio=12.8;
+        conversionFactor.angle.factor=0;
+        conversionFactor.drive.calculate();
+        conversionFactor.angle.calculate();
+        /*
+        DriveConversionFactorsJson  driveConversionFactorsJson= new DriveConversionFactorsJson();
+        driveConversionFactorsJson.gearRatio=6.75;
+        driveConversionFactorsJson.diameter=0.0508;
+        driveConversionFactorsJson.factor=0.1;
+        AngleConversionFactorsJson angleConversionFactorsJson= new AngleConversionFactorsJson();
+        angleConversionFactorsJson.factor=0.1;
+        angleConversionFactorsJson.gearRatio=12.8;
+        conversionFactor.drive=driveConversionFactorsJson;
+        conversionFactor.angle=angleConversionFactorsJson;
+        */
+        
+
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
         SwerveModuleConfiguration frontLeft = new SwerveModuleConfiguration(
                 new SparkMaxSwerve(31, true, DCMotor.getNEO(1)),
                 new SparkMaxSwerve(32, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(3),
-                15,
+                311.1,
                 LENGTH / 2,
                 WIDTH / 2,
                 steerPidf,
                 drivePidf,
                 characteristics,
                 false,
-                true,
+                false,
                 false,
                 "FrontLeft",
                 false
@@ -76,14 +97,14 @@ public class Swerve extends SubsystemBase {
                 new SparkMaxSwerve(51, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(4),
-                254.3,
+                282.2,
                 LENGTH / 2,
                 -WIDTH / 2,
                 steerPidf,
                 drivePidf,
                 characteristics,
                 false,
-                true,
+                false,
                 false,
                 "FrontRight",
                 false
@@ -93,14 +114,14 @@ public class Swerve extends SubsystemBase {
                 new SparkMaxSwerve(62, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(6),
-                44.2,
+                258.75,
                 -LENGTH / 2,
                 WIDTH / 2,
                 steerPidf,
                 drivePidf,
                 characteristics,
                 false,
-                true,
+                false,
                 false,
                 "BackLeft",
                 false
@@ -110,14 +131,14 @@ public class Swerve extends SubsystemBase {
                 new SparkMaxSwerve(41, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(5),
-                358.33,
+                177,
                 -LENGTH / 2,
                 -WIDTH / 2,
                 steerPidf,
                 drivePidf,
                 characteristics,
                 false,
-                true,
+                false,
                 false,
                 "BackRight",
                 false
@@ -165,6 +186,22 @@ public class Swerve extends SubsystemBase {
                     false,
                     false);
         });
+    }
+    public Command simpleDrive(){
+        return run(()-> {
+            swerveDrive.drive(new ChassisSpeeds(0.01, 0, 0));
+        });
+    }
+    public void resetEncoders(){
+        swerveDrive.resetDriveEncoders();
+    }
+    public void simpleMotorSet(){
+    SwerveModuleState[] states = new SwerveModuleState[]{new SwerveModuleState(0,new Rotation2d(0,0)),
+                 new SwerveModuleState(0,new Rotation2d(0,0)),
+                    new SwerveModuleState(0,new Rotation2d(0,0)),
+            new SwerveModuleState(0.5,new Rotation2d(0,0))
+    };
+    swerveDrive.setModuleStates(states,false);
     }
 
     public Pose2d getPose()
