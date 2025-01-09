@@ -74,7 +74,7 @@ public class Swerve extends SubsystemBase {
         );
         SwerveModuleConfiguration frontRight = new SwerveModuleConfiguration(
                 new SparkMaxSwerve(52, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(18, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(51, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(4),
                 254.3,
@@ -91,7 +91,7 @@ public class Swerve extends SubsystemBase {
         );
         SwerveModuleConfiguration backLeft = new SwerveModuleConfiguration(
                 new SparkMaxSwerve(61, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(12, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(62, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(6),
                 44.2,
@@ -107,8 +107,8 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration backRight = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(13, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(42, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(42, true,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(41, false,DCMotor.getNEO(1)),
                 conversionFactor,
                 new CANCoderSwerve(5),
                 358.33,
