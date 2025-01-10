@@ -8,11 +8,13 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -46,6 +48,7 @@ public class Swerve extends SubsystemBase {
     private static final double LENGTH = 0.702;
     private static final double MAX_SPEED = 4;
     private final SwerveDrive swerveDrive;
+    private SwerveDrivePoseEstimator poseEstimator;
 
     private final Mechanism2d mechanism;
     private final MechanismLigament2d[] moduleMechanisms;
@@ -56,22 +59,11 @@ public class Swerve extends SubsystemBase {
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio =6.75;
         conversionFactor.drive.factor =0;
-        conversionFactor.drive.diameter=0.0508;
+        conversionFactor.drive.diameter=0.106;
         conversionFactor.angle.gearRatio=12.8;
         conversionFactor.angle.factor=0;
         conversionFactor.drive.calculate();
         conversionFactor.angle.calculate();
-        /*
-        DriveConversionFactorsJson  driveConversionFactorsJson= new DriveConversionFactorsJson();
-        driveConversionFactorsJson.gearRatio=6.75;
-        driveConversionFactorsJson.diameter=0.0508;
-        driveConversionFactorsJson.factor=0.1;
-        AngleConversionFactorsJson angleConversionFactorsJson= new AngleConversionFactorsJson();
-        angleConversionFactorsJson.factor=0.1;
-        angleConversionFactorsJson.gearRatio=12.8;
-        conversionFactor.drive=driveConversionFactorsJson;
-        conversionFactor.angle=angleConversionFactorsJson;
-        */
         
 
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
@@ -174,6 +166,8 @@ public class Swerve extends SubsystemBase {
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
         });
+
+        poseEstimator = new SwerveDrivePoseEstimator(swerveDrive.kinematics,(swerveDrive.getGyro().getRotation3d().toRotation2d()),swerveDrive.getModulePositions(),new Pose2d(0,0,new Rotation2d()));
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
@@ -207,11 +201,13 @@ public class Swerve extends SubsystemBase {
     public Pose2d getPose()
     {
 
+
         return swerveDrive.getPose();
     }
     public void resetOdometry(Pose2d initialHolonomicPose)
     {
-        swerveDrive.resetOdometry(initialHolonomicPose);
+        poseEstimator.update(initialHolonomicPose.getRotation(), swerveDrive.getModulePositions());
+        //swerveDrive.resetOdometry(initialHolonomicPose);
     }
     public ChassisSpeeds getRobotVelocity()
     {
@@ -285,16 +281,23 @@ public class Swerve extends SubsystemBase {
                 .forEach(it -> it.setAngle(0.0)));
     }
 
+    public void updateOdometryPeri(){
+        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+        swerveDrive.swerveDrivePoseEstimator.update(swerveDrive.getOdometryHeading(),modulePositions);
 
+    }
     @Override
     public void periodic() {
         SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+        swerveDrive.updateOdometry();
+        resetOdometry();
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
 
 
 
         }
+
     }
     public void resetPose(Pose2d pose){
         swerveDrive.resetOdometry(pose);
