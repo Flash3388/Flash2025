@@ -156,6 +156,20 @@ the elevator up, retracting them lowers the elevator. These are operated each by
     - `isRaised`
     - `isLowered`
 
+Implement Basic Operational Commands for the subsystem:
+- `RaiseCoralElevator`
+   - runs on `CoralElevator` subsystem
+   - on `initialize` call `raise` to start raising system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isRaised` is `true`, `false` otherwise
+   - on `end` do nothing
+- `LowerCoralElevator`
+   - runs on `LowerElevator` subsystem
+   - on `initialize` call `lower` to start lowering system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isLowered` is `true`, `false` otherwise
+   - on `end` do nothing
+
 #### CoralArm
 
 The `CoralArm` operates a two-phased arm on top of the `CoralElevator`. This arm mounts the Coral gripper and as such manouvers it around. It is operated by 2 Pistons and has two positions. The pistons are operated each by a `DoubleSolenoid` with 2 limits switches indicating if the position of this arm.
@@ -184,6 +198,20 @@ The `CoralArm` operates a two-phased arm on top of the `CoralElevator`. This arm
     - `isExtended`
     - `isRetracted`
 
+Implement Basic Operational Commands for the subsystem:
+- `ExtendedCoralArm`
+   - runs on `CoralArm` subsystem
+   - on `initialize` call `extend` to start extending system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isExtended` is `true`, `false` otherwise
+   - on `end` do nothing
+- `RetractCoralArm`
+   - runs on `CoralArm` subsystem
+   - on `initialize` call `retract` to start retracting system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isRetracted` is `true`, `false` otherwise
+   - on `end` do nothing
+
 #### CoralGripper
 
 The `CoralGripper` sits on top of the `CoralArm` and is used to collect and hold the Coral pieces. The gripper uses two wheels to grip onto the Coral, collect it and hold it in place. A single NEO 550 and SparkMax motor controller operate this system. A limit switch is placed on the system to indicate if a Coral is present.
@@ -209,6 +237,26 @@ The `CoralGripper` sits on top of the `CoralArm` and is used to collect and hold
     - stops the motor
 - Add `periodic` method which prints the values from
     - `hasCoral`
+
+Implement Basic Operational Commands for the subsystem:
+- `CollectCoral`
+   - runs on `CoralGripper` subsystem
+   - on `initialize` call `rotateCollect` to start rotating
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `hasCoral` is `true`, `false` otherwise
+   - on `end` do nothing
+- `ReleaseCoral`
+   - runs on `CoralGripper` subsystem
+   - on `initialize` call `rotateRelease` to start rotating
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `hasCoral` is `false`, `false` otherwise
+   - on `end` do nothing
+- `HoldCoral`
+   - runs on `CoralGripper` subsystem
+   - on `initialize` call `rotateHold` to start retracting system
+   - on `execute` do nothing
+   - on `isFinished` return `false`
+   - on `end` do nothing
 
 #### AlgaeArm
 
@@ -238,6 +286,20 @@ The `AlgaeArm` operates a two-phased arm on top of the chassis. This arm mounts 
     - `isExtended`
     - `isRetracted`
 
+Implement Basic Operational Commands for the subsystem:
+- `ExtendedAlgaeArm`
+   - runs on `AlgaeArm` subsystem
+   - on `initialize` call `extend` to start extending system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isExtended` is `true`, `false` otherwise
+   - on `end` do nothing
+- `RetractAlgaeArm`
+   - runs on `AlgaeArm` subsystem
+   - on `initialize` call `retract` to start retracting system
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `isRetracted` is `true`, `false` otherwise
+   - on `end` do nothing
+
 #### AlgaeGripper
 
 The `AlgaeGripper` sits on top of the `AlgaeArm` and is used to collect and hold the Algae pieces. The gripper uses two wheels to grip onto the Algae, collect it and hold it in place. A single NEO 550 and SparkMax motor controller operate this system. A limit switch is placed on the system to indicate if a Algae is present.
@@ -251,18 +313,38 @@ The `AlgaeGripper` sits on top of the `AlgaeArm` and is used to collect and hold
     - query the limit switch with `.get`
     - remember that the limit switch is normally open and so `get` returns `true` when not pressed
 - Implement `public void rotateCollect()` method
-    - rotate the motor at a constant speed for collecting a Coral
+    - rotate the motor at a constant speed for collecting a Algae
     - use the speed value `0.8`
 - Implement `public void rotateRelease()` method
-    - rotate the motor at a constant speed for release a Coral
+    - rotate the motor at a constant speed for release a Algae
     - use the speed value `-0.5`
 - Implement `public void rotateHold()` method
-    - rotate the motor at a constant speed for holding a collected Coral in place 
+    - rotate the motor at a constant speed for holding a collected Algae in place 
     - use the speed value `0.2`
 - Implement `public void stop()` method
     - stops the motor
 - Add `periodic` method which prints the values from
     - `hasAlgae`
+
+Implement Basic Operational Commands for the subsystem:
+- `CollectAlgae`
+   - runs on `AlgaeGripper` subsystem
+   - on `initialize` call `rotateCollect` to start rotating
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `hasAlgae` is `true`, `false` otherwise
+   - on `end` do nothing
+- `ReleaseAlgae`
+   - runs on `AlgaeGripper` subsystem
+   - on `initialize` call `rotateRelease` to start rotating
+   - on `execute` do nothing
+   - on `isFinished` return `true` if `hasAlgae` is `false`, `false` otherwise
+   - on `end` do nothing
+- `HoldAlgae`
+   - runs on `AlgaeGripper` subsystem
+   - on `initialize` call `rotateHold` to start rotating
+   - on `execute` do nothing
+   - on `isFinished` return `false`
+   - on `end` do nothing
 
 ## Run Configuration
 
