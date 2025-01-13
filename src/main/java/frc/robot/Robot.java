@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -19,11 +20,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
+        DriverStation.reportError("FuckMyLife", false);
         swerve = new Swerve();
         xbox = new XboxController(0);
         swerve.setUpPathPlanner();
-       autoChooser = AutoBuilder.buildAutoChooser();
-       SmartDashboard.putData("Auto Chooser", autoChooser);
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     @Override
