@@ -59,8 +59,8 @@ public class Swerve extends SubsystemBase {
 
     public Swerve() {
         // 0.0020645
-        PIDFConfig drivePidf = new PIDFConfig(0.0020645, 0.01, 0, 0, 0);
-        PIDFConfig steerPidf = new PIDFConfig(0.02, 0.01, 0, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.01, 0, 0, 0, 0);
+        PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
         conversionFactor.drive.factor = 0;
@@ -171,7 +171,7 @@ public class Swerve extends SubsystemBase {
             module.getDriveMotor().setPosition(0);
             module.getAngleMotor().setPosition(module.getAbsolutePosition());
             module.setFeedforward(SwerveMath.createDriveFeedforward(
-                    12, MAX_SPEED, 1.5 // TODO: 1.19
+                    12, MAX_SPEED, 1.19
             ));
 
             try {
