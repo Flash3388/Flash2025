@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -77,9 +78,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        swerve.resetOdometeryToStart();
-        swerve.resetEncoders();
-        autoChooser.getSelected().schedule();
+        //swerve.resetOdometeryToStart();
+        //swerve.resetEncoders();
+        //autoChooser.getSelected().schedule();
+        swerve.driveA(()-> 1, ()-> 0, ()-> 0).schedule();
     }
 
     @Override
@@ -94,8 +96,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-        swerve.driveA(()-> 0.0, ()-> 0.0, ()-> -0.6).schedule();
-
+        swerve.centerModules().schedule();
     }
 
     @Override

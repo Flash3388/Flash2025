@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import swervelib.SwerveDrive;
+import swervelib.SwerveModule;
 import swervelib.encoders.CANCoderSwerve;
 import swervelib.imu.Pigeon2Swerve;
 import swervelib.math.SwerveMath;
@@ -54,24 +56,26 @@ public class Swerve extends SubsystemBase {
     private final MechanismLigament2d[] moduleMechanisms;
 
     public Swerve() {
-        PIDFConfig drivePidf = new PIDFConfig(0.0020645, 0, 0, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
-        conversionFactor.drive.gearRatio =6.75;
-        conversionFactor.drive.factor =0;
-        conversionFactor.drive.diameter=0.106;
-        conversionFactor.angle.gearRatio=12.8;
-        conversionFactor.angle.factor=0;
+        conversionFactor.drive.gearRatio = 6.75;
+        conversionFactor.drive.factor = 0;
+        conversionFactor.drive.diameter = 2 * 2;
+        conversionFactor.angle.gearRatio = 12.8;
+        conversionFactor.angle.factor = 0;
+
         conversionFactor.drive.calculate();
         conversionFactor.angle.calculate();
-        
+
+        conversionFactor.drive.diameter = Units.inchesToMeters(conversionFactor.drive.diameter);
 
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
         SwerveModuleConfiguration frontLeft = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(31, true, DCMotor.getNEO(1)),
-                new SparkMaxSwerve(32, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_LEFT_DRIVE, true, DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_LEFT_STEER, false,DCMotor.getNEO(1)),
                 conversionFactor,
-                new CANCoderSwerve(3),
+                new CANCoderSwerve(RobotMap.SWERVE_FRONT_LEFT_ENCODER),
                 311.1,
                 LENGTH / 2,
                 WIDTH / 2,
@@ -85,10 +89,10 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration frontRight = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(52, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(51, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_RIGHT_DRIVE, true,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_RIGHT_STEER, false,DCMotor.getNEO(1)),
                 conversionFactor,
-                new CANCoderSwerve(4),
+                new CANCoderSwerve(RobotMap.SWERVE_FRONT_RIGHT_ENCODER),
                 282.2,
                 LENGTH / 2,
                 -WIDTH / 2,
@@ -102,10 +106,10 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration backLeft = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(61, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(62, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_BACK_LEFT_DRIVE, true,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_BACK_LEFT_STEER, false,DCMotor.getNEO(1)),
                 conversionFactor,
-                new CANCoderSwerve(6),
+                new CANCoderSwerve(RobotMap.SWERVE_BACK_LEFT_ENCODER),
                 258.75,
                 -LENGTH / 2,
                 WIDTH / 2,
@@ -119,10 +123,10 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration backRight = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(42, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(41, false,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_BACK_RIGHT_DRIVE, true,DCMotor.getNEO(1)),
+                new SparkMaxSwerve(RobotMap.SWERVE_BACK_RIGHT_STEER, false,DCMotor.getNEO(1)),
                 conversionFactor,
-                new CANCoderSwerve(5),
+                new CANCoderSwerve(RobotMap.SWERVE_BACK_RIGHT_ENCODER),
                 177,
                 -LENGTH / 2,
                 -WIDTH / 2,
@@ -139,7 +143,7 @@ public class Swerve extends SubsystemBase {
                 new SwerveModuleConfiguration[] {
                         frontLeft, frontRight, backLeft, backRight
                 },
-                new Pigeon2Swerve(11),
+                new Pigeon2Swerve(RobotMap.SWERVE_PIGEON),
                 false,
                 characteristics
         );
@@ -152,12 +156,19 @@ public class Swerve extends SubsystemBase {
 
         SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
 
-        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED,new Pose2d());// dont know what to do with the pose currntly
+        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
         swerveDrive.setHeadingCorrection(false);
         swerveDrive.setCosineCompensator(false);
         swerveDrive.setAngularVelocityCompensation(false, false, 0);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
+
+        for (SwerveModule module : swerveDrive.getModules()) {
+            module.getDriveMotor().setPosition(0);
+            module.getAngleMotor().setPosition(module.getAbsolutePosition());
+        }
+
+        swerveDrive.resetOdometry(Pose2d.kZero);
 
         mechanism = new Mechanism2d(50, 50);
         moduleMechanisms = createMechanismDisplay(mechanism);
@@ -181,21 +192,15 @@ public class Swerve extends SubsystemBase {
                     false);
         });
     }
+
     public Command simpleDrive(){
         return run(()-> {
             swerveDrive.drive(new ChassisSpeeds(0.01, 0, 0));
         });
     }
+
     public void resetEncoders(){
         swerveDrive.resetDriveEncoders();
-    }
-    public void simpleMotorSet(){
-    SwerveModuleState[] states = new SwerveModuleState[]{new SwerveModuleState(0,new Rotation2d(0,0)),
-                 new SwerveModuleState(0,new Rotation2d(0,0)),
-                    new SwerveModuleState(0,new Rotation2d(0,0)),
-            new SwerveModuleState(0.5,new Rotation2d(0,0))
-    };
-    swerveDrive.setModuleStates(states,false);
     }
 
     public Pose2d getPose()
@@ -209,10 +214,12 @@ public class Swerve extends SubsystemBase {
         poseEstimator.update(initialHolonomicPose.getRotation(), swerveDrive.getModulePositions());
         //swerveDrive.resetOdometry(initialHolonomicPose);
     }
+
     public ChassisSpeeds getRobotVelocity()
     {
         return swerveDrive.getRobotVelocity();
     }
+
     public void resetOdometeryToStart() {
         swerveDrive.swerveDrivePoseEstimator.resetPosition(
                 swerveDrive.getOdometryHeading(),
@@ -220,6 +227,7 @@ public class Swerve extends SubsystemBase {
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0))
         );
     }
+
     public void setUpPathPlanner(){
         RobotConfig config;
         try
@@ -290,7 +298,7 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
-        resetOdometry();
+        //resetOdometry();
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
 
