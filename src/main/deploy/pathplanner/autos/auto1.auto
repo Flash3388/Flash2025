@@ -7,6 +7,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "path1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "path2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "path3"
           }
         }

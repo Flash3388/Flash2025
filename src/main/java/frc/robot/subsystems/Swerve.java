@@ -41,6 +41,7 @@ import swervelib.parser.json.modules.ConversionFactorsJson;
 import swervelib.parser.json.modules.DriveConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 
@@ -56,7 +57,7 @@ public class Swerve extends SubsystemBase {
     private final MechanismLigament2d[] moduleMechanisms;
 
     public Swerve() {
-        PIDFConfig drivePidf = new PIDFConfig(0.01, 0, 0, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.0, 0, 0, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
@@ -164,8 +165,20 @@ public class Swerve extends SubsystemBase {
         swerveDrive.pushOffsetsToEncoders();
 
         for (SwerveModule module : swerveDrive.getModules()) {
+            module.invalidateCache();
             module.getDriveMotor().setPosition(0);
             module.getAngleMotor().setPosition(module.getAbsolutePosition());
+            module.setFeedforward(SwerveMath.createDriveFeedforward(
+                    12, MAX_SPEED, 1.19
+            ));
+
+            try {
+                Field field = module.getClass().getDeclaredField("maxDriveVelocity");
+                field.setAccessible(true);
+                field.set(module, edu.wpi.first.units.Units.MetersPerSecond.of(MAX_SPEED));
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                throw new Error(e);
+            }
         }
 
         swerveDrive.resetOdometry(Pose2d.kZero);
@@ -209,10 +222,10 @@ public class Swerve extends SubsystemBase {
 
         return swerveDrive.getPose();
     }
+
     public void resetOdometry(Pose2d initialHolonomicPose)
     {
-        poseEstimator.update(initialHolonomicPose.getRotation(), swerveDrive.getModulePositions());
-        //swerveDrive.resetOdometry(initialHolonomicPose);
+        swerveDrive.resetOdometry(initialHolonomicPose);
     }
 
     public ChassisSpeeds getRobotVelocity()
