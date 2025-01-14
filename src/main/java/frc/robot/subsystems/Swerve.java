@@ -59,7 +59,7 @@ public class Swerve extends SubsystemBase {
 
     public Swerve() {
         // 0.0020645
-        PIDFConfig drivePidf = new PIDFConfig(0.01, 0, 0, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.53, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
