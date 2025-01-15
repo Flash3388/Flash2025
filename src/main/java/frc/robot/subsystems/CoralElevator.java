@@ -2,33 +2,52 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotMap;
 
-import static com.sun.tools.sjavac.Util.set;
+public class CoralElevator extends SubsystemBase {
 
-public class CoralElevator {
-
-    private Solenoid DoubleSolenoid;
-    private Solenoid DoubleSolenoid2;
+    private DoubleSolenoid piston1;
+    private DoubleSolenoid piston2;
     private DigitalInput UpperLimitSwitch;
     private DigitalInput LowerLimitSwitch;
 
-    public boolean isRaised(){
-        if (UpperLimitSwitch.get() ){
-            return true;
-        }
-        return false;
+    public CoralElevator() {
+        piston1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON_FORWARD_CHANNEL, RobotMap.PISTON_REVERSE_CHANNEL);
+        piston2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON_FORWARD_CHANNEL, RobotMap.PISTON_REVERSE_CHANNEL);
+        UpperLimitSwitch = new DigitalInput(1);
+        LowerLimitSwitch = new DigitalInput(2);
     }
 
-    public boolean isLowered(){
-        if (LowerLimitSwitch.get()){
-            return true;
-        }
-        return false;
+    public boolean isRaised() {
+        return !UpperLimitSwitch.get();
     }
 
-    public void raise(){
-
+    public boolean isLowered() {
+        return !LowerLimitSwitch.get();
     }
 
+    public void raise() {
+        piston1.set(DoubleSolenoid.Value.kForward);
+        piston2.set(DoubleSolenoid.Value.kForward);
+    }
+
+    public void lower() {
+        piston1.set(DoubleSolenoid.Value.kReverse);
+        piston2.set(DoubleSolenoid.Value.kReverse);
+    }
+
+    public void stop() {
+        piston1.set(DoubleSolenoid.Value.kOff);
+        piston2.set(DoubleSolenoid.Value.kOff);
+    }
+
+
+    @Override
+    public void periodic() {
+        System.out.println("Elevator Raised: " + isRaised());
+        System.out.println("Elevator Lowered: " + isLowered());
+    }
 }
