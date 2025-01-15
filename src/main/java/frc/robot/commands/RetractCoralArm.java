@@ -8,6 +8,7 @@ public class RetractCoralArm extends Command {
 
     public RetractCoralArm(CoralArm coralArm) {
         this.coralArm = coralArm;
+        addRequirements(coralArm);
     }
 
     @Override

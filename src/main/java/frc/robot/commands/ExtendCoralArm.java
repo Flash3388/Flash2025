@@ -7,6 +7,7 @@ public class ExtendCoralArm extends Command {
     private CoralArm coralArm;
     public ExtendCoralArm(CoralArm coralArm){
         this.coralArm = coralArm;
+        addRequirements(coralArm);
     }
 
     @Override

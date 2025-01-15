@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotMap;
 
 public class CoralArm extends SubsystemBase {
     private DoubleSolenoid piston;
@@ -11,8 +12,8 @@ public class CoralArm extends SubsystemBase {
     private DigitalInput extendlimitswitch;
     private DigitalInput retractlimitswitch;
     public CoralArm(){
-        this.piston = new DoubleSolenoid(PneumaticsModuleType.);
-        this.piston2 = new DoubleSolenoid(PneumaticsModuleType.);
+        this.piston = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON_FORWARD_CHANNEL,RobotMap.PISTON_BACKWARD_CHANNEL);
+        this.piston2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON2_FORWARD_CHANNEL,RobotMap.PISTON2_BACKWARD_CHANNEL);
         this.extendlimitswitch = new DigitalInput(1);
         this.retractlimitswitch = new DigitalInput(2);
 
