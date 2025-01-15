@@ -2,18 +2,19 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralArm extends SubsystemBase {
-    private final DoubleSolenoid piston;
-    private final DoubleSolenoid piston2;
-    private final DigitalInput extendlimitswitch;
-    private final DigitalInput retractlimitswitch;
-    public CoralArm(DoubleSolenoid piston, DoubleSolenoid piston2,DigitalInput extendlimitswitch, DigitalInput retractlimitswitch){
-        this.piston = piston;
-        this.piston2 = piston2;
-        this.extendlimitswitch = extendlimitswitch;
-        this.retractlimitswitch = retractlimitswitch;
+    private DoubleSolenoid piston;
+    private DoubleSolenoid piston2;
+    private DigitalInput extendlimitswitch;
+    private DigitalInput retractlimitswitch;
+    public CoralArm(){
+        this.piston = new DoubleSolenoid(PneumaticsModuleType.);
+        this.piston2 = new DoubleSolenoid(PneumaticsModuleType.);
+        this.extendlimitswitch = new DigitalInput(1);
+        this.retractlimitswitch = new DigitalInput(2);
 
         
     }
