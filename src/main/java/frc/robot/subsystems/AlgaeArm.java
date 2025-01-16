@@ -41,6 +41,7 @@ public class AlgaeArm extends SubsystemBase {
         solenoidRight.set(DoubleSolenoid.Value.kOff);
     }
 
+    @Override
     public void periodic(){
         SmartDashboard.putBoolean("Extended", isExtended());
         SmartDashboard.putBoolean("Retracted", isRetracted());

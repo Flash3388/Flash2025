@@ -37,6 +37,7 @@ public class AlgaeGripper extends SubsystemBase {
           motor.stopMotor();
      }
 
+     @Override
      public void periodic(){
           SmartDashboard.putBoolean("HasAlgae", hasAlgae());
      }
