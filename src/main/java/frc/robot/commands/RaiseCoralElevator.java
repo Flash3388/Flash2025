@@ -5,7 +5,7 @@ import frc.robot.subsystems.CoralElevator;
 
 public class RaiseCoralElevator extends Command {
 
-    private CoralElevator coralElevator;
+    private final CoralElevator coralElevator;
 
     public RaiseCoralElevator(CoralElevator coralElevator) {
         this.coralElevator = coralElevator;
@@ -24,7 +24,6 @@ public class RaiseCoralElevator extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        super.end(interrupted);
     }
 
     @Override
