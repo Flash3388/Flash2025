@@ -11,8 +11,8 @@ public class AlgaeGripper extends SubsystemBase {
      private static final double COLLECT_SPEED = 0.8;
      private static final double RELEASE_SPEED = -0.5;
      private static final double HOLD_SPEED = 0.2;
-     private SparkMax motor;
-     private DigitalInput digitalInput;
+     private final SparkMax motor;
+     private final DigitalInput digitalInput;
 
 
      public AlgaeGripper(){

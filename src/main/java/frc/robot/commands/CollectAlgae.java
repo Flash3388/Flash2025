@@ -4,10 +4,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlgaeGripper;
 
 public class CollectAlgae extends Command {
-    private AlgaeGripper algaeGripper;
+    private final AlgaeGripper algaeGripper;
 
-    public CollectAlgae(){
-        this.algaeGripper = new AlgaeGripper();
+    public CollectAlgae(AlgaeGripper algaeGripper){
+        this.algaeGripper = algaeGripper;
 
         addRequirements(algaeGripper);
     }

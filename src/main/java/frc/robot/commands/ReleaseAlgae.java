@@ -4,10 +4,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlgaeGripper;
 
 public class ReleaseAlgae extends Command {
-    private AlgaeGripper algaeGripper;
+    private final AlgaeGripper algaeGripper;
 
-    public ReleaseAlgae(){
-        this.algaeGripper = new AlgaeGripper();
+    public ReleaseAlgae(AlgaeGripper algaeGripper){
+        this.algaeGripper = algaeGripper;
 
         addRequirements(algaeGripper);
     }
@@ -29,6 +29,6 @@ public class ReleaseAlgae extends Command {
 
     @Override
     public void end(boolean interrupted) {
-
+        algaeGripper.stop();
     }
 }

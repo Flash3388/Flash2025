@@ -8,16 +8,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class AlgaeArm extends SubsystemBase {
-    private DoubleSolenoid solenoidForward;
-    private DoubleSolenoid solenoidBackward;
-    private DigitalInput switchTop;
-    private DigitalInput switchBottom;
+    private final DoubleSolenoid solenoid1;
+    private final DoubleSolenoid solenoid2;
+    private final DigitalInput switchTop;
+    private final DigitalInput switchBottom;
 
     public AlgaeArm(){
-        this.solenoidForward = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.FORWARD_PISTON_REVERSE_CHANI);
-        this.solenoidBackward = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.BACKWARD_PISTON_REVERSE_CHANI);
-        this.switchTop = new DigitalInput(RobotMap.ALGAE_ARM_TOP);
-        this.switchBottom = new DigitalInput(RobotMap.ALGAE_ARM_BOTTOM);
+        this.solenoid1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANI);
+        this.solenoid2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANI);
+        this.switchTop = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_TOP);
+        this.switchBottom = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_BOTTOM);
     }
 
     public boolean isExtended(){
@@ -29,18 +29,18 @@ public class AlgaeArm extends SubsystemBase {
     }
 
     public void extend(){
-        solenoidForward.set(DoubleSolenoid.Value.kForward);
-        solenoidBackward.set(DoubleSolenoid.Value.kForward);
+        solenoid1.set(DoubleSolenoid.Value.kForward);
+        solenoid2.set(DoubleSolenoid.Value.kForward);
     }
 
     public void retract(){
-        solenoidForward.set(DoubleSolenoid.Value.kReverse);
-        solenoidBackward.set(DoubleSolenoid.Value.kReverse);
+        solenoid1.set(DoubleSolenoid.Value.kReverse);
+        solenoid2.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void stop(){
-        solenoidForward.set(DoubleSolenoid.Value.kOff);
-        solenoidBackward.set(DoubleSolenoid.Value.kOff);
+        solenoid1.set(DoubleSolenoid.Value.kOff);
+        solenoid2.set(DoubleSolenoid.Value.kOff);
     }
 
     @Override
