@@ -4,26 +4,29 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralArm;
 
 public class RetractCoralArm extends Command {
-    private CoralArm coralArm;
+    private final CoralArm coralArm;
+    private final double speed;
 
-    public RetractCoralArm(CoralArm coralArm) {
+    public RetractCoralArm(CoralArm coralArm, double speed) {
         this.coralArm = coralArm;
+        this.speed = speed;
         addRequirements(coralArm);
     }
 
     @Override
     public void initialize() {
-        coralArm.retract();
+
     }
 
     @Override
     public void execute() {
+        coralArm.simpleRetract(speed);
 
     }
 
     @Override
     public void end(boolean interrupted) {
-
+        coralArm.stop();
     }
 
     @Override

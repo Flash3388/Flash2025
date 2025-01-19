@@ -1,21 +1,24 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.jni.CANSparkJNI;
+import com.revrobotics.spark.SparkLowLevel;
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
+import java.util.concurrent.CancellationException;
+
 public class CoralArm extends SubsystemBase {
-    private DoubleSolenoid piston;
-    private DoubleSolenoid piston2;
+    private SparkMax sparkMax ;
+
     private DigitalInput extendlimitswitch;
-    private DigitalInput retractlimitswitch;
+    private DigitalInput retractedLimitSwitch;
     public CoralArm(){
-        this.piston = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON_FORWARD_CHANNEL,RobotMap.PISTON_BACKWARD_CHANNEL);
-        this.piston2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.PISTON2_FORWARD_CHANNEL,RobotMap.PISTON2_BACKWARD_CHANNEL);
-        this.extendlimitswitch = new DigitalInput(1);
-        this.retractlimitswitch = new DigitalInput(2);
+        sparkMax = new SparkMax(RobotMap.ARM_CORAL_MOTOR, SparkLowLevel.MotorType.kBrushless);
+       this.extendlimitswitch = new DigitalInput(1);
 
         
     }
@@ -24,22 +27,16 @@ public class CoralArm extends SubsystemBase {
     }
     public boolean isRetracted(){
 
-        return !retractlimitswitch.get();
+        return !retractedLimitSwitch.get();
     }
-    public void extend(){
-        piston.set(DoubleSolenoid.Value.kForward);
-        piston2.set(DoubleSolenoid.Value.kForward);
-
+    public void simpleExtend(double speed){
+    sparkMax.set(speed);
     }
-    public void retract(){
-        piston.set(DoubleSolenoid.Value.kReverse);
-        piston2.set(DoubleSolenoid.Value.kReverse);
-
+    public void simpleRetract(double speed){
+    sparkMax.set(-speed);
     }
     public void stop(){
-        piston.set(DoubleSolenoid.Value.kOff);
-        piston2.set(DoubleSolenoid.Value.kOff);
-
+    sparkMax.stopMotor();
     }
 
     @Override

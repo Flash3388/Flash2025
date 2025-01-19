@@ -4,19 +4,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralArm;
 
 public class ExtendCoralArm extends Command {
-    private CoralArm coralArm;
-    public ExtendCoralArm(CoralArm coralArm){
+    private final CoralArm coralArm;
+    private final double speed;
+    public ExtendCoralArm(CoralArm coralArm, double speed){
         this.coralArm = coralArm;
+        this.speed =speed;
         addRequirements(coralArm);
     }
 
     @Override
     public void initialize() {
-        coralArm.extend();
+
     }
 
     @Override
     public void execute() {
+        coralArm.simpleExtend(speed);
 
     }
     @Override
@@ -26,7 +29,7 @@ public class ExtendCoralArm extends Command {
     }
     @Override
     public void end(boolean interrupted) {
-
+        coralArm.stop();
     }
 
 
