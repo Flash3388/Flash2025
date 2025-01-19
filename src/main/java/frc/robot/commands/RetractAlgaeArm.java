@@ -6,8 +6,8 @@ import frc.robot.subsystems.AlgaeArm;
 public class RetractAlgaeArm extends Command {
     private AlgaeArm algaeArm;
 
-    public RetractAlgaeArm(AlgaeArm algaeArm){
-        this.algaeArm = algaeArm;
+    public RetractAlgaeArm(){
+        this.algaeArm = new AlgaeArm();
 
         addRequirements(algaeArm);
     }

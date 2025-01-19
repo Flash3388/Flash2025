@@ -6,8 +6,8 @@ import frc.robot.subsystems.AlgaeArm;
 public class ExtendedAlgaeArm extends Command {
     private AlgaeArm algaeArm;
 
-    public ExtendedAlgaeArm(AlgaeArm algaeArm){
-        this.algaeArm = algaeArm;
+    public ExtendedAlgaeArm(){
+        this.algaeArm = new AlgaeArm();
 
         addRequirements(algaeArm);
     }
@@ -29,7 +29,7 @@ public class ExtendedAlgaeArm extends Command {
 
     @Override
     public void end(boolean interrupted) {
-
+        algaeArm.stop();
     }
 
 }

@@ -6,8 +6,8 @@ import frc.robot.subsystems.AlgaeGripper;
 public class CollectAlgae extends Command {
     private AlgaeGripper algaeGripper;
 
-    public CollectAlgae(AlgaeGripper algaeGripper){
-        this.algaeGripper = algaeGripper;
+    public CollectAlgae(){
+        this.algaeGripper = new AlgaeGripper();
 
         addRequirements(algaeGripper);
     }
@@ -29,7 +29,7 @@ public class CollectAlgae extends Command {
 
     @Override
     public void end(boolean interrupted) {
-
+        algaeGripper.stop();
     }
 
 

@@ -2,49 +2,51 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotMap;
 
 public class AlgaeArm extends SubsystemBase {
-    private DoubleSolenoid solenoidLeft;
-    private DoubleSolenoid solenoidRight;
-    private DigitalInput switchLeft;
-    private DigitalInput switchRight;
+    private DoubleSolenoid solenoidForward;
+    private DoubleSolenoid solenoidBackward;
+    private DigitalInput switchTop;
+    private DigitalInput switchBottom;
 
-    public AlgaeArm(DoubleSolenoid solenoidLeft, DoubleSolenoid solenoidRight, DigitalInput switchLeft, DigitalInput switchRight){
-        this.solenoidLeft = solenoidLeft;
-        this.solenoidRight = solenoidRight;
-        this.switchLeft = switchLeft;
-        this.switchRight = switchRight;
+    public AlgaeArm(){
+        this.solenoidForward = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.FORWARD_PISTON_REVERSE_CHANI);
+        this.solenoidBackward = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.BACKWARD_PISTON_REVERSE_CHANI);
+        this.switchTop = new DigitalInput(RobotMap.ALGAE_ARM_TOP);
+        this.switchBottom = new DigitalInput(RobotMap.ALGAE_ARM_BOTTOM);
     }
 
     public boolean isExtended(){
-        return !(switchLeft.get()) && !(switchRight.get());
+        return !(switchTop.get()) && !(switchBottom.get());
     }
 
     public boolean isRetracted(){
-        return switchLeft.get() && switchRight.get();
+        return switchTop.get() && switchBottom.get();
     }
 
     public void extend(){
-        solenoidLeft.set(DoubleSolenoid.Value.kForward);
-        solenoidRight.set(DoubleSolenoid.Value.kForward);
+        solenoidForward.set(DoubleSolenoid.Value.kForward);
+        solenoidBackward.set(DoubleSolenoid.Value.kForward);
     }
 
     public void retract(){
-        solenoidLeft.set(DoubleSolenoid.Value.kReverse);
-        solenoidRight.set(DoubleSolenoid.Value.kReverse);
+        solenoidForward.set(DoubleSolenoid.Value.kReverse);
+        solenoidBackward.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void stop(){
-        solenoidLeft.set(DoubleSolenoid.Value.kOff);
-        solenoidRight.set(DoubleSolenoid.Value.kOff);
+        solenoidForward.set(DoubleSolenoid.Value.kOff);
+        solenoidBackward.set(DoubleSolenoid.Value.kOff);
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putBoolean("Extended", isExtended());
-        SmartDashboard.putBoolean("Retracted", isRetracted());
+        SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
+        SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
     }
 
 }

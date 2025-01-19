@@ -6,8 +6,8 @@ import frc.robot.subsystems.AlgaeGripper;
 public class ReleaseAlgae extends Command {
     private AlgaeGripper algaeGripper;
 
-    public ReleaseAlgae(AlgaeGripper algaeGripper){
-        this.algaeGripper = algaeGripper;
+    public ReleaseAlgae(){
+        this.algaeGripper = new AlgaeGripper();
 
         addRequirements(algaeGripper);
     }
