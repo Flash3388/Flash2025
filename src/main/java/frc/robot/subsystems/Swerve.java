@@ -70,8 +70,6 @@ public class Swerve extends SubsystemBase {
         conversionFactor.drive.calculate();
         conversionFactor.angle.calculate();
 
-        conversionFactor.drive.diameter = Units.inchesToMeters(conversionFactor.drive.diameter);
-
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
         SwerveModuleConfiguration frontLeft = new SwerveModuleConfiguration(
                 new SparkMaxSwerve(RobotMap.SWERVE_FRONT_LEFT_DRIVE, true, DCMotor.getNEO(1)),
@@ -169,14 +167,23 @@ public class Swerve extends SubsystemBase {
             module.invalidateCache();
             module.getDriveMotor().setPosition(0);
             module.getAngleMotor().setPosition(module.getAbsolutePosition());
+
+            double wheelDiameterMeters = Units.inchesToMeters(conversionFactor.drive.diameter);
+            double maxVelMps = module.getDriveMotor().getSimMotor().freeSpeedRadPerSec / (2 * Math.PI) /
+                    conversionFactor.drive.gearRatio * (Math.PI * wheelDiameterMeters);
+
             module.setFeedforward(SwerveMath.createDriveFeedforward(
-                    12, MAX_SPEED, 1.19
+                    12, maxVelMps, 1.19
             ));
 
             try {
                 Field field = module.getClass().getDeclaredField("maxDriveVelocity");
                 field.setAccessible(true);
-                field.set(module, edu.wpi.first.units.Units.MetersPerSecond.of(MAX_SPEED));
+                field.set(module, edu.wpi.first.units.Units.MetersPerSecond.of(maxVelMps));
+
+                field = module.getClass().getDeclaredField("maxDriveVelocityMetersPerSecond");
+                field.setAccessible(true);
+                field.set(module, maxVelMps);
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 throw new Error(e);
             }
