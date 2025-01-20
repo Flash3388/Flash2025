@@ -21,11 +21,11 @@ public class AlgaeArm extends SubsystemBase {
     }
 
     public boolean isExtended(){
-        return !(switchTop.get()) && !(switchBottom.get());
+        return !(switchTop.get());
     }
 
     public boolean isRetracted(){
-        return switchTop.get() && switchBottom.get();
+        return !(switchBottom.get());
     }
 
     public void extend(){
