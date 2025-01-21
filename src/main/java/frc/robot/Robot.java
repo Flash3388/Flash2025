@@ -2,11 +2,17 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.AlgaeArm;
+import frc.robot.subsystems.AlgaeGripper;
 
 public class Robot extends TimedRobot {
+    private AlgaeArm algaeArm;
+    private AlgaeGripper algaeGripper;
 
     @Override
     public void robotInit() {
+        algaeArm = new AlgaeArm();
+        algaeGripper = new AlgaeGripper();
 
     }
 
