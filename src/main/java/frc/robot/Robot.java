@@ -2,12 +2,19 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.CoralArmCommand;
+import frc.robot.subsystems.CoralArm;
 
 public class Robot extends TimedRobot {
 
+    private CoralArm coralArm;
+    private CoralArmCommand coralArmCommand;
+
     @Override
     public void robotInit() {
-
+        coralArm = new CoralArm();
+        coralArmCommand = new CoralArmCommand(coralArm);
+        coralArm.setDefaultCommand(coralArmCommand);
     }
 
     @Override
@@ -42,7 +49,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        coralArmCommand.setNewTargetPosition(90);
     }
 
     @Override
@@ -57,7 +64,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-
+        coralArmCommand.setNewTargetPosition(60);
     }
 
     @Override

@@ -2,72 +2,79 @@ package frc.robot.subsystems;
 
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.jni.CANSparkJNI;
-import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.*;
+import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
-import java.util.concurrent.CancellationException;
-
 public class CoralArm extends SubsystemBase {
-    private SparkMax sparkMax ;
-    private PIDController pid;
-    private DigitalInput extendlimitswitch;
-    private DigitalInput retractedLimitSwitch;
-    private AbsoluteEncoder encoder;
-    public CoralArm(){
-        sparkMax = new SparkMax(RobotMap.ARM_CORAL_MOTOR, SparkLowLevel.MotorType.kBrushless);
+
+    private final SparkMax motor;
+    private final AbsoluteEncoder encoder;
+    private final SparkClosedLoopController controller;
+    private final SparkLimitSwitch forwardLimitSwitch;
+    private final SparkLimitSwitch reverseLimitSwitch;
+
+    public CoralArm() {
+        motor = new SparkMax(RobotMap.ARM_CORAL_MOTOR, SparkLowLevel.MotorType.kBrushless);
         SparkMaxConfig config = new SparkMaxConfig();
-        final int START_PULSE_US = 1;
-        final int END_PULSE_US = 1024;
-        final double ZERO_OFFSET = 0.2;
+        config.absoluteEncoder
+                .startPulseUs(RobotMap.ARM_CORAL_START_PULSE_US)
+                .endPulseUs(RobotMap.ARM_CORAL_END_PULSE_US)
+                .zeroOffset(RobotMap.ARM_CORAL_ZERO_OFFSET);
+        config.limitSwitch
+                .forwardLimitSwitchEnabled(true)
+                .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
+                .reverseLimitSwitchEnabled(true)
+                .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen);
+        config.softLimit
+                .forwardSoftLimit(180)
+                .forwardSoftLimitEnabled(true)
+                .reverseSoftLimit(0)
+                .reverseSoftLimitEnabled(true);
+        config.closedLoop
+                .pid(RobotMap.ARM_CORAL_KP, RobotMap.ARM_CORAL_KI, RobotMap.ARM_CORAL_KD)
+                .iZone(RobotMap.ARM_CORAL_IZONE)
+                .outputRange(-1, 1);
+        motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
-        config.absoluteEncoder.startPulseUs(START_PULSE_US).endPulseUs(END_PULSE_US).zeroOffset(ZERO_OFFSET);
-        encoder = sparkMax.getAbsoluteEncoder();
-        pid = new PIDController(RobotMap.KP,RobotMap.KI,RobotMap.KD);
-        pid.setIZone(RobotMap.IZONE);
-        pid.setTolerance(RobotMap.TOLORANCE);
-       this.extendlimitswitch = new DigitalInput(1);
-
-        
+        encoder = motor.getAbsoluteEncoder();
+        controller = motor.getClosedLoopController();
+        forwardLimitSwitch = motor.getForwardLimitSwitch();
+        reverseLimitSwitch = motor.getReverseLimitSwitch();
     }
 
-    public void moveToAngle(double angle){
-        // angle offsets logics
-        double speed = pid.calculate(getPosition(),angle);
-        // angle offsets logics
-        sparkMax.set(speed);
+    public double getPositionDegrees() {
+        return encoder.getPosition() * 360;
     }
-    public double getPosition(){
-        return encoder.getPosition()*360;
-    }
-    public boolean isExtended(){
-        return !extendlimitswitch.get();
-    }
-    public boolean isRetracted(){
 
-        return !retractedLimitSwitch.get();
+    public boolean isAtForwardLimit() {
+        return forwardLimitSwitch.isPressed();
     }
-    public void simpleExtend(double speed){
-    sparkMax.set(speed);
+
+    public boolean isAtReverseLimit() {
+        return reverseLimitSwitch.isPressed();
     }
-    public void simpleRetract(double speed){
-    sparkMax.set(-speed);
+
+    public void setMoveToPosition(double positionDegrees) {
+        double currentPosition = getPositionDegrees();
+        double ff = RobotMap.ARM_CORAL_KF * Math.cos(Math.toRadians(currentPosition));
+
+        double positionRotations = positionDegrees / 360.0;
+        controller.setReference(positionRotations, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, ff, SparkClosedLoopController.ArbFFUnits.kPercentOut);
     }
-    public void stop(){
-    sparkMax.stopMotor();
+
+    public void stop() {
+        motor.stopMotor();
     }
 
     @Override
     public void periodic() {
-        System.out.println("extended"+ isExtended());
-        System.out.println("retracted"+ isRetracted());
+        SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
+        SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
+        SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
     }
 
 }
