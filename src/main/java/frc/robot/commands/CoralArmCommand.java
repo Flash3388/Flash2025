@@ -9,6 +9,7 @@ public class CoralArmCommand extends Command {
 
     private double targetPositionDegrees;
     private boolean hasNewTarget;
+    private boolean didReachPosition;
 
     public CoralArmCommand(CoralArm arm) {
         this.arm = arm;
@@ -26,11 +27,12 @@ public class CoralArmCommand extends Command {
         if (hasNewTarget) {
             // reset to move to new angle
 
-
+            didReachPosition = false;
             hasNewTarget = false;
         }
 
         arm.setMoveToPosition(targetPositionDegrees);
+        didReachPosition = arm.didReachPosition(targetPositionDegrees);
     }
 
     @Override
@@ -46,5 +48,13 @@ public class CoralArmCommand extends Command {
     public void setNewTargetPosition(double positionDegrees) {
         this.targetPositionDegrees = positionDegrees;
         this.hasNewTarget = true;
+    }
+
+    public boolean didReachTargetPosition() {
+        if (hasNewTarget) {
+            return false;
+        }
+
+        return didReachPosition;
     }
 }

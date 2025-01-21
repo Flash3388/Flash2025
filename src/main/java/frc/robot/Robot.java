@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        coralArmCommand.setNewTargetPosition(90);
+
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        coralArmCommand.setNewTargetPosition(60);
+
     }
 
     @Override

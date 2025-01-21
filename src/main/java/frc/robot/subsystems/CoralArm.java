@@ -5,6 +5,7 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -48,6 +49,12 @@ public class CoralArm extends SubsystemBase {
 
     public double getPositionDegrees() {
         return encoder.getPosition() * 360;
+    }
+
+    public boolean didReachPosition(double positionDegrees) {
+        double currentPosition = getPositionDegrees();
+        return MathUtil.isNear(positionDegrees, currentPosition, RobotMap.ARM_CORAL_TOLERANCE_POSITION_DEGREES) &&
+                Math.abs(encoder.getVelocity()) < RobotMap.ARM_CORAL_TOLERANCE_VELOCITY_RPM;
     }
 
     public boolean isAtForwardLimit() {
