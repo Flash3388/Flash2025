@@ -5,7 +5,7 @@ import com.revrobotics.spark.SparkMax;
 public class RobotMap {
 
 
-    public static final int MOTOR_IDENTIFIER = 2;
+    public static final int CORAL_GRIPPER_MOTOR = 2;
 }
 
     // add constants here
