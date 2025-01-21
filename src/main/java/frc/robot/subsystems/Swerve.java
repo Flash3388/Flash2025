@@ -7,6 +7,7 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -56,7 +57,8 @@ public class Swerve extends SubsystemBase {
     private final MechanismLigament2d[] moduleMechanisms;
 
     public Swerve() {
-        PIDFConfig drivePidf = new PIDFConfig(0.0, 0, 0, 0, 0);
+        // 0.0020645
+        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.53, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
@@ -244,25 +246,12 @@ public class Swerve extends SubsystemBase {
         try
         {
             config = RobotConfig.fromGUISettings();
-            final boolean enableFeedforward = true;
+            final boolean enableFeedforward = false;
             AutoBuilder.configure(
                     this::getPose,
                     this::resetOdometry,
                     this::getRobotVelocity,
-                    (speedsRobotRelative, moduleFeedForwards) -> {
-                        if (enableFeedforward)
-                        {
-                            swerveDrive.drive(
-                                    speedsRobotRelative,
-                                    swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
-                                    moduleFeedForwards.linearForces()
-                            );
-                        }
-                        else
-                        {
-                            swerveDrive.setChassisSpeeds(speedsRobotRelative);
-                        }
-                    },
+                    this::setSpeeds,
                     new PPHolonomicDriveController(
                             new PIDConstants(5.0, 0.0, 0.0),
                             new PIDConstants(5.0, 0.0, 0.0)
@@ -280,7 +269,7 @@ public class Swerve extends SubsystemBase {
             );
         } catch (Exception e)
         {
-            e.printStackTrace();
+            throw new Error(e);
         }
         PathfindingCommand.warmupCommand().schedule();
     }
@@ -323,6 +312,19 @@ public class Swerve extends SubsystemBase {
     }
     public void resetPose(Pose2d pose){
         swerveDrive.resetOdometry(pose);
+    }
+
+    private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        System.out.println(speeds);
+        SmartDashboard.putNumber("SpeedsY", speeds.vxMetersPerSecond);
+        if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
+            for (SwerveModule module : swerveDrive.getModules()) {
+                module.getDriveMotor().set(0);
+                module.getAngleMotor().set(0);
+            }
+        } else {
+            swerveDrive.setChassisSpeeds(speeds);
+        }
     }
 
     private MechanismLigament2d[] createMechanismDisplay(Mechanism2d mechanism) {
