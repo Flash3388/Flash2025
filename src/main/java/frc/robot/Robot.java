@@ -4,15 +4,25 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.CoralArmCommand;
 import frc.robot.subsystems.CoralArm;
+import frc.robot.subsystems.AlgaeArm;
+import frc.robot.subsystems.AlgaeGripper;
+import frc.robot.subsystems.CoralElevator;
 
 public class Robot extends TimedRobot {
-
+    private AlgaeArm algaeArm;
+    private AlgaeGripper algaeGripper;
+    private CoralElevator coralElevator;
     private CoralArm coralArm;
+
     private CoralArmCommand coralArmCommand;
 
     @Override
     public void robotInit() {
+        algaeArm = new AlgaeArm();
+        algaeGripper = new AlgaeGripper();
+        coralElevator = new CoralElevator();
         coralArm = new CoralArm();
+
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
     }
