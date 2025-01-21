@@ -1,25 +1,25 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CoralGripper;
+import frc.robot.subsystems.AlgaeGripper;
 
-public class HoldCoral extends Command {
-    public CoralGripper coralGripper;
+public class HoldAlgae extends Command {
+    private final AlgaeGripper algaeGripper;
 
+    public HoldAlgae(AlgaeGripper algaeGripper){
+        this.algaeGripper = algaeGripper;
 
-    public HoldCoral(CoralGripper coralGripper) {
-        this.coralGripper = coralGripper;
-
-        addRequirements(coralGripper);
+        addRequirements(algaeGripper);
     }
 
     @Override
     public void initialize() {
-        coralGripper.rotateHold();
+        algaeGripper.rotateHold();
     }
 
     @Override
     public void execute() {
+
     }
 
     @Override
@@ -29,6 +29,6 @@ public class HoldCoral extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        coralGripper.stop();
+        algaeGripper.stop();
     }
 }
