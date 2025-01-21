@@ -3,11 +3,17 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.CoralGripper;
 
 public class Robot extends TimedRobot {
+    private CoralGripper coralGripper;
+
 
     @Override
     public void robotInit() {
+        coralGripper = new CoralGripper();
+
+
     }
 
     @Override
@@ -48,7 +54,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        
+
     }
 
     @Override

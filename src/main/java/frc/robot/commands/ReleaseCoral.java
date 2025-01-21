@@ -13,17 +13,22 @@ public class ReleaseCoral extends Command {
         addRequirements(coralGripper);
     }
 
+    @Override
     public void initialize() {
         coralGripper.rotateRelease();
     }
 
+    @Override
     public void execute() {
     }
 
+    @Override
     public boolean isFinished() {
         return !coralGripper.hasCoral();
     }
 
-    public void end() {
+    @Override
+    public void end(boolean wasInterrupted) {
+        coralGripper.stop();
     }
 }

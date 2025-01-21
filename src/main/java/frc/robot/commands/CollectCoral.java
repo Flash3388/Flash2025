@@ -13,18 +13,22 @@ public class CollectCoral extends Command {
 
         addRequirements(coralGripper);
     }
-
+    @Override
     public void initialize() {
         coralGripper.rotateCollect();
     }
 
+    @Override
     public void execute() {
     }
 
+    @Override
     public boolean isFinished() {
         return coralGripper.hasCoral();
     }
 
-    public void end() {
+    @Override
+    public void end(boolean wasInterrupted)  {
+        coralGripper.stop();
     }
 }

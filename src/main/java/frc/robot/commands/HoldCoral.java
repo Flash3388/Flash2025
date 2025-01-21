@@ -30,5 +30,6 @@ public class HoldCoral extends Command {
 
     @Override
     public void end(boolean interrupted) {
+        coralGripper.stop();
     }
 }
