@@ -51,7 +51,6 @@ public class Swerve extends SubsystemBase {
     private static final double LENGTH = 0.702;
     private static final double MAX_SPEED = 4;
     private final SwerveDrive swerveDrive;
-    private SwerveDrivePoseEstimator poseEstimator;
 
     private final Mechanism2d mechanism;
     private final MechanismLigament2d[] moduleMechanisms;
@@ -191,7 +190,6 @@ public class Swerve extends SubsystemBase {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
         });
 
-        poseEstimator = new SwerveDrivePoseEstimator(swerveDrive.kinematics,(swerveDrive.getGyro().getRotation3d().toRotation2d()),swerveDrive.getModulePositions(),new Pose2d(0,0,new Rotation2d()));
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
@@ -311,7 +309,8 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
-        //resetOdometry();
+        //TODO : swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement();
+        // when limelight branch is merged, add the limelight logic to the periodic.
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
 
