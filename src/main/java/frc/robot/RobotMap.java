@@ -1,7 +1,14 @@
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+
 public class RobotMap {
+
     private RobotMap() {}
+
+    // coral gripper
+    public static final int CORAL_GRIPPER_LIMIT_SWITCH = 1;
+    public static final int CORAL_GRIPPER_MOTOR = 2;
 
     // coral arm
     public static final int ARM_CORAL_MOTOR = 1;
@@ -34,4 +41,3 @@ public class RobotMap {
     public static final int ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL = 0;
     public static final int ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANI = 0;
 }
-
