@@ -317,6 +317,8 @@ public class Swerve extends SubsystemBase {
 
 
         }
+        SwerveModule[] arr =swerveDrive.getModules();
+        SmartDashboard.putNumber("MaxSpeed",arr[1].getMaxDriveVelocityMetersPerSecond());
 
     }
     public void resetPose(Pose2d pose){
