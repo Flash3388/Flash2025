@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlgaeArm;
 
 public class RetractAlgaeArm extends Command {
-    private AlgaeArm algaeArm;
+    private final AlgaeArm algaeArm;
 
     public RetractAlgaeArm(AlgaeArm algaeArm){
         this.algaeArm = algaeArm;
@@ -29,6 +29,6 @@ public class RetractAlgaeArm extends Command {
 
     @Override
     public void end(boolean interrupted) {
-
     }
+
 }
