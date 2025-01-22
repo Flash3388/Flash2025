@@ -29,7 +29,6 @@ public class CoralArmCommand extends Command {
     public void initialize() {
         isHolding = false;
     }
-//TODO : stop the motion profiling when finished
     @Override
     public void execute() {
         if (hasNewTarget) {
