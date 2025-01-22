@@ -13,7 +13,6 @@ public class Dashboard extends SubsystemBase {
     private final CoralArm coralArm;
     private final CoralGripper coralGripper;
 
-    // Shuffleboard Tabs
     private final ShuffleboardTab coralTab;
     private final ShuffleboardTab algaeTab;
 
