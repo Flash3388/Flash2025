@@ -163,32 +163,6 @@ public class Swerve extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        for (SwerveModule module : swerveDrive.getModules()) {
-            module.invalidateCache();
-            module.getDriveMotor().setPosition(0);
-            module.getAngleMotor().setPosition(module.getAbsolutePosition());
-
-            double wheelDiameterMeters = Units.inchesToMeters(conversionFactor.drive.diameter);
-            double maxVelMps = module.getDriveMotor().getSimMotor().freeSpeedRadPerSec / (2 * Math.PI) /
-                    conversionFactor.drive.gearRatio * (Math.PI * wheelDiameterMeters);
-
-            module.setFeedforward(SwerveMath.createDriveFeedforward(
-                    12, maxVelMps, 1.19
-            ));
-
-            try {
-                Field field = module.getClass().getDeclaredField("maxDriveVelocity");
-                field.setAccessible(true);
-                field.set(module, edu.wpi.first.units.Units.MetersPerSecond.of(maxVelMps));
-
-                field = module.getClass().getDeclaredField("maxDriveVelocityMetersPerSecond");
-                field.setAccessible(true);
-                field.set(module, maxVelMps);
-            } catch (IllegalAccessException | NoSuchFieldException e) {
-                throw new Error(e);
-            }
-        }
-
         swerveDrive.resetOdometry(Pose2d.kZero);
 
         mechanism = new Mechanism2d(50, 50);
