@@ -2,8 +2,11 @@ package frc.robot.subsystems;
 
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.*;
+import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.LimitSwitchConfig;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,10 +16,12 @@ import frc.robot.RobotMap;
 public class CoralArm extends SubsystemBase {
 
     private final SparkMax motor;
-    private final AbsoluteEncoder encoder;
+    private final AbsoluteEncoder absEncoder;
+    private final RelativeEncoder relEncoder;
     private final SparkClosedLoopController controller;
     private final SparkLimitSwitch forwardLimitSwitch;
     private final SparkLimitSwitch reverseLimitSwitch;
+
 
     public CoralArm() {
         motor = new SparkMax(RobotMap.ARM_CORAL_MOTOR, SparkLowLevel.MotorType.kBrushless);
@@ -38,23 +43,29 @@ public class CoralArm extends SubsystemBase {
         config.closedLoop
                 .pid(RobotMap.ARM_CORAL_KP, RobotMap.ARM_CORAL_KI, RobotMap.ARM_CORAL_KD)
                 .iZone(RobotMap.ARM_CORAL_IZONE)
-                .outputRange(-1, 1);
+                .outputRange(-1, 1)
+                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder);
+        config.idleMode(SparkBaseConfig.IdleMode.kBrake);
         motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+        relEncoder =  motor.getEncoder();
+        absEncoder = motor.getAbsoluteEncoder();
+        relEncoder.setPosition(absEncoder.getPosition());
 
-        encoder = motor.getAbsoluteEncoder();
+
         controller = motor.getClosedLoopController();
         forwardLimitSwitch = motor.getForwardLimitSwitch();
         reverseLimitSwitch = motor.getReverseLimitSwitch();
+
     }
 
     public double getPositionDegrees() {
-        return encoder.getPosition() * 360;
+        return relEncoder.getPosition() * 360;
     }
 
     public boolean didReachPosition(double positionDegrees) {
         double currentPosition = getPositionDegrees();
         return MathUtil.isNear(positionDegrees, currentPosition, RobotMap.ARM_CORAL_TOLERANCE_POSITION_DEGREES) &&
-                Math.abs(encoder.getVelocity()) < RobotMap.ARM_CORAL_TOLERANCE_VELOCITY_RPM;
+                Math.abs(relEncoder.getVelocity()) < RobotMap.ARM_CORAL_TOLERANCE_VELOCITY_RPM;
     }
 
     public boolean isAtForwardLimit() {
@@ -81,7 +92,8 @@ public class CoralArm extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
         SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
-        SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
+        SmartDashboard.putNumber("CoralArmPositionRelative", getPositionDegrees());
+        SmartDashboard.putNumber("CoralArmPositionAbsolute",absEncoder.getPosition());
     }
 
 }
