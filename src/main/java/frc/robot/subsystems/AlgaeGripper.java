@@ -1,23 +1,29 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 
 public class AlgaeGripper extends SubsystemBase {
+
      private static final double COLLECT_SPEED = 0.8;
      private static final double RELEASE_SPEED = -0.5;
      private static final double HOLD_SPEED = 0.2;
+
      private final SparkMax motor;
      private final DigitalInput digitalInput;
-
 
      public AlgaeGripper(){
           this.motor = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR, SparkLowLevel.MotorType.kBrushless);
           this.digitalInput = new DigitalInput(RobotMap.ALGAE_GRIPPER_DIGITALINPUT);
+
+          SparkMaxConfig config = new SparkMaxConfig();
+          motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
      }
 
      public boolean hasAlgae(){

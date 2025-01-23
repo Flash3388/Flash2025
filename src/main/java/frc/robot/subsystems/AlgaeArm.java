@@ -14,8 +14,8 @@ public class AlgaeArm extends SubsystemBase {
     private final DigitalInput switchBottom;
 
     public AlgaeArm(){
-        this.solenoid1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANI);
-        this.solenoid2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANI);
+        this.solenoid1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL);
+        this.solenoid2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANNEL);
         this.switchTop = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_TOP);
         this.switchBottom = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_BOTTOM);
     }
