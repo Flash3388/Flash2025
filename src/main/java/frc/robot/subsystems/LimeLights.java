@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Limelight;
 import frc.robot.LimelightHelpers;
 
+import java.util.Optional;
+
 public class LimeLights extends SubsystemBase {
 
     private static final String LL_Name_Banana = "limelight-banana";
@@ -25,13 +27,13 @@ public class LimeLights extends SubsystemBase {
             this.redAlliance = DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
     }
 
-    public Pose2d getRobotPoseEstimate(){
+    public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate(){
         if(limelight_apple.targetIsSeen()){
-            return limelight_apple.getPoseEstimate().pose;
+            return Optional.of(limelight_apple.getPoseEstimate());
         }else if(limelight_banana.targetIsSeen()){
-            return limelight_banana.getPoseEstimate().pose;
+            return Optional.of(limelight_banana.getPoseEstimate());
         }
-        return  Pose2d.kZero;
+        return Optional.empty();
     }
     public double getTimeStamp(){
 

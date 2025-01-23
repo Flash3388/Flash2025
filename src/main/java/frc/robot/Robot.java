@@ -19,7 +19,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        DriverStation.reportError("FuckMyLife", false);
         swerve = new Swerve();
         xbox = new XboxController(0);
         swerve.setUpPathPlanner();
@@ -79,7 +78,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        swerve.resetOdometeryToStart();
         //swerve.resetEncoders();
         autoChooser.getSelected().schedule();
     }

@@ -9,25 +9,18 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.estimator.PoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
 import frc.robot.RobotMap;
 import swervelib.SwerveDrive;
 import swervelib.SwerveModule;
@@ -36,14 +29,10 @@ import swervelib.imu.Pigeon2Swerve;
 import swervelib.math.SwerveMath;
 import swervelib.motors.SparkMaxSwerve;
 import swervelib.parser.*;
-import swervelib.parser.json.MotorConfigDouble;
-import swervelib.parser.json.modules.AngleConversionFactorsJson;
 import swervelib.parser.json.modules.ConversionFactorsJson;
-import swervelib.parser.json.modules.DriveConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
-
-import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
@@ -55,6 +44,8 @@ public class Swerve extends SubsystemBase {
 
     private final Mechanism2d mechanism;
     private final MechanismLigament2d[] moduleMechanisms;
+    private final LimeLights limeLights;
+    Field2d secondField;
 
     public Swerve() {
         // 0.0020645
@@ -172,7 +163,8 @@ public class Swerve extends SubsystemBase {
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
         });
-
+        limeLights = new LimeLights();
+        secondField = new Field2d();
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
@@ -227,7 +219,6 @@ public class Swerve extends SubsystemBase {
         try
         {
             config = RobotConfig.fromGUISettings();
-            final boolean enableFeedforward = false;
             AutoBuilder.configure(
                     this::getPose,
                     this::resetOdometry,
@@ -254,46 +245,35 @@ public class Swerve extends SubsystemBase {
         }
         PathfindingCommand.warmupCommand().schedule();
     }
-    public Command getAutonomousCommand(String pathName)
-    {
-        // Create a path following command using AutoBuilder. This will also trigger event markers.
-        return new PathPlannerAuto(pathName);
-    }
+
     public ChassisSpeeds getSpeeds(){
         return swerveDrive.getRobotVelocity();
     }
-    public void drive(ChassisSpeeds speeds){
-        swerveDrive.drive(speeds);
-    }
+
     public Command centerModules() {
         return run(() -> Arrays.asList(swerveDrive.getModules())
                 .forEach(it -> it.setAngle(0.0)));
     }
 
-    public void updateOdometryPeri(){
-        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
-        swerveDrive.swerveDrivePoseEstimator.update(swerveDrive.getOdometryHeading(),modulePositions);
 
-    }
     @Override
     public void periodic() {
         SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
-        //TODO : swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement();
-        // when limelight branch is merged, add the limelight logic to the periodic.
+        SmartDashboard.putData("Camerafield",secondField);
+
+        Optional<LimelightHelpers.PoseEstimate> optionalPose = limeLights.getRobotPoseEstimate();
+        if (optionalPose.isPresent()) {
+            LimelightHelpers.PoseEstimate pose = optionalPose.get();
+            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+        }
+
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
-
-
-
         }
-        SwerveModule[] arr =swerveDrive.getModules();
-        SmartDashboard.putNumber("MaxSpeed",arr[1].getMaxDriveVelocityMetersPerSecond());
 
     }
-    public void resetPose(Pose2d pose){
-        swerveDrive.resetOdometry(pose);
-    }
+
 
     private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
         System.out.println(speeds);
@@ -340,7 +320,5 @@ public class Swerve extends SubsystemBase {
                 mechanismBottomRight
         };
     }
-    public void updatePoseEstimator(Pose2d pos, double time){
-        swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(pos,time);
-    }
+
 }
