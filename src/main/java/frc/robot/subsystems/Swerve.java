@@ -27,7 +27,7 @@ import swervelib.SwerveModule;
 import swervelib.encoders.CANCoderSwerve;
 import swervelib.imu.Pigeon2Swerve;
 import swervelib.math.SwerveMath;
-import swervelib.motors.SparkMaxSwerve;
+import swervelib.motors.SparkFlexSwerve;
 import swervelib.parser.*;
 import swervelib.parser.json.modules.ConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -63,8 +63,8 @@ public class Swerve extends SubsystemBase {
 
         SwerveModulePhysicalCharacteristics characteristics = new SwerveModulePhysicalCharacteristics(conversionFactor,0.25,0.25);
         SwerveModuleConfiguration frontLeft = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_LEFT_DRIVE, true, DCMotor.getNEO(1)),
-                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_LEFT_STEER, false,DCMotor.getNEO(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_FRONT_LEFT_DRIVE,true,DCMotor.getNeoVortex(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_FRONT_LEFT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_FRONT_LEFT_ENCODER),
                 311.1,
@@ -80,8 +80,8 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration frontRight = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_RIGHT_DRIVE, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(RobotMap.SWERVE_FRONT_RIGHT_STEER, false,DCMotor.getNEO(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_FRONT_RIGHT_DRIVE,true,DCMotor.getNeoVortex(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_FRONT_RIGHT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_FRONT_RIGHT_ENCODER),
                 282.2,
@@ -97,8 +97,8 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration backLeft = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(RobotMap.SWERVE_BACK_LEFT_DRIVE, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(RobotMap.SWERVE_BACK_LEFT_STEER, false,DCMotor.getNEO(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_BACK_LEFT_DRIVE,true,DCMotor.getNeoVortex(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_BACK_LEFT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_BACK_LEFT_ENCODER),
                 258.75,
@@ -114,8 +114,8 @@ public class Swerve extends SubsystemBase {
                 false
         );
         SwerveModuleConfiguration backRight = new SwerveModuleConfiguration(
-                new SparkMaxSwerve(RobotMap.SWERVE_BACK_RIGHT_DRIVE, true,DCMotor.getNEO(1)),
-                new SparkMaxSwerve(RobotMap.SWERVE_BACK_RIGHT_STEER, false,DCMotor.getNEO(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_BACK_RIGHT_DRIVE,true,DCMotor.getNeoVortex(1)),
+                new SparkFlexSwerve(RobotMap.SWERVE_BACK_RIGHT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_BACK_RIGHT_ENCODER),
                 177,
