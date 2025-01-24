@@ -17,10 +17,7 @@ public class Robot extends TimedRobot {
     private CoralElevator coralElevator;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
-
     private CoralArmCommand coralArmCommand;
-    private RetractAlgaeArm retractAlgaeArm;
-    private LowerCoralElevator lowerCoralElevator;
 
     @Override
     public void robotInit() {
@@ -33,27 +30,31 @@ public class Robot extends TimedRobot {
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
-        retractAlgaeArm = new RetractAlgaeArm(algaeArm);
-        algaeArm.setDefaultCommand(retractAlgaeArm);
+        algaeArm.setDefaultCommand(new RetractAlgaeArm(algaeArm));
 
-        lowerCoralElevator = new LowerCoralElevator(coralElevator);
-        coralElevator.setDefaultCommand(lowerCoralElevator);
+        Command checkIfLow = Commands.defer(()-> {
+            if(coralElevator.isRaised()){
+                return new LowerCoralElevator(coralElevator);
+            }
+            return Commands.none();
+        }, Set.of(coralElevator));
+        coralElevator.setDefaultCommand(checkIfLow);
 
-        Command CheckCoral = Commands.defer(()-> {
+        Command checkCoral = Commands.defer(()-> {
             if (coralGripper.hasCoral()) {
                 return new HoldCoral(coralGripper);
             }
             return Commands.none();
-        }, (Set<Subsystem>) coralGripper);
-        coralGripper.setDefaultCommand(CheckCoral);
+        }, Set.of(coralGripper));
+        coralGripper.setDefaultCommand(checkCoral);
 
-        Command CheckAlgae = Commands.defer(()-> {
+        Command checkAlgae = Commands.defer(()-> {
             if (algaeGripper.hasAlgae()) {
                 return new HoldAlgae(algaeGripper);
             }
             return Commands.none();
-        }, (Set<Subsystem>) algaeGripper);
-        algaeGripper.setDefaultCommand(CheckAlgae);
+        }, Set.of(algaeGripper));
+        algaeGripper.setDefaultCommand(checkAlgae);
 
     }
 
@@ -135,35 +136,43 @@ public class Robot extends TimedRobot {
 
     private Command coralLevel2Place(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> new LowerCoralElevator(coralElevator)),
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition()),
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
                 new CollectCoral(coralGripper));
     }
 
     private Command coralLevel3Place(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> new RaiseCoralElevator(coralElevator)),
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition()),
+                new ParallelCommandGroup(
+                        new RaiseCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
                 new CollectCoral(coralGripper));
     }
 
     private Command coralCollect(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> new LowerCoralElevator(coralElevator)),
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
-                Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition()),
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
                 new ReleaseCoral(coralGripper));
     }
 
     private Command algaeCollect(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> new ExtendedAlgaeArm(algaeArm)), new CollectAlgae(algaeGripper));
+                new ExtendedAlgaeArm(algaeArm),
+                new CollectAlgae(algaeGripper));
     }
 
     private Command algaeOut(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> new RetractAlgaeArm(algaeArm)), new ReleaseAlgae(algaeGripper));
+                new RetractAlgaeArm(algaeArm),
+                new ReleaseAlgae(algaeGripper));
     }
 }

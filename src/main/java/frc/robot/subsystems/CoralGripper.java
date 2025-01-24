@@ -29,7 +29,7 @@ public class CoralGripper extends SubsystemBase {
     public static final double ROTATE_HOLD = 0.2;
 
     public CoralGripper() {
-        motor = new TalonFX(RobotMap.MOTOR_IDENTIFIER);
+        motor = new TalonFX(RobotMap.CORAL_GRIPPER_MOTOR);
         motor.getConfigurator().apply(new TalonFXConfiguration());
         limitSwitch = new DigitalInput(RobotMap.CORAL_GRIPPER_LIMIT_SWITCH);
 
