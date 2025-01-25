@@ -36,7 +36,7 @@ public class Robot extends TimedRobot {
             if(coralElevator.isRaised()){
                 return new LowerCoralElevator(coralElevator);
             }
-            return Commands.none();
+            return Commands.idle(coralElevator);
         }, Set.of(coralElevator));
         coralElevator.setDefaultCommand(checkIfLow);
 
