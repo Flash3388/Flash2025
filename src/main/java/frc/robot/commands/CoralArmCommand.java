@@ -44,8 +44,8 @@ public class CoralArmCommand extends Command {
                 hasNewTarget = false;
 
             motionProfile = new TrapezoidProfile(constraints);
-            motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
-            motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
+            //motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
+            //motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
         }
         motionProfileSetPoint = motionProfile.calculate(0.02, motionProfileSetPoint, motionProfileGoal);
         arm.setMoveToPosition(motionProfileSetPoint.position);
