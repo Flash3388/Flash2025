@@ -13,6 +13,9 @@ public class CoralArmCommand extends Command {
     private TrapezoidProfile.State motionProfileGoal;
     private TrapezoidProfile.State motionProfileSetPoint;
 
+    private static final double MAX_VELOCITY = 1000;
+    private static final double MAX_ACCELERATION = 200;
+
     private double targetPositionDegrees;
     private boolean hasNewTarget;
     private boolean didReachPosition;
@@ -20,7 +23,7 @@ public class CoralArmCommand extends Command {
 
     public CoralArmCommand(CoralArm arm) {
         this.arm = arm;
-        constraints = new TrapezoidProfile.Constraints(1000,200);
+        constraints = new TrapezoidProfile.Constraints(MAX_VELOCITY, MAX_ACCELERATION);
 
         addRequirements(arm);
     }
@@ -28,6 +31,7 @@ public class CoralArmCommand extends Command {
     @Override
     public void initialize() {
         isHolding = false;
+        hasNewTarget = true;
     }
     @Override
     public void execute() {
@@ -35,11 +39,10 @@ public class CoralArmCommand extends Command {
             // reset to move to new angle
             if(!isHolding){
                 arm.stop();
-            }else {
-
+            }
                 didReachPosition = false;
                 hasNewTarget = false;
-            }
+
             motionProfile = new TrapezoidProfile(constraints);
             motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
             motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
@@ -75,5 +78,6 @@ public class CoralArmCommand extends Command {
     }
      public void stopHolding(){
         isHolding = false;
+        hasNewTarget = true;
      }
 }
