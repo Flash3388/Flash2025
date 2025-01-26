@@ -20,6 +20,8 @@ public class RobotMap {
     public static final int ARM_CORAL_END_PULSE_US = 1024;
     public static final double ARM_CORAL_ZERO_OFFSET = 0;
     public static final double ARM_CORAL_KF = 0;
+    public static final double ARM_CORAL_ANGLE_A = 0;
+    public static final double ARM_CORAL_ANGLE_B = 0;
 
     // coral elevator
     public static final int CORAL_ELEVATOR_UPPER_LIMIT_SWITCH = 2;
