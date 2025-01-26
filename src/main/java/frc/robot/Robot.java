@@ -30,7 +30,13 @@ public class Robot extends TimedRobot {
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
-        algaeArm.setDefaultCommand(new RetractAlgaeArm(algaeArm));
+        Command checkIfAlgaeRetract = Commands.defer(()->{
+            if(algaeArm.isExtended()){
+                return new RetractAlgaeArm(algaeArm);
+            }
+            return Commands.idle(algaeArm);
+        }, Set.of(algaeArm));
+        algaeArm.setDefaultCommand(checkIfAlgaeRetract);
 
         Command checkIfLow = Commands.defer(()-> {
             if(coralElevator.isRaised()){
@@ -44,7 +50,7 @@ public class Robot extends TimedRobot {
             if (coralGripper.hasCoral()) {
                 return new HoldCoral(coralGripper);
             }
-            return Commands.none();
+            return Commands.idle(coralGripper);
         }, Set.of(coralGripper));
         coralGripper.setDefaultCommand(checkCoral);
 
@@ -52,7 +58,7 @@ public class Robot extends TimedRobot {
             if (algaeGripper.hasAlgae()) {
                 return new HoldAlgae(algaeGripper);
             }
-            return Commands.none();
+            return Commands.idle(algaeGripper);
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);
 
