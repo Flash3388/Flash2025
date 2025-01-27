@@ -49,7 +49,7 @@ public class Swerve extends SubsystemBase {
 
     public Swerve() {
         // 0.0020645
-        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.53, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.50, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
@@ -67,7 +67,7 @@ public class Swerve extends SubsystemBase {
                 new SparkFlexSwerve(RobotMap.SWERVE_FRONT_LEFT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_FRONT_LEFT_ENCODER),
-                311.1,
+                357,
                 LENGTH / 2,
                 WIDTH / 2,
                 steerPidf,
@@ -84,7 +84,7 @@ public class Swerve extends SubsystemBase {
                 new SparkFlexSwerve(RobotMap.SWERVE_FRONT_RIGHT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_FRONT_RIGHT_ENCODER),
-                282.2,
+                78,
                 LENGTH / 2,
                 -WIDTH / 2,
                 steerPidf,
@@ -101,7 +101,7 @@ public class Swerve extends SubsystemBase {
                 new SparkFlexSwerve(RobotMap.SWERVE_BACK_LEFT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_BACK_LEFT_ENCODER),
-                258.75,
+                101,
                 -LENGTH / 2,
                 WIDTH / 2,
                 steerPidf,
@@ -118,7 +118,7 @@ public class Swerve extends SubsystemBase {
                 new SparkFlexSwerve(RobotMap.SWERVE_BACK_RIGHT_STEER,false,DCMotor.getNeoVortex(1)),
                 conversionFactor,
                 new CANCoderSwerve(RobotMap.SWERVE_BACK_RIGHT_ENCODER),
-                177,
+                135,
                 -LENGTH / 2,
                 -WIDTH / 2,
                 steerPidf,
@@ -164,7 +164,7 @@ public class Swerve extends SubsystemBase {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
         });
         limeLights = new LimeLights();
-        secondField = new Field2d();
+        setUpPathPlanner();
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {

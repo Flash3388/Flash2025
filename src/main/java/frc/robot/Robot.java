@@ -20,7 +20,6 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         swerve = new Swerve();
         xbox = new XboxController(0);
-        swerve.setUpPathPlanner();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
@@ -57,7 +56,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        swerve.resetEncoders();
         swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
@@ -77,8 +75,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        //swerve.resetEncoders();
-        autoChooser.getSelected().schedule();
+        if(autoChooser.getSelected() != null) {
+            autoChooser.getSelected().schedule();
+        }
     }
 
     @Override
@@ -88,12 +87,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-
+    autoChooser.getSelected().cancel();
     }
 
     @Override
     public void testInit() {
-        swerve.centerModules().schedule();
+
     }
 
     @Override
