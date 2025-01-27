@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
@@ -16,7 +15,6 @@ public class CoralGripper extends SubsystemBase {
 
 
     private TalonFX motor;
-    private Encoder encoder;
     private DutyCycleOut dutyCycleControl;
     private NeutralOut neutralControl;
     private DigitalInput limitSwitch;
