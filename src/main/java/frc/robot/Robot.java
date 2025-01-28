@@ -10,22 +10,28 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.VisionSystem;
+
+import java.util.Optional;
+
 public class Robot extends TimedRobot {
 
     private Swerve swerve;
     private XboxController xbox;
     private SendableChooser<Command> autoChooser;
-
+    private VisionSystem visionSystem;
     @Override
     public void robotInit() {
         swerve = new Swerve();
         xbox = new XboxController(0);
+        visionSystem = new VisionSystem();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     @Override
     public void robotPeriodic() {
+        swerve.updatePoseEstimator(visionSystem.getRobotPoseEstimate());
         CommandScheduler.getInstance().run();
     }
 

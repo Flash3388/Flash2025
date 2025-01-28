@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -10,7 +9,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -44,11 +42,9 @@ public class Swerve extends SubsystemBase {
 
     private final Mechanism2d mechanism;
     private final MechanismLigament2d[] moduleMechanisms;
-    private final LimeLights limeLights;
-    Field2d secondField;
+
 
     public Swerve() {
-        // 0.0020645
         PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.50, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
@@ -148,7 +144,7 @@ public class Swerve extends SubsystemBase {
         SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
 
         swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
-        swerveDrive.setHeadingCorrection(false);
+        swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
         swerveDrive.setCosineCompensator(false);
         swerveDrive.setAngularVelocityCompensation(false, false, 0);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
@@ -163,36 +159,28 @@ public class Swerve extends SubsystemBase {
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
         });
-        limeLights = new LimeLights();
+
         setUpPathPlanner();
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
-        return run(() -> {
-            // Make the robot move
+        return runEnd(() -> {
             swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
                             translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
                             translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
                     Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
                     false,
                     false);
+        },() -> {
+            for (SwerveModule module : swerveDrive.getModules()) {
+                module.getDriveMotor().set(0);
+                module.getAngleMotor().set(0);
+            }
         });
-    }
-
-    public Command simpleDrive(){
-        return run(()-> {
-            swerveDrive.drive(new ChassisSpeeds(0.01, 0, 0));
-        });
-    }
-
-    public void resetEncoders(){
-        swerveDrive.resetDriveEncoders();
     }
 
     public Pose2d getPose()
     {
-
-
         return swerveDrive.getPose();
     }
 
@@ -210,7 +198,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.swerveDrivePoseEstimator.resetPosition(
                 swerveDrive.getOdometryHeading(),
                 swerveDrive.getModulePositions(),
-                new Pose2d(0, 0, Rotation2d.fromDegrees(0))
+                Pose2d.kZero
         );
     }
 
@@ -260,24 +248,21 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
-        SmartDashboard.putData("Camerafield",secondField);
-
-        Optional<LimelightHelpers.PoseEstimate> optionalPose = limeLights.getRobotPoseEstimate();
-        if (optionalPose.isPresent()) {
-            LimelightHelpers.PoseEstimate pose = optionalPose.get();
-            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-        }
 
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
         }
 
     }
+    public void updatePoseEstimator(Optional<LimelightHelpers.PoseEstimate> optionalPose){
+        if (optionalPose.isPresent()) {
+            LimelightHelpers.PoseEstimate pose = optionalPose.get();
+            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
+        }
+    }
 
 
     private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        System.out.println(speeds);
-        SmartDashboard.putNumber("SpeedsY", speeds.vxMetersPerSecond);
         if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
             for (SwerveModule module : swerveDrive.getModules()) {
                 module.getDriveMotor().set(0);
