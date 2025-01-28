@@ -39,15 +39,24 @@ public class CoralArmCommand extends Command {
             // reset to move to new angle
             didReachPosition = false;
             hasNewTarget = false;
-
             motionProfile = new TrapezoidProfile(constraints);
+
+
 
         }
         if (isHolding) {
             if (!arm.didReachPosition(targetPositionDegrees)) {
+                didReachPosition = false;
+
                 arm.setMoveToPosition(targetPositionDegrees);
+                motionProfileSetPoint = motionProfile.calculate(0.02,motionProfileSetPoint,motionProfileGoal);
+            }else {
+                didReachPosition = true;
             }
-            arm.setMoveToPosition(targetPositionDegrees);
+
+
+        }else {
+            arm.stop();
         }
 
 
