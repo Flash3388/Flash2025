@@ -22,7 +22,7 @@ public class AlgaeGripper extends SubsystemBase {
      public AlgaeGripper(){
           this.motor = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR, SparkLowLevel.MotorType.kBrushless);
 
-          encoder = this.motor.getAlternateEncoder();
+          encoder = this.motor.getEncoder();
 
           this.digitalInput = new DigitalInput(RobotMap.ALGAE_GRIPPER_DIGITALINPUT);
 
@@ -34,7 +34,7 @@ public class AlgaeGripper extends SubsystemBase {
           return !digitalInput.get();
      }
 
-     public double getVelocity(){
+     public double getVelocityRpm(){
           return encoder.getVelocity();
      }
 

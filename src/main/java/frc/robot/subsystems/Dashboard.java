@@ -26,13 +26,13 @@ public class Dashboard extends SubsystemBase {
         algaeTab = Shuffleboard.getTab("Algae Systems");
 
         // Coral Gripper
-        coralTab.addBoolean("Gripper Has Coral", coralGripper::hasCoral)
+        coralTab.addBoolean("Holding Coral", coralGripper::hasCoral)
                 .withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 0)
                 .withSize(2, 1);
 
-        coralTab.addNumber("Gripper Velocity", coralGripper::getVelocity)
-                .withWidget(BuiltInWidgets.kGraph)
+        coralTab.addNumber("Gripper RPM", coralGripper::getVelocityRPM)
+                .withWidget(BuiltInWidgets.kNumberBar)
                 .withPosition(2, 0)
                 .withSize(4, 3);
 
@@ -70,8 +70,8 @@ public class Dashboard extends SubsystemBase {
                 .withPosition(0, 0)
                 .withSize(2, 1);
 
-        algaeTab.addNumber("Gripper Velocity", algaeGripper::getVelocity)
-                .withWidget(BuiltInWidgets.kGraph)
+        algaeTab.addNumber("Gripper RPM", algaeGripper::getVelocityRpm)
+                .withWidget(BuiltInWidgets.kNumberBar)
                 .withPosition(2, 0)
                 .withSize(4, 3);
 
