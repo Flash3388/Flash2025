@@ -15,8 +15,8 @@ public class CoralElevator extends SubsystemBase {
     private final DigitalInput LowerLimitSwitch;
 
     public CoralElevator() {
-        piston1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.CORAL_ELEVATOR_PISTON_FORWARD_CHANNEL, RobotMap.CORAL_ELEVATOR_PISTON_REVERSE_CHANNEL);
-        piston2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.CORAL_ELEVATOR_PISTON_FORWARD_CHANNEL, RobotMap.CORAL_ELEVATOR_PISTON_REVERSE_CHANNEL);
+        piston1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.CORAL_ELEVATOR_PISTON1_FORWARD_CHANNEL, RobotMap.CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL);
+        piston2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.CORAL_ELEVATOR_PISTON2_FORWARD_CHANNEL, RobotMap.CORAL_ELEVATOR_PISTON2_REVERSE_CHANNEL);
         UpperLimitSwitch = new DigitalInput(RobotMap.CORAL_ELEVATOR_UPPER_LIMIT_SWITCH);
         LowerLimitSwitch = new DigitalInput(RobotMap.CORAL_ELEVATOR_LOWER_LIMIT_SWITCH);
     }
@@ -47,7 +47,7 @@ public class CoralElevator extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Elevator Raised: " , isRaised());
-        SmartDashboard.putBoolean("Elevator Lowered: " , isLowered());
+        SmartDashboard.putBoolean("CoralElevatorRaised", isRaised());
+        SmartDashboard.putBoolean("CoralElevatorLowered", isLowered());
     }
 }
