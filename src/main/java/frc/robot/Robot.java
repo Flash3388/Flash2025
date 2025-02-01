@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.*;
 import frc.robot.commands.CoralArmCommand;
 import edu.wpi.first.wpilibj2.command.*;
@@ -16,6 +17,7 @@ import frc.robot.subsystems.CoralElevator;
 import java.util.Set;
 
 public class Robot extends TimedRobot {
+    private CoralRevArm revArm;
     private AlgaeArm algaeArm;
     private AlgaeGripper algaeGripper;
     private CoralElevator coralElevator;
@@ -49,7 +51,6 @@ public class Robot extends TimedRobot {
         //cpr = new Compressor(1,PneumaticsModuleType.REVPH);
         //cpr.enableAnalog(minPresseure,maxPresseure);
         dashboard = new Dashboard(algaeArm,algaeGripper,coralElevator,coralArm,coralGripper);
-
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
@@ -93,6 +94,11 @@ public class Robot extends TimedRobot {
                 .whileTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)
                 .whileTrue(new RetractAlgaeArm(algaeArm));
+
+        new POVButton(xbox,90).onTrue(coralLevel3Place());
+        new POVButton(xbox,270).onTrue(coralLevel2Place());
+
+        revArm = new CoralRevArm();
 
     }
 
@@ -148,6 +154,8 @@ public class Robot extends TimedRobot {
             System.out.println("Piston Reverse!");
         }
         */
+        double setPoint =-200000;
+        revArm.moveToSetPoint(setPoint);
     }
 
     @Override

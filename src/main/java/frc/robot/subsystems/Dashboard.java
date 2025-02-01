@@ -50,7 +50,7 @@ public class Dashboard extends SubsystemBase {
         // Coral Arm
         coralTab.addNumber("Arm Degree", coralArm::getPositionDegrees)
                 .withWidget(BuiltInWidgets.kDial)
-                .withProperties(Map.of("min", 0, "max", 180))
+                .withProperties(Map.of("min", 0, "max", 360))
                 .withPosition(6, 0)
                 .withSize(2, 2);
 
@@ -58,6 +58,11 @@ public class Dashboard extends SubsystemBase {
                 .withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(6, 2)
                 .withSize(1, 1);
+
+        coralTab.addNumber("Arm PVB", coralArm::getPercentVBus)
+                .withWidget(BuiltInWidgets.kNumberBar)
+                .withPosition(6, 4)
+                .withSize(2, 1);
 
         coralTab.addBoolean("Arm At RL", coralArm::isAtReverseLimit)
                 .withWidget(BuiltInWidgets.kBooleanBox)

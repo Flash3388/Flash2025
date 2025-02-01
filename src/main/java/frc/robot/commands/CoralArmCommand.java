@@ -1,13 +1,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralArm;
 
 public class CoralArmCommand extends Command {
 
-    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 1000;
-    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 200;
+    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 2000;
+    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 20;
 
     private final CoralArm arm;
     private final TrapezoidProfile.Constraints constraints;
@@ -35,6 +36,8 @@ public class CoralArmCommand extends Command {
     }
     @Override
     public void execute() {
+
+        SmartDashboard.putBoolean("didReachPosArm",arm.didReachPosition(targetPositionDegrees));
         if (hasNewTarget) {
             // reset to move to new angle
             hasNewTarget = false;

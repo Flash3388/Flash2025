@@ -62,14 +62,16 @@ public class CoralArm extends SubsystemBase {
     }
 
     public double getPositionDegrees() {
-        return relEncoder.getPosition() * 360;
+        return absEncoder.getPosition() * 360;
     }
 
     public boolean didReachPosition(double positionDegrees) {
         double currentPosition = getPositionDegrees();
         return MathUtil.isNear(positionDegrees, currentPosition, RobotMap.ARM_CORAL_TOLERANCE_POSITION_DEGREES) &&
-                Math.abs(relEncoder.getVelocity()) < RobotMap.ARM_CORAL_TOLERANCE_VELOCITY_RPM;
+                Math.abs(absEncoder.getVelocity()) < RobotMap.ARM_CORAL_TOLERANCE_VELOCITY_RPM;
     }
+
+    public double getPercentVBus() {return motor.getOutputCurrent();}
 
     public boolean isAtForwardLimit() {
         return forwardLimitSwitch.isPressed();
