@@ -1,21 +1,43 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.CollectAlgae;
+import frc.robot.commands.CollectCoral;
 import frc.robot.commands.CoralArmCommand;
-import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.commands.*;
-import frc.robot.subsystems.CoralGripper;
-import frc.robot.subsystems.CoralArm;
+import frc.robot.commands.ExtendedAlgaeArm;
+import frc.robot.commands.HoldAlgae;
+import frc.robot.commands.HoldCoral;
+import frc.robot.commands.LowerCoralElevator;
+import frc.robot.commands.RaiseCoralElevator;
+import frc.robot.commands.ReleaseAlgae;
+import frc.robot.commands.ReleaseCoral;
+import frc.robot.commands.RetractAlgaeArm;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
+import frc.robot.subsystems.CoralArm;
 import frc.robot.subsystems.CoralElevator;
+import frc.robot.subsystems.CoralGripper;
+import frc.robot.subsystems.Dashboard;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.VisionSystem;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class Robot extends TimedRobot {
+
+    private Swerve swerve;
+    private VisionSystem visionSystem;
     private AlgaeArm algaeArm;
     private AlgaeGripper algaeGripper;
     private CoralElevator coralElevator;
@@ -24,18 +46,28 @@ public class Robot extends TimedRobot {
     private Dashboard dashboard;
 
     private CoralArmCommand coralArmCommand;
+    private Command autoCommand;
+
+    private XboxController xbox;
+    private SendableChooser<Command> autoChooser;
 
     @Override
     public void robotInit() {
+        swerve = new Swerve();
+        visionSystem = new VisionSystem();
         algaeArm = new AlgaeArm();
         algaeGripper = new AlgaeGripper();
         coralElevator = new CoralElevator();
         coralGripper = new CoralGripper();
         coralArm = new CoralArm();
-        dashboard = new Dashboard(algaeArm,algaeGripper,coralElevator,coralArm,coralGripper);
+        dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
+
+        xbox = new XboxController(0);
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
 
         Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
@@ -68,11 +100,14 @@ public class Robot extends TimedRobot {
             return Commands.idle(algaeGripper);
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);
-
     }
 
     @Override
     public void robotPeriodic() {
+        Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
+        if(pose.isPresent()) {
+            swerve.updatePoseEstimator(pose.get());
+        }
         CommandScheduler.getInstance().run();
     }
 
@@ -104,7 +139,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        swerve.driveA(
+                ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
+        ).schedule();
     }
 
     @Override
@@ -119,6 +158,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        this.autoCommand = autoChooser.getSelected();;
+        if(this.autoCommand  != null) {
+            this.autoCommand.schedule();
+        }
 
     }
 
@@ -129,7 +172,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-
+     if (this.autoCommand != null){
+            this.autoCommand.cancel();
+            this.autoCommand = null;
+      }
     }
 
     @Override
@@ -189,3 +235,4 @@ public class Robot extends TimedRobot {
                 new ReleaseAlgae(algaeGripper));
     }
 }
+
