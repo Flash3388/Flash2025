@@ -171,12 +171,13 @@ public class Swerve extends SubsystemBase {
                     Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
                     false,
                     false);
-        },() -> {
+        },this::stop);
+    }
+    public void stop(){
             for (SwerveModule module : swerveDrive.getModules()) {
                 module.getDriveMotor().set(0);
                 module.getAngleMotor().set(0);
             }
-        });
     }
 
     public Pose2d getPose()
@@ -195,11 +196,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void resetOdometeryToStart() {
-        swerveDrive.swerveDrivePoseEstimator.resetPosition(
-                swerveDrive.getOdometryHeading(),
-                swerveDrive.getModulePositions(),
-                Pose2d.kZero
-        );
+        swerveDrive.resetOdometry(Pose2d.kZero);
     }
 
     public void setUpPathPlanner(){
@@ -254,11 +251,9 @@ public class Swerve extends SubsystemBase {
         }
 
     }
-    public void updatePoseEstimator(Optional<LimelightHelpers.PoseEstimate> optionalPose){
-        if (optionalPose.isPresent()) {
-            LimelightHelpers.PoseEstimate pose = optionalPose.get();
-            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(pose.pose, pose.timestampSeconds);
-        }
+    public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){
+            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
+
     }
 
 

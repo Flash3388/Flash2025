@@ -15,7 +15,7 @@ import frc.robot.subsystems.VisionSystem;
 import java.util.Optional;
 
 public class Robot extends TimedRobot {
-
+    private Command autoCommand;
     private Swerve swerve;
     private XboxController xbox;
     private SendableChooser<Command> autoChooser;
@@ -31,7 +31,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        swerve.updatePoseEstimator(visionSystem.getRobotPoseEstimate());
+        Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
+        if(pose.isPresent()) {
+            swerve.updatePoseEstimator(pose.get());
+        }
         CommandScheduler.getInstance().run();
     }
 
@@ -81,9 +84,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        if(autoChooser.getSelected() != null) {
-            autoChooser.getSelected().schedule();
+        this.autoCommand = autoChooser.getSelected();;
+        if(this.autoCommand  != null) {
+            this.autoCommand.schedule();
         }
+
     }
 
     @Override
@@ -93,7 +98,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-    autoChooser.getSelected().cancel();
+     if (this.autoCommand != null){
+            this.autoCommand.cancel();
+            this.autoCommand = null;
+      }
     }
 
     @Override
