@@ -2,31 +2,104 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.CollectAlgae;
+import frc.robot.commands.CollectCoral;
+import frc.robot.commands.CoralArmCommand;
+import frc.robot.commands.ExtendedAlgaeArm;
+import frc.robot.commands.HoldAlgae;
+import frc.robot.commands.HoldCoral;
+import frc.robot.commands.LowerCoralElevator;
+import frc.robot.commands.RaiseCoralElevator;
+import frc.robot.commands.ReleaseAlgae;
+import frc.robot.commands.ReleaseCoral;
+import frc.robot.commands.RetractAlgaeArm;
+import frc.robot.subsystems.AlgaeArm;
+import frc.robot.subsystems.AlgaeGripper;
+import frc.robot.subsystems.CoralArm;
+import frc.robot.subsystems.CoralElevator;
+import frc.robot.subsystems.CoralGripper;
+import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.VisionSystem;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class Robot extends TimedRobot {
-    private Command autoCommand;
+
     private Swerve swerve;
+    private VisionSystem visionSystem;
+    private AlgaeArm algaeArm;
+    private AlgaeGripper algaeGripper;
+    private CoralElevator coralElevator;
+    private CoralGripper coralGripper;
+    private CoralArm coralArm;
+    private Dashboard dashboard;
+
+    private CoralArmCommand coralArmCommand;
+    private Command autoCommand;
+
     private XboxController xbox;
     private SendableChooser<Command> autoChooser;
-    private VisionSystem visionSystem;
+
     @Override
     public void robotInit() {
         swerve = new Swerve();
-        xbox = new XboxController(0);
         visionSystem = new VisionSystem();
+        algaeArm = new AlgaeArm();
+        algaeGripper = new AlgaeGripper();
+        coralElevator = new CoralElevator();
+        coralGripper = new CoralGripper();
+        coralArm = new CoralArm();
+        dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
+
+        coralArmCommand = new CoralArmCommand(coralArm);
+        coralArm.setDefaultCommand(coralArmCommand);
+
+        xbox = new XboxController(0);
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
+
+        Command checkIfAlgaeRetract = Commands.defer(()->{
+            if(algaeArm.isExtended()){
+                return new RetractAlgaeArm(algaeArm);
+            }
+            return Commands.idle(algaeArm);
+        }, Set.of(algaeArm));
+        algaeArm.setDefaultCommand(checkIfAlgaeRetract);
+
+        Command checkIfLow = Commands.defer(()-> {
+            if(coralElevator.isRaised()){
+                return new LowerCoralElevator(coralElevator);
+            }
+            return Commands.idle(coralElevator);
+        }, Set.of(coralElevator));
+        coralElevator.setDefaultCommand(checkIfLow);
+
+        Command checkCoral = Commands.defer(()-> {
+            if (coralGripper.hasCoral()) {
+                return new HoldCoral(coralGripper);
+            }
+            return Commands.idle(coralGripper);
+        }, Set.of(coralGripper));
+        coralGripper.setDefaultCommand(checkCoral);
+
+        Command checkAlgae = Commands.defer(()-> {
+            if (algaeGripper.hasAlgae()) {
+                return new HoldAlgae(algaeGripper);
+            }
+            return Commands.idle(algaeGripper);
+        }, Set.of(algaeGripper));
+        algaeGripper.setDefaultCommand(checkAlgae);
     }
 
     @Override
@@ -37,6 +110,7 @@ public class Robot extends TimedRobot {
         }
         CommandScheduler.getInstance().run();
     }
+
 
     @Override
     public void simulationInit() {
@@ -117,6 +191,48 @@ public class Robot extends TimedRobot {
     @Override
     public void testExit() {
 
+    }
+
+    private Command coralLevel2Place(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
+                new CollectCoral(coralGripper));
+    }
+
+    private Command coralLevel3Place(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                new ParallelCommandGroup(
+                        new RaiseCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
+                new CollectCoral(coralGripper));
+    }
+
+    private Command coralCollect(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
+                new ReleaseCoral(coralGripper));
+    }
+
+    private Command algaeCollect(){
+        return new SequentialCommandGroup(
+                new ExtendedAlgaeArm(algaeArm),
+                new CollectAlgae(algaeGripper));
+    }
+
+    private Command algaeOut(){
+        return new SequentialCommandGroup(
+                new RetractAlgaeArm(algaeArm),
+                new ReleaseAlgae(algaeGripper));
     }
 }
 
