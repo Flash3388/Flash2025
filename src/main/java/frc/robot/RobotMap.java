@@ -6,10 +6,10 @@ public class RobotMap {
 
     // coral gripper
     public static final int CORAL_GRIPPER_LIMIT_SWITCH = 1;
-    public static final int CORAL_GRIPPER_MOTOR = 1;
+    public static final int CORAL_GRIPPER_MOTOR = 4;
 
     // coral arm
-    public static final int ARM_CORAL_MOTOR = 2;
+    public static final int ARM_CORAL_MOTOR = 5;
     public static final double ARM_CORAL_KP = 0;
     public static final double ARM_CORAL_KI = 0;
     public static final double ARM_CORAL_KD = 0;
@@ -27,10 +27,10 @@ public class RobotMap {
     // coral elevator
     public static final int CORAL_ELEVATOR_UPPER_LIMIT_SWITCH = 2;
     public static final int CORAL_ELEVATOR_LOWER_LIMIT_SWITCH = 3;
-    public static final int CORAL_ELEVATOR_PISTON1_FORWARD_CHANNEL = 0;
-    public static final int CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL = 1;
-    public static final int CORAL_ELEVATOR_PISTON2_FORWARD_CHANNEL = 2;
-    public static final int CORAL_ELEVATOR_PISTON2_REVERSE_CHANNEL = 3;
+    public static final int CORAL_ELEVATOR_PISTON1_FORWARD_CHANNEL = 13;
+    public static final int CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL = 15;
+    public static final int CORAL_ELEVATOR_PISTON2_FORWARD_CHANNEL = 13;
+    public static final int CORAL_ELEVATOR_PISTON2_REVERSE_CHANNEL = 15;
 
     // algae gripper
     public static final int ALGAE_GRIPPER_MOTOR = 4;
@@ -39,8 +39,8 @@ public class RobotMap {
     // algae arm
     public static final int ALGAE_ARM_SWITCH_TOP = 5;
     public static final int ALGAE_ARM_SWITCH_BOTTOM = 6;
-    public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 4;
-    public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 5;
+    public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
+    public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
     public static final int ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL = 6;
     public static final int ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANNEL = 7;
 }

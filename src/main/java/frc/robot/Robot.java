@@ -1,8 +1,9 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.*;
 import frc.robot.commands.CoralArmCommand;
 import edu.wpi.first.wpilibj2.command.*;
@@ -12,18 +13,21 @@ import frc.robot.subsystems.CoralArm;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
 import frc.robot.subsystems.CoralElevator;
-
 import java.util.Set;
 
 public class Robot extends TimedRobot {
     private AlgaeArm algaeArm;
     private AlgaeGripper algaeGripper;
     private CoralElevator coralElevator;
+    XboxController xbox;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
     private Dashboard dashboard;
-
+    PneumaticHub ph;
     private CoralArmCommand coralArmCommand;
+    Compressor cpr;
+    int minPresseure = 80;
+    int maxPresseure = 120;
 
     @Override
     public void robotInit() {
@@ -32,7 +36,20 @@ public class Robot extends TimedRobot {
         coralElevator = new CoralElevator();
         coralGripper = new CoralGripper();
         coralArm = new CoralArm();
+        xbox = new XboxController(0);
+        ph = new PneumaticHub(1);
+        if (ph.getModuleNumber() != 1) {
+            throw new RuntimeException("Pneumatic Hub not detected!");
+        }
+        cpr = new Compressor(1, PneumaticsModuleType.REVPH);
+        cpr.enableAnalog(minPresseure, maxPresseure);
+        System.out.println("PH Module ID: " + ph.getModuleNumber());
+        ph.enableCompressorAnalog(minPresseure,maxPresseure);
+        ph.enableCompressorDigital();
+        //cpr = new Compressor(1,PneumaticsModuleType.REVPH);
+        //cpr.enableAnalog(minPresseure,maxPresseure);
         dashboard = new Dashboard(algaeArm,algaeGripper,coralElevator,coralArm,coralGripper);
+
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
@@ -68,12 +85,25 @@ public class Robot extends TimedRobot {
             return Commands.idle(algaeGripper);
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);
+        new JoystickButton(xbox, XboxController.Button.kY.value)
+                .whileTrue(new RaiseCoralElevator(coralElevator));
+        new JoystickButton(xbox, XboxController.Button.kA.value)
+                .whileTrue(new LowerCoralElevator(coralElevator));
+        new JoystickButton(xbox, XboxController.Button.kX.value)
+                .whileTrue(new ExtendedAlgaeArm(algaeArm));
+        new JoystickButton(xbox, XboxController.Button.kB.value)
+                .whileTrue(new RetractAlgaeArm(algaeArm));
 
     }
 
     @Override
-    public void robotPeriodic() {
+    public void robotPeriodic() {/*
+        Compressor cpr = ph.makeCompressor();
+        ph.enableCompressorAnalog(minPresseure,maxPresseure);*/
+        SmartDashboard.putNumber("pressure",ph.getPressure(0));
+        ph.enableCompressorAnalog(minPresseure,maxPresseure);
         CommandScheduler.getInstance().run();
+
     }
 
 
@@ -104,12 +134,20 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        cpr.enableDigital();
     }
 
     @Override
-    public void teleopPeriodic() {
-
+    public void teleopPeriodic() {/*
+        if (xbox.getAButtonPressed()) {
+            coralElevator.piston1.set(DoubleSolenoid.Value.kForward);
+            System.out.println("Piston Forward!");
+        }
+        if (xbox.getBButtonPressed()) {
+            coralElevator.piston1.set(DoubleSolenoid.Value.kReverse);
+            System.out.println("Piston Reverse!");
+        }
+        */
     }
 
     @Override
