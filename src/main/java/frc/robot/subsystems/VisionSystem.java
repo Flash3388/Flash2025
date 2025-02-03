@@ -22,8 +22,6 @@ public class VisionSystem extends SubsystemBase {
         limelightBack = new Limelight(LL_NAME_BACK);
         limelightFront = new Limelight(LL_NANE_FRONT);
         layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-        if(DriverStation.getAlliance().isPresent())
-            this.redAlliance = DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
     }
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate(){
