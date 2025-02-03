@@ -86,9 +86,9 @@ public class Robot extends TimedRobot {
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .whileTrue(new RaiseCoralElevator(coralElevator));
+                .whileTrue(new CollectCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kA.value)
-                .whileTrue(new LowerCoralElevator(coralElevator));
+                .whileTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kX.value)
                 .whileTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)

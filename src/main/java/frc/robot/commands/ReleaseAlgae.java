@@ -24,7 +24,7 @@ public class ReleaseAlgae extends Command {
 
     @Override
     public boolean isFinished() {
-        return !algaeGripper.hasAlgae();
+        return /*!*/algaeGripper.hasAlgae();
     }
 
     @Override

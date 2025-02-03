@@ -17,8 +17,8 @@ import frc.robot.RobotMap;
 
 public class CoralGripper extends SubsystemBase {
 
-    public static final double ROTATE_COLLECT = 0.8;
-    public static final double ROTATE_RELEASE = -0.5;
+    public static final double ROTATE_COLLECT = -0.8;
+    public static final double ROTATE_RELEASE = 0.5;
     public static final double ROTATE_HOLD = 0.2;
     public static StatusSignal<AngularVelocity> velocitySignal;
 

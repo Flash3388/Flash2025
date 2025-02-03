@@ -31,9 +31,10 @@ public class RobotMap {
     public static final int CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL = 15;
     public static final int CORAL_ELEVATOR_PISTON2_FORWARD_CHANNEL = 13;
     public static final int CORAL_ELEVATOR_PISTON2_REVERSE_CHANNEL = 15;
-
     // algae gripper
-    public static final int ALGAE_GRIPPER_MOTOR = 4;
+    public static final int ALGAE_GRIPPER_MOTOR1 = 7;
+    public static final int ALGAE_GRIPPER_MOTOR2 = 6;
+
     public static final int ALGAE_GRIPPER_DIGITALINPUT = 4;
 
     // algae arm

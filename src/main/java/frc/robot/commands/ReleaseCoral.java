@@ -23,7 +23,7 @@ public class ReleaseCoral extends Command {
 
     @Override
     public boolean isFinished() {
-        return !coralGripper.hasCoral();
+        return /*!*/coralGripper.hasCoral();
     }
 
     @Override
