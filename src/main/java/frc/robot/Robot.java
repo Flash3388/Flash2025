@@ -2,6 +2,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -159,10 +161,9 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         this.autoCommand = autoChooser.getSelected();;
-        if(this.autoCommand  != null) {
+        if(this.autoCommand != null) {
             this.autoCommand.schedule();
         }
-
     }
 
     @Override
@@ -172,10 +173,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-     if (this.autoCommand != null){
+        /*if (this.autoCommand != null){
             this.autoCommand.cancel();
             this.autoCommand = null;
-      }
+        }*/
     }
 
     @Override
