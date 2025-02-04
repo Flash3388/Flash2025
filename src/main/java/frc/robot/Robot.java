@@ -173,10 +173,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-        /*if (this.autoCommand != null){
+        if (this.autoCommand != null){
             this.autoCommand.cancel();
             this.autoCommand = null;
-        }*/
+        }
     }
 
     @Override
