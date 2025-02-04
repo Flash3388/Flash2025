@@ -16,18 +16,19 @@ import frc.robot.subsystems.CoralElevator;
 import java.util.Set;
 
 public class Robot extends TimedRobot {
+    private final int MIN_PRESSURE = 80;
+    private final int MAX_PRESSURE = 120;
     private AlgaeArm algaeArm;
     private AlgaeGripper algaeGripper;
     private CoralElevator coralElevator;
-    XboxController xbox;
+    private XboxController xbox;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
     private Dashboard dashboard;
-    PneumaticHub ph;
+    private PneumaticHub ph;
     private CoralArmCommand coralArmCommand;
-    Compressor cpr;
-    int minPresseure = 80;
-    int maxPresseure = 120;
+    private Compressor cpr;
+
 
     @Override
     public void robotInit() {
@@ -37,20 +38,12 @@ public class Robot extends TimedRobot {
         coralGripper = new CoralGripper();
         coralArm = new CoralArm();
         xbox = new XboxController(0);
-        ph = new PneumaticHub(1);
-        if (ph.getModuleNumber() != 1) {
-            throw new RuntimeException("Pneumatic Hub not detected!");
-        }
-        cpr = new Compressor(1, PneumaticsModuleType.REVPH);
-        cpr.enableAnalog(minPresseure, maxPresseure);
-        System.out.println("PH Module ID: " + ph.getModuleNumber());
-        ph.enableCompressorAnalog(minPresseure,maxPresseure);
+        ph = new PneumaticHub();
+        cpr = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
+        cpr.enableAnalog(MIN_PRESSURE, MAX_PRESSURE);
+        ph.enableCompressorAnalog(MIN_PRESSURE,MAX_PRESSURE);
         ph.enableCompressorDigital();
-        //cpr = new Compressor(1,PneumaticsModuleType.REVPH);
-        //cpr.enableAnalog(minPresseure,maxPresseure);
         dashboard = new Dashboard(algaeArm,algaeGripper,coralElevator,coralArm,coralGripper);
-
-
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
@@ -90,9 +83,9 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .whileTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kX.value)
-                .whileTrue(new ExtendedAlgaeArm(algaeArm));
+                .whileTrue(new CollectAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .whileTrue(new RetractAlgaeArm(algaeArm));
+                .whileTrue(new ReleaseAlgae(algaeGripper));
 
     }
 
@@ -101,7 +94,7 @@ public class Robot extends TimedRobot {
         Compressor cpr = ph.makeCompressor();
         ph.enableCompressorAnalog(minPresseure,maxPresseure);*/
         SmartDashboard.putNumber("pressure",ph.getPressure(0));
-        ph.enableCompressorAnalog(minPresseure,maxPresseure);
+        ph.enableCompressorAnalog(MIN_PRESSURE,MAX_PRESSURE);
         CommandScheduler.getInstance().run();
 
     }

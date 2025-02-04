@@ -29,8 +29,6 @@ public class RobotMap {
     public static final int CORAL_ELEVATOR_LOWER_LIMIT_SWITCH = 3;
     public static final int CORAL_ELEVATOR_PISTON1_FORWARD_CHANNEL = 13;
     public static final int CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL = 15;
-    public static final int CORAL_ELEVATOR_PISTON2_FORWARD_CHANNEL = 13;
-    public static final int CORAL_ELEVATOR_PISTON2_REVERSE_CHANNEL = 15;
     // algae gripper
     public static final int ALGAE_GRIPPER_MOTOR1 = 7;
     public static final int ALGAE_GRIPPER_MOTOR2 = 6;
@@ -42,6 +40,6 @@ public class RobotMap {
     public static final int ALGAE_ARM_SWITCH_BOTTOM = 6;
     public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
-    public static final int ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL = 6;
-    public static final int ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANNEL = 7;
+
+    public static final int COMPRESSION_PORT = 1;
 }
