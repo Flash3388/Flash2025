@@ -1,51 +1,86 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticHub;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.subsystems.*;
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.CollectAlgae;
+import frc.robot.commands.CollectCoral;
 import frc.robot.commands.CoralArmCommand;
-import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.commands.*;
-import frc.robot.subsystems.CoralGripper;
-import frc.robot.subsystems.CoralArm;
+import frc.robot.commands.ExtendedAlgaeArm;
+import frc.robot.commands.HoldAlgae;
+import frc.robot.commands.HoldCoral;
+import frc.robot.commands.LowerCoralElevator;
+import frc.robot.commands.RaiseCoralElevator;
+import frc.robot.commands.ReleaseAlgae;
+import frc.robot.commands.ReleaseCoral;
+import frc.robot.commands.RetractAlgaeArm;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
+import frc.robot.subsystems.CoralArm;
 import frc.robot.subsystems.CoralElevator;
+import frc.robot.subsystems.CoralGripper;
+import frc.robot.subsystems.Dashboard;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.VisionSystem;
+
+import java.util.Optional;
 import java.util.Set;
 
 public class Robot extends TimedRobot {
-    private final int MIN_PRESSURE = 80;
-    private final int MAX_PRESSURE = 120;
+
+    private Swerve swerve;
+    private VisionSystem visionSystem;
     private AlgaeArm algaeArm;
     private AlgaeGripper algaeGripper;
     private CoralElevator coralElevator;
-    private XboxController xbox;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
-    private Dashboard dashboard;
-    private PneumaticHub ph;
-    private CoralArmCommand coralArmCommand;
-    private Compressor cpr;
 
+    private PneumaticHub pneumaticsHub;
+    private Compressor compressor;
+    private Dashboard dashboard;
+
+    private CoralArmCommand coralArmCommand;
+    private Command autoCommand;
+
+    private XboxController xbox;
+    private SendableChooser<Command> autoChooser;
 
     @Override
     public void robotInit() {
+        swerve = new Swerve();
+        visionSystem = new VisionSystem();
         algaeArm = new AlgaeArm();
         algaeGripper = new AlgaeGripper();
         coralElevator = new CoralElevator();
         coralGripper = new CoralGripper();
         coralArm = new CoralArm();
+
         xbox = new XboxController(0);
-        ph = new PneumaticHub();
-        cpr = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
-        cpr.enableAnalog(MIN_PRESSURE, MAX_PRESSURE);
-        ph.enableCompressorAnalog(MIN_PRESSURE,MAX_PRESSURE);
-        ph.enableCompressorDigital();
-        dashboard = new Dashboard(algaeArm,algaeGripper,coralElevator,coralArm,coralGripper);
+
+        pneumaticsHub = new PneumaticHub();
+        compressor = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
+        compressor.enableHybrid(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
+
+        dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
+
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
 
         Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
@@ -78,6 +113,7 @@ public class Robot extends TimedRobot {
             return Commands.idle(algaeGripper);
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);
+
         new JoystickButton(xbox, XboxController.Button.kY.value)
                 .whileTrue(new CollectCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kA.value)
@@ -86,17 +122,19 @@ public class Robot extends TimedRobot {
                 .whileTrue(new CollectAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kB.value)
                 .whileTrue(new ReleaseAlgae(algaeGripper));
-
     }
 
     @Override
-    public void robotPeriodic() {/*
-        Compressor cpr = ph.makeCompressor();
-        ph.enableCompressorAnalog(minPresseure,maxPresseure);*/
-        SmartDashboard.putNumber("pressure",ph.getPressure(0));
-        ph.enableCompressorAnalog(MIN_PRESSURE,MAX_PRESSURE);
-        CommandScheduler.getInstance().run();
+    public void robotPeriodic() {
+        SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
 
+        Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
+        //noinspection OptionalIsPresent
+        if(pose.isPresent()) {
+            swerve.updatePoseEstimator(pose.get());
+        }
+
+        CommandScheduler.getInstance().run();
     }
 
 
@@ -127,20 +165,17 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        cpr.enableDigital();
+        compressor.enableDigital();
+        swerve.driveA(
+                ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
+        ).schedule();
     }
 
     @Override
-    public void teleopPeriodic() {/*
-        if (xbox.getAButtonPressed()) {
-            coralElevator.piston1.set(DoubleSolenoid.Value.kForward);
-            System.out.println("Piston Forward!");
-        }
-        if (xbox.getBButtonPressed()) {
-            coralElevator.piston1.set(DoubleSolenoid.Value.kReverse);
-            System.out.println("Piston Reverse!");
-        }
-        */
+    public void teleopPeriodic() {
+
     }
 
     @Override
@@ -150,7 +185,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-
+        this.autoCommand = autoChooser.getSelected();;
+        if(this.autoCommand != null) {
+            this.autoCommand.schedule();
+        }
     }
 
     @Override
@@ -160,7 +198,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousExit() {
-
+        if (this.autoCommand != null){
+            this.autoCommand.cancel();
+            this.autoCommand = null;
+        }
     }
 
     @Override
