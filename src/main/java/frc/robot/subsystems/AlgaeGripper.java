@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -12,16 +13,20 @@ import frc.robot.RobotMap;
 
 public class AlgaeGripper extends SubsystemBase {
      private static final double COLLECT_SPEED = -0.8;
-     private static final double RELEASE_SPEED = 0.5;
-     private static final double HOLD_SPEED = 0.2;
+     private static final double RELEASE_SPEED = 0.8;
+     private static final double HOLD_SPEED = 0.8;
      private final SparkMax motor;
+     private final SparkBaseConfig config;
      private final SparkMax motor2;
      private final RelativeEncoder encoder;
      private final DigitalInput digitalInput;
 
 
      public AlgaeGripper(){
+          config = new SparkMaxConfig();
+          config.idleMode(SparkBaseConfig.IdleMode.kBrake);
           this.motor = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR1, SparkLowLevel.MotorType.kBrushless);
+          motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
           this.motor2 = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR2, SparkLowLevel.MotorType.kBrushless);
           encoder = this.motor.getEncoder();
 

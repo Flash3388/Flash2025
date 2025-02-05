@@ -72,7 +72,7 @@ public class Robot extends TimedRobot {
 
         pneumaticsHub = new PneumaticHub();
         compressor = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
-        compressor.enableHybrid(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
+        compressor.enableAnalog(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
 
         dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
 
@@ -106,22 +106,22 @@ public class Robot extends TimedRobot {
         }, Set.of(coralGripper));
         coralGripper.setDefaultCommand(checkCoral);*/
 
-        Command checkAlgae = Commands.defer(()-> {
+        /*Command checkAlgae = Commands.defer(()-> {
             if (algaeGripper.hasAlgae()) {
                 return new HoldAlgae(algaeGripper);
             }
             return Commands.idle(algaeGripper);
         }, Set.of(algaeGripper));
-        algaeGripper.setDefaultCommand(checkAlgae);
+        algaeGripper.setDefaultCommand(checkAlgae);*/
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(new CollectCoral(coralGripper));
+                .onTrue(new CollectAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kA.value)
-                .onTrue(new ReleaseCoral(coralGripper));
+                .onTrue(new ReleaseAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kX.value)
-                .whileTrue(new CollectAlgae(algaeGripper));
+                .whileTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .whileTrue(new ReleaseAlgae(algaeGripper));
+                .whileTrue(new RetractAlgaeArm(algaeArm));
     }
 
     @Override
@@ -165,7 +165,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        compressor.enableDigital();
+        compressor.enableAnalog(RobotMap.MIN_PRESSURE,RobotMap.MAX_PRESSURE);
         swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
