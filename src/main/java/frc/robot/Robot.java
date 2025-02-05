@@ -98,13 +98,13 @@ public class Robot extends TimedRobot {
         }, Set.of(coralElevator));
         coralElevator.setDefaultCommand(checkIfLow);
 
-        Command checkCoral = Commands.defer(()-> {
+       /* Command checkCoral = Commands.defer(()-> {
             if (coralGripper.hasCoral()) {
                 return new HoldCoral(coralGripper);
             }
             return Commands.idle(coralGripper);
         }, Set.of(coralGripper));
-        coralGripper.setDefaultCommand(checkCoral);
+        coralGripper.setDefaultCommand(checkCoral);*/
 
         Command checkAlgae = Commands.defer(()-> {
             if (algaeGripper.hasAlgae()) {
@@ -115,9 +115,9 @@ public class Robot extends TimedRobot {
         algaeGripper.setDefaultCommand(checkAlgae);
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .whileTrue(new CollectCoral(coralGripper));
+                .onTrue(new CollectCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kA.value)
-                .whileTrue(new ReleaseCoral(coralGripper));
+                .onTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kX.value)
                 .whileTrue(new CollectAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kB.value)
