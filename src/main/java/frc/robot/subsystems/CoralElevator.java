@@ -13,10 +13,10 @@ public class CoralElevator extends SubsystemBase {
     public final DoubleSolenoid piston1;
     //private final DoubleSolenoid piston2;
     private final AnalogInput UpperLimitSwitch;
-    private final double MAX_UPPER_INPUT = 1400;
-    private final double MIN_UPPER_INPUT = 100;
-    private final double MIN_LOWER_INPUT = 100;
-    private final double MAX_LOWER_INPUT = 1400;
+    private final double MAX_UPPER_INPUT = 4100;
+    private final double MIN_UPPER_INPUT = 3000;
+    private final double MIN_LOWER_INPUT = 3000;
+    private final double MAX_LOWER_INPUT = 4100;
     private final AnalogInput LowerLimitSwitch;
 
     public CoralElevator() {

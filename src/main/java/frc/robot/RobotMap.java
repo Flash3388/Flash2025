@@ -36,15 +36,15 @@ public class RobotMap {
     public static final double ARM_CORAL_TOLERANCE_VELOCITY_RPM = 5;
     public static final double ARM_CORAL_ZERO_OFFSET = 0.6838749;
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
-    public static final double ARM_CORAL_ANGLE_A = 0;
-    public static final double ARM_CORAL_ANGLE_B = 0;
+    public static final double ARM_CORAL_ANGLE_A = 43;
+    public static final double ARM_CORAL_ANGLE_B = 230;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
     public static final double ARM_CORAL_MIN_ANGLE = 16;
     public static final double ARM_CORAL_MAX_ANGLE = 276.5;
 
     // coral elevator
-    public static final int CORAL_ELEVATOR_UPPER_LIMIT_SWITCH = 2;
-    public static final int CORAL_ELEVATOR_LOWER_LIMIT_SWITCH = 3;
+    public static final int CORAL_ELEVATOR_UPPER_LIMIT_SWITCH = 3;
+    public static final int CORAL_ELEVATOR_LOWER_LIMIT_SWITCH = 2;
     public static final int CORAL_ELEVATOR_PISTON1_FORWARD_CHANNEL = 13;
     public static final int CORAL_ELEVATOR_PISTON1_REVERSE_CHANNEL = 15;
     // algae gripper
