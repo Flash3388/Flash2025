@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -16,17 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.CollectAlgae;
-import frc.robot.commands.CollectCoral;
-import frc.robot.commands.CoralArmCommand;
-import frc.robot.commands.ExtendedAlgaeArm;
-import frc.robot.commands.HoldAlgae;
-import frc.robot.commands.HoldCoral;
-import frc.robot.commands.LowerCoralElevator;
-import frc.robot.commands.RaiseCoralElevator;
-import frc.robot.commands.ReleaseAlgae;
-import frc.robot.commands.ReleaseCoral;
-import frc.robot.commands.RetractAlgaeArm;
+import frc.robot.commands.*;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
 import frc.robot.subsystems.CoralArm;
@@ -122,7 +113,7 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kX.value)
                 .onTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .onTrue(coralCollect());
+                .onTrue( new AllignToCoralStationAngle(visionSystem,swerve));
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
                 .onTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
@@ -139,6 +130,16 @@ public class Robot extends TimedRobot {
         if(pose.isPresent()) {
             swerve.updatePoseEstimator(pose.get());
         }
+
+        if(visionSystem.getIdPose(2).isPresent()){
+            SmartDashboard.putNumber("targetPoseX",visionSystem.getIdPose(2).get().getX());
+            SmartDashboard.putNumber("targetPoseY",visionSystem.getIdPose(2).get().getY());
+            SmartDashboard.putNumber("targetPoseRotateDegrees",visionSystem.getIdPose(2).get().getRotation().getDegrees());
+        }
+        SmartDashboard.putNumber("robotPoseX",swerve.getPose().getX());
+        SmartDashboard.putNumber("robotPoseY",swerve.getPose().getY());
+        SmartDashboard.putNumber("robotPoseRotateDegrees",swerve.getPose().getRotation().getDegrees()
+        );
 
         CommandScheduler.getInstance().run();
     }
