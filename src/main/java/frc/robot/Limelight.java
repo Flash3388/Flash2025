@@ -22,6 +22,10 @@ public class Limelight {
         return 3;
     }
 
+    public int getTargetId(){
+        return  (int) LimelightHelpers.getFiducialID(name);
+    }
+
     public double getTargetArea(){
         return LimelightHelpers.getTA(name);
     }

@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 13.797848360655736,
-        "y": 5.127868852459017
+        "x": 13.82,
+        "y": 5.008
       },
       "prevControl": {
-        "x": 13.76188524590164,
-        "y": 6.230737704918033
+        "x": 13.784036885245904,
+        "y": 6.110868852459016
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,9 +34,36 @@
   "eventMarkers": [
     {
       "name": "dropL3",
-      "waypointRelativePos": 1.0,
+      "waypointRelativePos": 0.6014888337468941,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "dropL3"
+        }
+      }
+    },
+    {
+      "name": "allign",
+      "waypointRelativePos": 0.9032258064516127,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "allign"
+        }
+      }
+    },
+    {
+      "name": "release",
+      "waypointRelativePos": 0.9687344913151386,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "release"
+        }
+      }
     }
   ],
   "globalConstraints": {

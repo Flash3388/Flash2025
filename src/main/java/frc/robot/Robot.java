@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
-import java.util.Timer;
-import java.util.TimerTask;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -19,17 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.CollectAlgae;
-import frc.robot.commands.CollectCoral;
-import frc.robot.commands.CoralArmCommand;
-import frc.robot.commands.ExtendedAlgaeArm;
-import frc.robot.commands.HoldAlgae;
-import frc.robot.commands.HoldCoral;
-import frc.robot.commands.LowerCoralElevator;
-import frc.robot.commands.RaiseCoralElevator;
-import frc.robot.commands.ReleaseAlgae;
-import frc.robot.commands.ReleaseCoral;
-import frc.robot.commands.RetractAlgaeArm;
+import frc.robot.commands.*;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
 import frc.robot.subsystems.CoralArm;
@@ -84,9 +72,6 @@ public class Robot extends TimedRobot {
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
         Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
                 return new RetractAlgaeArm(algaeArm);
@@ -120,7 +105,7 @@ public class Robot extends TimedRobot {
         algaeGripper.setDefaultCommand(checkAlgae);*/
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(new RaiseCoralElevator(coralElevator));
+                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .onTrue(new LowerCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kX.value)
@@ -132,7 +117,11 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralCollect());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
-        NamedCommands.registerCommand("dropL3",new ReleaseCoral(coralGripper));
+        NamedCommands.registerCommand("dropL3",coralLevel2Place());
+        NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
+        NamedCommands.registerCommand("release",new ReleaseCoral(coralGripper));
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     @Override
@@ -201,14 +190,6 @@ public class Robot extends TimedRobot {
             this.autoCommand.schedule();
         }
 
-        // Create a timer to schedule the delayed execution
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                coralLevel3Place().schedule();
-            }
-        }, 8500); // Delay of 3000 milliseconds (3 seconds)
     }
 
     @Override

@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Limelight;
@@ -33,6 +34,16 @@ public class VisionSystem extends SubsystemBase {
              return Optional.of(limelightBack.getPoseEstimate());
         }
         return Optional.empty();
+    }
+
+    public Optional<Double> frontTargetAngle(){
+        Optional<Double> angle = Optional.empty();
+        if(limelightFront.hasDetectedTarget()) {
+            int id = limelightFront.getTargetId();
+            Pose2d targetPose = layout.getTagPose(id).get().toPose2d();
+            angle = Optional.of(targetPose.getRotation().getDegrees()) ;
+        }
+        return angle;
     }
 
     public void changePipeline(int id){
