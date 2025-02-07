@@ -24,6 +24,7 @@ public class CoralArm extends SubsystemBase {
 
     public CoralArm() {
         motor = new SparkMax(RobotMap.ARM_CORAL_MOTOR, SparkLowLevel.MotorType.kBrushless);
+
         SparkMaxConfig config = new SparkMaxConfig();
         config.absoluteEncoder
                 .zeroOffset(RobotMap.ARM_CORAL_ZERO_OFFSET);
@@ -48,6 +49,7 @@ public class CoralArm extends SubsystemBase {
         config.encoder
                 .positionConversionFactor(1 / RobotMap.ARM_CORAL_GEAR_RATIO)
                 .velocityConversionFactor(1 / RobotMap.ARM_CORAL_GEAR_RATIO);
+        config.idleMode(SparkBaseConfig.IdleMode.kBrake);
         motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
         absEncoder = motor.getAbsoluteEncoder();

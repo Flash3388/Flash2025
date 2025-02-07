@@ -26,11 +26,18 @@ public class VisionSystem extends SubsystemBase {
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate(){
         if(limelightFront.hasDetectedTarget()){
-            return Optional.of(limelightFront.getPoseEstimate());
+            if(limelightFront.getDistanceToTarget()<=2.5)
+                return Optional.of(limelightFront.getPoseEstimate());
         }else if(limelightBack.hasDetectedTarget()){
-            return Optional.of(limelightBack.getPoseEstimate());
+            if(limelightBack.getDistanceToTarget()<=2.5)
+             return Optional.of(limelightBack.getPoseEstimate());
         }
         return Optional.empty();
+    }
+
+    public void changePipeline(int id){
+        limelightFront.changePipeline(id);
+        limelightBack.changePipeline(id);
     }
 
 
