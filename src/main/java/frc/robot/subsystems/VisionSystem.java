@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -40,6 +41,13 @@ public class VisionSystem extends SubsystemBase {
 
     }
 
+    public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate(){
+        if(limelightFront.hasDetectedTarget()){
+            if(limelightFront.getDistanceToTarget()<=2.5)
+                return Optional.of(limelightFront.getPoseEstimate());
+        }else if(limelightBack.hasDetectedTarget()){
+            if(limelightBack.getDistanceToTarget()<=2.5)
+             return Optional.of(limelightBack.getPoseEstimate());
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
         if (limelightFront.hasDetectedTarget()) {
             return Optional.of(limelightFront.getPoseEstimate());
@@ -47,6 +55,21 @@ public class VisionSystem extends SubsystemBase {
             return Optional.of(limelightBack.getPoseEstimate());
         }
         return Optional.empty();
+    }
+
+    public Optional<Double> frontTargetAngle(){
+        Optional<Double> angle = Optional.empty();
+        if(limelightFront.hasDetectedTarget()) {
+            int id = limelightFront.getTargetId();
+            Pose2d targetPose = layout.getTagPose(id).get().toPose2d();
+            angle = Optional.of(targetPose.getRotation().getDegrees()) ;
+        }
+        return angle;
+    }
+
+    public void changePipeline(int id){
+        limelightFront.changePipeline(id);
+        limelightBack.changePipeline(id);
     }
 
     private void setReefPositions() {

@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.math.geometry.Pose2d;
 
 import java.util.Optional;
@@ -15,6 +17,25 @@ public class Limelight {
 
     public boolean hasDetectedTarget(){
         return LimelightHelpers.getTV(name);
+    }
+
+    public double getDistanceToTarget(){
+        LimelightHelpers.RawFiducial[] fiducials = LimelightHelpers.getRawFiducials(name);
+        if(fiducials.length >0)
+            return fiducials[0].distToRobot;
+        return 3;
+    }
+
+    public int getTargetId(){
+        return  (int) LimelightHelpers.getFiducialID(name);
+    }
+
+    public double getTargetArea(){
+        return LimelightHelpers.getTA(name);
+    }
+
+    public void changePipeline(int id){
+            LimelightHelpers.setPipelineIndex(name,id);
     }
 
     public LimelightHelpers.PoseEstimate getPoseEstimate(){

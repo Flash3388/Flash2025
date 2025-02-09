@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.util.sendable.Sendable;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -19,6 +20,15 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
+import frc.robot.commands.*;
+import frc.robot.subsystems.AlgaeArm;
+import frc.robot.subsystems.AlgaeGripper;
+import frc.robot.subsystems.CoralArm;
+import frc.robot.subsystems.CoralElevator;
+import frc.robot.subsystems.CoralGripper;
+import frc.robot.subsystems.Dashboard;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.VisionSystem;
 
 import java.util.Optional;
 import java.util.Set;
@@ -64,9 +74,6 @@ public class Robot extends TimedRobot {
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
         Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
                 return new RetractAlgaeArm(algaeArm);
@@ -100,20 +107,26 @@ public class Robot extends TimedRobot {
         algaeGripper.setDefaultCommand(checkAlgae);*/
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(new RaiseCoralElevator(coralElevator));
+                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .onTrue(new LowerCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kX.value)
                 .onTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)
+                .onTrue(coralLevel2Place());
                 .onTrue(new AllignToFrontTarget(swerve,visionSystem));
        // new JoystickButton(xbox, XboxController.Button.kB.value)
       //          .onTrue( new AllignToCoralStationAngle(visionSystem,swerve));
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
-                .onTrue(new ReleaseCoral(coralGripper));
+                .onTrue(coralLevel3Place());
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
-                .onTrue(coralLevel2Place());
+                .onTrue(coralCollect());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
+        NamedCommands.registerCommand("dropL3",coralLevel2Place());
+        NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
+        NamedCommands.registerCommand("release",new ReleaseCoral(coralGripper));
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     @Override
@@ -197,10 +210,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        this.autoCommand = autoChooser.getSelected();;
+        this.autoCommand = autoChooser.getSelected();
         if(this.autoCommand != null) {
             this.autoCommand.schedule();
         }
+
     }
 
     @Override
@@ -238,17 +252,17 @@ public class Robot extends TimedRobot {
                         new LowerCoralElevator(coralElevator),
                         Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
                 ),
-                new CollectCoral(coralGripper));
+                new ReleaseCoral(coralGripper));
     }
 
     private Command coralLevel3Place(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(200/*RobotMap.ARM_CORAL_ANGLE_A*/)),
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 new ParallelCommandGroup(
                         new RaiseCoralElevator(coralElevator),
                         Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
                 ),
-                new CollectCoral(coralGripper));
+                new ReleaseCoral(coralGripper));
     }
 
     private Command coralCollect(){
