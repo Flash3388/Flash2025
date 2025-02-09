@@ -41,8 +41,16 @@ public class Limelight {
             LimelightHelpers.setPipelineIndex(name,1);
     }
 
+    public double getAngle(){
+        return LimelightHelpers.getTX(name);
+    }
+
     public int getTargetId(){
         return  (int) LimelightHelpers.getFiducialID(name);
+    }
+
+    public LimelightHelpers.RawFiducial[] getFiducials(){
+        return LimelightHelpers.getRawFiducials(name);
     }
 
     public void periodic(){

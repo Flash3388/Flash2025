@@ -18,14 +18,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.AlgaeArm;
-import frc.robot.subsystems.AlgaeGripper;
-import frc.robot.subsystems.CoralArm;
-import frc.robot.subsystems.CoralElevator;
-import frc.robot.subsystems.CoralGripper;
-import frc.robot.subsystems.Dashboard;
-import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.VisionSystem;
+import frc.robot.subsystems.*;
 
 import java.util.Optional;
 import java.util.Set;
@@ -113,7 +106,9 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kX.value)
                 .onTrue(new ExtendedAlgaeArm(algaeArm));
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .onTrue( new AllignToCoralStationAngle(visionSystem,swerve));
+                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
+       // new JoystickButton(xbox, XboxController.Button.kB.value)
+      //          .onTrue( new AllignToCoralStationAngle(visionSystem,swerve));
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
                 .onTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
@@ -131,10 +126,13 @@ public class Robot extends TimedRobot {
             swerve.updatePoseEstimator(pose.get());
         }
 
-        if(visionSystem.getIdPose(2).isPresent()){
-            SmartDashboard.putNumber("targetPoseX",visionSystem.getIdPose(2).get().getX());
-            SmartDashboard.putNumber("targetPoseY",visionSystem.getIdPose(2).get().getY());
-            SmartDashboard.putNumber("targetPoseRotateDegrees",visionSystem.getIdPose(2).get().getRotation().getDegrees());
+        if(visionSystem.getIdPose(8).isPresent()){
+            SmartDashboard.putNumber("targetPoseX",visionSystem.getIdPose(8).get().getX());
+            SmartDashboard.putNumber("targetPoseY",visionSystem.getIdPose(8).get().getY());
+            SmartDashboard.putNumber("targetPoseRotateDegrees",visionSystem.getIdPose(8).get().getRotation().getDegrees());
+        }
+        if(visionSystem.frontHasSeenTarget()){
+            SmartDashboard.putNumber("targetVisionRotate",visionSystem.getFrontAngle());
         }
         SmartDashboard.putNumber("robotPoseX",swerve.getPose().getX());
         SmartDashboard.putNumber("robotPoseY",swerve.getPose().getY());
@@ -173,11 +171,18 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         compressor.enableAnalog(RobotMap.MIN_PRESSURE,RobotMap.MAX_PRESSURE);
+        /*
         swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
         ).schedule();
+         */
+        swerve.setDefaultCommand(swerve.driveA(
+                ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
+                ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
+        ));
     }
 
     @Override

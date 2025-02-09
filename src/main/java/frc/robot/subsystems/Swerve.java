@@ -181,6 +181,10 @@ public class Swerve extends SubsystemBase {
             }
     }
 
+    public SwerveDrive getSwerveDrive(){
+        return swerveDrive;
+    }
+
     public Pose2d getPose()
     {
         return swerveDrive.getPose();
