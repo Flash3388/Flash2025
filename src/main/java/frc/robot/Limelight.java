@@ -66,12 +66,12 @@ public class Limelight {
         return LimelightHelpers.getTX(name);
     }
 
-    public int getTargetId(){
-        return  (int) LimelightHelpers.getFiducialID(name);
-    }
-
     public LimelightHelpers.RawFiducial[] getFiducials(){
         return LimelightHelpers.getRawFiducials(name);
+    }
+
+    public double getDistance(){
+        return getFiducials()[0].distToRobot;
     }
 
     public void periodic(){

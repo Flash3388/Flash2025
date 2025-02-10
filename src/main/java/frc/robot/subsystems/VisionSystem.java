@@ -42,20 +42,16 @@ public class VisionSystem extends SubsystemBase {
     }
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate(){
-        if(limelightFront.hasDetectedTarget()){
-            if(limelightFront.getDistanceToTarget()<=2.5)
+        if(limelightFront.hasDetectedTarget()) {
+            if (limelightFront.getDistanceToTarget() <= 2.5)
                 return Optional.of(limelightFront.getPoseEstimate());
-        }else if(limelightBack.hasDetectedTarget()){
-            if(limelightBack.getDistanceToTarget()<=2.5)
-             return Optional.of(limelightBack.getPoseEstimate());
-    public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
-        if (limelightFront.hasDetectedTarget()) {
-            return Optional.of(limelightFront.getPoseEstimate());
-        } else if (limelightBack.hasDetectedTarget()) {
-            return Optional.of(limelightBack.getPoseEstimate());
+        } else if(limelightBack.hasDetectedTarget()) {
+            if (limelightBack.getDistanceToTarget() <= 2.5)
+               return Optional.of(limelightBack.getPoseEstimate());
         }
         return Optional.empty();
     }
+
 
     public Optional<Double> frontTargetAngle(){
         Optional<Double> angle = Optional.empty();
@@ -103,6 +99,13 @@ public class VisionSystem extends SubsystemBase {
             }
         }
         return closestPose;
+    }
+    public double getMovingAngle(int id){
+        switch (id){
+            case 9: return -120;
+            case 8: return -90;
+        }
+        return 0;
     }
 
     public double getMovingAngle(){
@@ -153,15 +156,6 @@ public class VisionSystem extends SubsystemBase {
 
     }
 
-    public double frontTargetAngle() {
-        if (limelightFront.hasDetectedTarget()) {
-            int id = limelightFront.getTargetId();
-            Pose2d targetPose = layout.getTagPose(id).get().toPose2d();
-            return targetPose.getRotation().getDegrees();
-        }
-        return -1;
-    }
-
     public double getFrontAngle() {
         return limelightFront.getAngle();
     }
@@ -183,6 +177,10 @@ public class VisionSystem extends SubsystemBase {
 
     public int frontGetTargetId() {
         return limelightFront.getTargetId();
+    }
+
+    public double getDistanceFront(){
+        return limelightFront.getDistance();
     }
 
     public boolean frontHasSeenTarget() {

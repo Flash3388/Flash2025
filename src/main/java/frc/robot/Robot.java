@@ -1,7 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.util.sendable.Sendable;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -18,8 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.*;
-import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.AlgaeArm;
 import frc.robot.subsystems.AlgaeGripper;
@@ -74,6 +70,9 @@ public class Robot extends TimedRobot {
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
 
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+
         Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
                 return new RetractAlgaeArm(algaeArm);
@@ -107,50 +106,36 @@ public class Robot extends TimedRobot {
         algaeGripper.setDefaultCommand(checkAlgae);*/
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
+                .onTrue(new RaiseCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .onTrue(new LowerCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kX.value)
-                .onTrue(new ExtendedAlgaeArm(algaeArm));
+                .onTrue(coralLevel2PlaceAlign());
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .onTrue(coralLevel2Place());
-                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
-       // new JoystickButton(xbox, XboxController.Button.kB.value)
-      //          .onTrue( new AllignToCoralStationAngle(visionSystem,swerve));
-        new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
-                .onTrue(coralLevel3Place());
-        new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralCollect());
+        new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
+                .onTrue(new ReleaseCoral(coralGripper));
+        new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
+                .onTrue(coralLevel2Place());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
-        NamedCommands.registerCommand("dropL3",coralLevel2Place());
-        NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
-        NamedCommands.registerCommand("release",new ReleaseCoral(coralGripper));
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+
+        CommandScheduler.getInstance().onCommandExecute((command)-> {
+            System.out.printf("INITIALIZING COMMAND %s %s\n", command.getName(), command.getClass().getSimpleName());
+        });
     }
 
     @Override
     public void robotPeriodic() {
         SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
+        SmartDashboard.putNumber("robotPoseX",swerve.getPose().getX());
+        SmartDashboard.putNumber("robotPoseY",swerve.getPose().getY());
+        SmartDashboard.putNumber("robotPoseDegrees",swerve.getPose().getRotation().getDegrees());
 
         Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
         //noinspection OptionalIsPresent
         if(pose.isPresent()) {
             swerve.updatePoseEstimator(pose.get());
         }
-
-        if(visionSystem.getIdPose(8).isPresent()){
-            SmartDashboard.putNumber("targetPoseX",visionSystem.getIdPose(8).get().getX());
-            SmartDashboard.putNumber("targetPoseY",visionSystem.getIdPose(8).get().getY());
-            SmartDashboard.putNumber("targetPoseRotateDegrees",visionSystem.getIdPose(8).get().getRotation().getDegrees());
-        }
-        if(visionSystem.frontHasSeenTarget()){
-            SmartDashboard.putNumber("targetVisionRotate",visionSystem.getFrontAngle());
-        }
-        SmartDashboard.putNumber("robotPoseX",swerve.getPose().getX());
-        SmartDashboard.putNumber("robotPoseY",swerve.getPose().getY());
-        SmartDashboard.putNumber("robotPoseRotateDegrees",swerve.getPose().getRotation().getDegrees()
-        );
 
         CommandScheduler.getInstance().run();
     }
@@ -184,13 +169,6 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         compressor.enableAnalog(RobotMap.MIN_PRESSURE,RobotMap.MAX_PRESSURE);
-        /*
-        swerve.driveA(
-                ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
-                ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
-                ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
-        ).schedule();
-         */
         swerve.setDefaultCommand(swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
@@ -200,7 +178,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-
     }
 
     @Override
@@ -210,11 +187,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        this.autoCommand = autoChooser.getSelected();
+        this.autoCommand = autoChooser.getSelected();;
         if(this.autoCommand != null) {
             this.autoCommand.schedule();
         }
-
     }
 
     @Override
@@ -245,6 +221,14 @@ public class Robot extends TimedRobot {
 
     }
 
+    private Command coralLevel2PlaceAlign() {
+        return new SequentialCommandGroup(
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve)), // Step 1: Align to the target
+                coralLevel2Place1() // Step 2-4: Execute the standard placement sequence
+        );
+    }
+
     private Command coralLevel2Place(){
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
@@ -254,15 +238,23 @@ public class Robot extends TimedRobot {
                 ),
                 new ReleaseCoral(coralGripper));
     }
+    private Command coralLevel2Place1(){
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
+                new ReleaseCoral(coralGripper));
+    }
 
     private Command coralLevel3Place(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(200/*RobotMap.ARM_CORAL_ANGLE_A*/)),
                 new ParallelCommandGroup(
                         new RaiseCoralElevator(coralElevator),
                         Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
                 ),
-                new ReleaseCoral(coralGripper));
+                new CollectCoral(coralGripper));
     }
 
     private Command coralCollect(){
