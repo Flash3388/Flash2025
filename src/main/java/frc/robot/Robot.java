@@ -120,6 +120,7 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralLevel2Place());
         new POVButton(xbox,180).onTrue(algaeAndCoral());
+        new POVButton(xbox,90).onTrue(algaeOut());
         new POVButton(xbox,0).onTrue(algaeCollect());
     }
 
@@ -258,9 +259,11 @@ public class Robot extends TimedRobot {
     private Command algaeAndCoral(){
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                new RaiseCoralElevator(coralElevator),
-                algaeCollect(),
-                Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve)),
+                new ParallelCommandGroup(
+                        new RaiseCoralElevator(coralElevator),
+                    algaeCollect(),
+                    Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve))
+                        ),
                 coralLevel3Place1()
         );
     }
@@ -293,7 +296,9 @@ public class Robot extends TimedRobot {
 
     private Command algaeOut(){
         return new SequentialCommandGroup(
-                new RetractAlgaeArm(algaeArm),
-                new ReleaseAlgae(algaeGripper));
+                new LowerCoralElevator(coralElevator),
+                new ReleaseAlgae(algaeGripper),
+                new RetractAlgaeArm(algaeArm)
+        );
     }
 }

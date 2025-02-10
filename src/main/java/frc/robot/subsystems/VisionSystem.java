@@ -102,7 +102,7 @@ public class VisionSystem extends SubsystemBase {
     }
     public double getMovingAngle(int id){
         switch (id){
-            case 9: return -120;
+            case 9: return -90;
             case 8: return -90;
         }
         return 0;
@@ -110,6 +110,7 @@ public class VisionSystem extends SubsystemBase {
 
     public Pose2d getMovingPoseLeft(int id){
         switch (id){
+            case 9: return new Pose2d(12.749,4.92,new Rotation2d(-72.79));
             case 8: return new Pose2d(13.697,4.76,new Rotation2d(-120));
         }
         return Pose2d.kZero;

@@ -13,8 +13,8 @@ public class AlgaeArm extends SubsystemBase {
     //private final DoubleSolenoid solenoid2;
     private final AnalogInput switchTop;
     private final AnalogInput switchBottom;
-    private final double MAX_UPPER_INPUT = 4100;
-    private final double MIN_UPPER_INPUT = 3000;
+    private final double MAX_UPPER_INPUT = 380;
+    private final double MIN_UPPER_INPUT = 250;
 
     public AlgaeArm(){
         this.solenoid1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL);
@@ -28,7 +28,7 @@ public class AlgaeArm extends SubsystemBase {
     }
 
     public boolean isRetracted(){
-        return isConstrained(switchBottom.getValue(),MIN_UPPER_INPUT,MAX_UPPER_INPUT);
+        return !isConstrained(switchBottom.getValue(),MIN_UPPER_INPUT,MAX_UPPER_INPUT);
     }
 
     public void extend(){
@@ -50,6 +50,8 @@ public class AlgaeArm extends SubsystemBase {
     public void periodic(){
         SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
         SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
+        SmartDashboard.putNumber("BottomValue",switchBottom.getValue());
+        SmartDashboard.putNumber("TopValue",switchTop.getValue());
     }
 
     private boolean isConstrained(double value, double min, double max){
