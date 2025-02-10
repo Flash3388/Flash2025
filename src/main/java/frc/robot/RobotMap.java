@@ -54,8 +54,8 @@ public class RobotMap {
     public static final int ALGAE_GRIPPER_DIGITALINPUT = 0;
 
     // algae arm
-    public static final int ALGAE_ARM_SWITCH_TOP = 5;
-    public static final int ALGAE_ARM_SWITCH_BOTTOM = 6;
+    public static final int ALGAE_ARM_SWITCH_TOP = 0;
+    public static final int ALGAE_ARM_SWITCH_BOTTOM = 1;
     public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 

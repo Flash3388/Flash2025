@@ -110,7 +110,7 @@ public class VisionSystem extends SubsystemBase {
 
     public Pose2d getMovingPoseLeft(int id){
         switch (id){
-            case 8: return new Pose2d(13.73,4.75,new Rotation2d(-120));
+            case 8: return new Pose2d(13.697,4.76,new Rotation2d(-120));
         }
         return Pose2d.kZero;
     }
@@ -176,6 +176,8 @@ public class VisionSystem extends SubsystemBase {
     public int frontGetTargetId() {
         return limelightFront.getTargetId();
     }
+    public int backGetTargetId(){return limelightBack.getTargetId();}
+
 
     public double getDistanceFront(){
         return limelightFront.getDistance();
