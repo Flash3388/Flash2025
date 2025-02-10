@@ -108,13 +108,11 @@ public class VisionSystem extends SubsystemBase {
         return 0;
     }
 
-    public double getMovingAngle(){
-        int id = limelightFront.aprilTagId();
+    public Pose2d getMovingPoseLeft(int id){
         switch (id){
-            case 9: return -60;
-            case 8: return 90;
+            case 8: return new Pose2d(13.73,4.75,new Rotation2d(-120));
         }
-        return 0;
+        return Pose2d.kZero;
     }
 
     public double getDistance(){

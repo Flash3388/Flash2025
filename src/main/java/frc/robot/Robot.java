@@ -118,10 +118,6 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralLevel2Place());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
-
-        CommandScheduler.getInstance().onCommandExecute((command)-> {
-            System.out.printf("INITIALIZING COMMAND %s %s\n", command.getName(), command.getClass().getSimpleName());
-        });
     }
 
     @Override

@@ -204,7 +204,7 @@ public class Swerve extends SubsystemBase {
         int id = visionSystem.frontGetTargetId();
         targetPose = visionSystem.getIdPose(id).get();
         Pose2d pose = new Pose2d(targetPose.getX()+0.1, targetPose.getY()+0.1, targetPose.getRotation());
-        Pose2d leftPose = new Pose2d(13.73,4.75,new Rotation2d(-120));
+        Pose2d leftPose = visionSystem.getMovingPoseLeft(id);
 
         rotate(()-> visionSystem.getMovingAngle(id));
 
