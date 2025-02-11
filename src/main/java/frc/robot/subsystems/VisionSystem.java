@@ -2,15 +2,13 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Limelight;
 import frc.robot.LimelightHelpers;
+import frc.robot.RobotMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,18 +100,38 @@ public class VisionSystem extends SubsystemBase {
     }
     public double getMovingAngle(int id){
         switch (id){
-            case 9: return -90;
+            case 9: return -120;
             case 8: return -90;
         }
         return 0;
     }
 
-    public Pose2d getMovingPoseLeft(int id){
-        switch (id){
-            case 9: return new Pose2d(12.749,4.92,new Rotation2d(-72.79));
-            case 8: return new Pose2d(13.697,4.76,new Rotation2d(-120));
+    public Pose2d getPoseForReefStand(int id, boolean isLeft) {
+        Optional<Pose3d> optional = layout.getTagPose(id);
+        if (optional.isEmpty()) {
+            throw new Error("wrong apriltag");
         }
-        return Pose2d.kZero;
+
+        Pose2d pose = optional.get().toPose2d();
+        double d1 = isLeft ? RobotMap.DISTANCE_ON_PANE : -RobotMap.DISTANCE_FROM_PANE;
+        Pose2d calculatedPose = calcPose(pose, d1, RobotMap.DISTANCE_FROM_PANE);
+
+        double correctedRotation = (calculatedPose.getRotation().getDegrees() + 180) % 360;
+        return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), Rotation2d.fromDegrees(correctedRotation));
+    }
+
+    public Pose2d calcPose(Pose2d pose, double d1, double d2){
+        double distance = Math.sqrt(
+                pose.getX()* pose.getX() +
+                        pose.getY()* pose.getY());
+        double angle = Math.toRadians(180-pose.getRotation().getDegrees()-Math.atan(d2/ d1));
+        double A = distance * Math.sin(angle);
+        double B = distance * Math.cos(angle);
+
+        double C = pose.getX() - A;
+        double D = pose.getY() - B;
+
+        return new Pose2d(C,D,pose.getRotation());
     }
 
     public double getDistance(){

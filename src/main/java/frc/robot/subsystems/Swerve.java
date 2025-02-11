@@ -196,7 +196,24 @@ public class Swerve extends SubsystemBase {
             }
     }
 
-    public PathPlannerPath alignToReefLeft(VisionSystem visionSystem){
+    public PathPlannerPath createToReefPath(Pose2d startPose, Pose2d endPose) {
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+                startPose,
+                endPose
+        );
+        PathConstraints constraints = new PathConstraints(0.5,0.5,Math.PI*2,Math.PI);
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                constraints,
+                null,
+                new GoalEndState(0.0, endPose.getRotation())
+        );
+        path.preventFlipping = true;
+        return path;
+
+    }
+
+    /*public PathPlannerPath createToReefPath(VisionSystem visionSystem){
         List<Waypoint> waypoints;
         PathPlannerPath path;
         Pose2d targetPose;
@@ -204,7 +221,7 @@ public class Swerve extends SubsystemBase {
         int id = visionSystem.frontGetTargetId();
         // targetPose = visionSystem.getIdPose(id).get();
         //Pose2d pose = new Pose2d(targetPose.getX()+0.1, targetPose.getY()+0.1, targetPose.getRotation());
-        Pose2d leftPose = visionSystem.getMovingPoseLeft(id);
+        Pose2d leftPose = Pose2d.kZero;//visionSystem.getPoseForReefStand(id);
 
         rotate(()-> visionSystem.getMovingAngle(id));
 
@@ -222,7 +239,7 @@ public class Swerve extends SubsystemBase {
         );
         path.preventFlipping = true;
         return path;
-    }
+    }*/
 
     public boolean isNear(Pose2d otherPose) {
         double tolerance = 0.05;

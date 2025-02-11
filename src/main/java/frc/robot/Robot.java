@@ -1,6 +1,7 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -27,7 +28,6 @@ import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.VisionSystem;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -111,17 +111,22 @@ public class Robot extends TimedRobot {
                 .onTrue(new RaiseCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .onTrue(new LowerCoralElevator(coralElevator));
-        new JoystickButton(xbox, XboxController.Button.kX.value)
-                .onTrue(coralLevel2PlaceAlign());
+        //new JoystickButton(xbox, XboxController.Button.kX.value)
+          //      .onTrue(coralLevel2PlaceAlign());
         new JoystickButton(xbox, XboxController.Button.kB.value)
                 .onTrue(coralCollect());
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
                 .onTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralLevel2Place());
-        new POVButton(xbox,180).onTrue(algaeAndCoral());
+        new POVButton(xbox,180).onTrue(driveToCoralReef(8));
         new POVButton(xbox,90).onTrue(algaeOut());
         new POVButton(xbox,0).onTrue(algaeCollect());
+
+        Pose2d reefRight = visionSystem.getPoseForReefStand(8, false);
+        Pose2d reefLeft = visionSystem.getPoseForReefStand(8, true);
+        SmartDashboard.putNumberArray("ReefRight", new double[]{reefRight.getX(), reefRight.getY(), reefRight.getRotation().getDegrees()});
+        SmartDashboard.putNumberArray("ReefLeft", new double[]{reefLeft.getX(), reefLeft.getY(), reefLeft.getRotation().getDegrees()});
     }
 
     @Override
@@ -222,13 +227,35 @@ public class Robot extends TimedRobot {
 
     }
 
-    private Command coralLevel2PlaceAlign() {
+    private Command driveToCoralReef(int aprilTagId) {
+        return Commands.defer(()-> {
+            Pose2d robotPose = swerve.getPose();
+            Pose2d reefRight = visionSystem.getPoseForReefStand(aprilTagId, false);
+            Pose2d reefLeft = visionSystem.getPoseForReefStand(aprilTagId, true);
+
+            return new SequentialCommandGroup(
+                    new ParallelCommandGroup(
+                            AutoBuilder.followPath(swerve.createToReefPath(robotPose, reefRight)),
+                            new SequentialCommandGroup(
+                                    Commands.waitSeconds(2),
+                                    new RaiseCoralElevator(coralElevator)
+                            )
+                    ),
+                    new ParallelCommandGroup(
+                            AutoBuilder.followPath(swerve.createToReefPath(robotPose, reefLeft)),
+                            algaeCollect()
+                    )
+            );
+        }, Set.of(swerve));
+    }
+
+    /*private Command coralLevel2PlaceAlign() {
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve)), // Step 1: Align to the target
+                Commands.defer(()-> AutoBuilder.followPath(swerve.createToReefPath(visionSystem)),Set.of(swerve)), // Step 1: Align to the target
                 coralLevel2Place1() // Step 2-4: Execute the standard placement sequence
         );
-    }
+    }*/
 
     private Command coralLevel2Place(){
         return new SequentialCommandGroup(
@@ -256,17 +283,17 @@ public class Robot extends TimedRobot {
                 new ReleaseCoral(coralGripper));
     }
 
-    private Command algaeAndCoral(){
+    /*private Command algaeAndCoral(){
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 new ParallelCommandGroup(
                         new RaiseCoralElevator(coralElevator),
                     algaeCollect(),
-                    Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve))
+                    Commands.defer(()-> AutoBuilder.followPath(swerve.createToReefPath(visionSystem)),Set.of(swerve))
                         ),
                 coralLevel3Place1()
         );
-    }
+    }*/
 
     private Command coralLevel3Place(){
         return new SequentialCommandGroup(

@@ -6,6 +6,7 @@ public class RobotMap {
 
     public static final int MIN_PRESSURE = 100;
     public static final int MAX_PRESSURE = 120;
+    public static final int COMPRESSION_PORT = 1;
 
     public static final int SWERVE_FRONT_LEFT_DRIVE = 11;
     public static final int SWERVE_FRONT_LEFT_STEER = 12;
@@ -59,5 +60,8 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
-    public static final int COMPRESSION_PORT = 1;
+    //vision system
+    public static final double DISTANCE_ON_PANE = 0.165;
+    public static final double DISTANCE_FROM_PANE = 0.432;
+
 }
