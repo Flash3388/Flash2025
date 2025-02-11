@@ -199,11 +199,8 @@ public class Swerve extends SubsystemBase {
     public PathPlannerPath alignToReefLeft(VisionSystem visionSystem){
         List<Waypoint> waypoints;
         PathPlannerPath path;
-        Pose2d targetPose;
 
         int id = visionSystem.frontGetTargetId();
-        targetPose = visionSystem.getIdPose(id).get();
-        Pose2d pose = new Pose2d(targetPose.getX()+0.1, targetPose.getY()+0.1, targetPose.getRotation());
         Pose2d leftPose = visionSystem.getMovingPoseLeft(id);
 
         rotate(()-> visionSystem.getMovingAngle(id));
