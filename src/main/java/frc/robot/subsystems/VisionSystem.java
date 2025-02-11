@@ -113,25 +113,23 @@ public class VisionSystem extends SubsystemBase {
         }
 
         Pose2d pose = optional.get().toPose2d();
-        double d1 = isLeft ? RobotMap.DISTANCE_ON_PANE : -RobotMap.DISTANCE_FROM_PANE;
-        Pose2d calculatedPose = calcPose(pose, d1, RobotMap.DISTANCE_FROM_PANE);
+        Pose2d calculatedPose = calcPose(pose, RobotMap.DISTANCE_ON_PANE, RobotMap.DISTANCE_FROM_PANE, isLeft);
 
-        double correctedRotation = (calculatedPose.getRotation().getDegrees() + 180) % 360;
+         double correctedRotation = (calculatedPose.getRotation().getDegrees() + 180) % 360;
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), Rotation2d.fromDegrees(correctedRotation));
     }
 
-    public Pose2d calcPose(Pose2d pose, double d1, double d2){
-        double distance = Math.sqrt(
-                pose.getX()* pose.getX() +
-                        pose.getY()* pose.getY());
-        double angle = Math.toRadians(180-pose.getRotation().getDegrees()-Math.atan(d2/ d1));
+    public Pose2d calcPose(Pose2d pose, double d1, double d2, boolean isLeft) {
+        // beta = alpha - 90
+        // alpha = beta + 90
+
+        double alpha = pose.getRotation().getDegrees() -180;
+        double distance = Math.sqrt(d1 * d1 + d2 * d2);
+        double angle = Math.toRadians(180 - alpha - Math.toDegrees(Math.atan(d2 / d1)));
         double A = distance * Math.sin(angle);
         double B = distance * Math.cos(angle);
 
-        double C = pose.getX() - A;
-        double D = pose.getY() - B;
-
-        return new Pose2d(C,D,pose.getRotation());
+        return new Pose2d(pose.getX() - A, pose.getY() + B, pose.getRotation());
     }
 
     public double getDistance(){

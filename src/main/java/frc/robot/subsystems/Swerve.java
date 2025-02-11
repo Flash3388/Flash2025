@@ -371,4 +371,7 @@ public class Swerve extends SubsystemBase {
         };
     }
 
+    public Field2d getField() {
+        return swerveDrive.field;
+    }
 }

@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -75,13 +76,13 @@ public class Robot extends TimedRobot {
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        Command checkIfAlgaeRetract = Commands.defer(()->{
+       /* Command checkIfAlgaeRetract = Commands.defer(()->{
             if(algaeArm.isExtended()){
                 return new RetractAlgaeArm(algaeArm);
             }
             return Commands.idle(algaeArm);
         }, Set.of(algaeArm));
-        algaeArm.setDefaultCommand(checkIfAlgaeRetract);
+        algaeArm.setDefaultCommand(checkIfAlgaeRetract); */
 
        /* Command checkIfLow = Commands.defer(()-> {
             if(coralElevator.isRaised()){
@@ -125,6 +126,9 @@ public class Robot extends TimedRobot {
 
         Pose2d reefRight = visionSystem.getPoseForReefStand(8, false);
         Pose2d reefLeft = visionSystem.getPoseForReefStand(8, true);
+
+        swerve.getField().getObject("ReefRight").setPose(reefRight);
+        swerve.getField().getObject("ReefLeft").setPose(reefLeft);
         SmartDashboard.putNumberArray("ReefRight", new double[]{reefRight.getX(), reefRight.getY(), reefRight.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("ReefLeft", new double[]{reefLeft.getX(), reefLeft.getY(), reefLeft.getRotation().getDegrees()});
     }

@@ -62,6 +62,6 @@ public class RobotMap {
 
     //vision system
     public static final double DISTANCE_ON_PANE = 0.165;
-    public static final double DISTANCE_FROM_PANE = 0.432;
+    public static final double DISTANCE_FROM_PANE = -0.432;
 
 }
