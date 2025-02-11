@@ -133,6 +133,7 @@ public class Robot extends TimedRobot {
         NamedCommands.registerCommand("coralDrop",new ReleaseCoral(coralGripper));
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putNumber("rifSetAngle",45.5);
     }
 
     @Override
@@ -278,7 +279,7 @@ public class Robot extends TimedRobot {
         return Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B));
     }
     private Command armToRif(){
-        return Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A));
+        return Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(SmartDashboard.getNumber("rifSetAngle",43)));
     }
     private Command coralCollect(){
         return new SequentialCommandGroup(
