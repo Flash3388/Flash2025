@@ -118,8 +118,10 @@ public class Robot extends TimedRobot {
                 .onTrue(coralCollect());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
         NamedCommands.registerCommand("dropL3",coralLevel2Place());
-        NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
+       // NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
         NamedCommands.registerCommand("release",new ReleaseCoral(coralGripper));
+        NamedCommands.registerCommand("collectArm",coralCollect());
+        NamedCommands.registerCommand("collectCoral",new CollectCoral(coralGripper));
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
