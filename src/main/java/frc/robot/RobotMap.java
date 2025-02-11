@@ -4,7 +4,7 @@ public class RobotMap {
 
     private RobotMap() {}
 
-    public static final int MIN_PRESSURE = 80;
+    public static final int MIN_PRESSURE = 100;
     public static final int MAX_PRESSURE = 120;
 
     public static final int SWERVE_FRONT_LEFT_DRIVE = 11;

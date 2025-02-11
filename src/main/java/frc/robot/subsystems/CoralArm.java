@@ -43,7 +43,7 @@ public class CoralArm extends SubsystemBase {
                 .iZone(RobotMap.ARM_CORAL_IZONE)
                 .outputRange(-1, 1)
                 .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder);
-        config.idleMode(SparkBaseConfig.IdleMode.kCoast);
+        config.idleMode(SparkBaseConfig.IdleMode.kBrake);
         config.inverted(true);
         config.voltageCompensation(12);
         config.encoder

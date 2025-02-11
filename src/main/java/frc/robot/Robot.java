@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -168,16 +167,15 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         compressor.enableAnalog(RobotMap.MIN_PRESSURE,RobotMap.MAX_PRESSURE);
-        swerve.driveA(
+        swerve.setDefaultCommand(swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getRightX(), 0.05)
-        ).schedule();
+        ));
     }
 
     @Override
     public void teleopPeriodic() {
-
     }
 
     @Override
@@ -222,6 +220,14 @@ public class Robot extends TimedRobot {
 
     }
 
+    private Command coralLevel2PlaceAlign() {
+        return new SequentialCommandGroup(
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                Commands.defer(()-> AutoBuilder.followPath(swerve.alignToReefLeft(visionSystem)),Set.of(swerve)), // Step 1: Align to the target
+                coralLevel2Place1() // Step 2-4: Execute the standard placement sequence
+        );
+    }
+
     private Command coralLevel2Place(){
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
@@ -231,10 +237,18 @@ public class Robot extends TimedRobot {
                 ),
                 new ReleaseCoral(coralGripper));
     }
+    private Command coralLevel2Place1(){
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        new LowerCoralElevator(coralElevator),
+                        Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
+                ),
+                new ReleaseCoral(coralGripper));
+    }
 
     private Command coralLevel3Place(){
         return new SequentialCommandGroup(
-                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(200/*RobotMap.ARM_CORAL_ANGLE_A*/)),
                 new ParallelCommandGroup(
                         new RaiseCoralElevator(coralElevator),
                         Commands.waitUntil(()-> coralArmCommand.didReachTargetPosition())
