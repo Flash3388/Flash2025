@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -100,19 +99,34 @@ public class VisionSystem extends SubsystemBase {
         }
         return closestPose;
     }
-    public double getMovingAngle(int id){
+    public double getMovingAngleReef(int id){
         switch (id){
+            case 3: return 90;
             case 9: return -120;
             case 8: return -90;
         }
         return 0;
     }
 
-    public Pose2d getMovingPoseLeft(int id){
+    public double getMovingAngleCoral(int id){
+        switch (id){
+            case 2: return 130;
+        }
+        return 0;
+    }
+
+    public Pose2d getMovingPoseCoral(int id){
+        switch (id){
+            case 2: return new Pose2d(16.4,7.14,new Rotation2d(130));
+        }
+        return Pose2d.kZero;
+    }
+
+    public Pose2d getMovingPoseReefLeft(int id){
         switch (id){
             case 8: return new Pose2d(13.73,4.75,new Rotation2d(-120));
         }
-        return Pose2d.kZero;
+        return getRobotPoseEstimate().get().pose;
     }
 
     public double getDistance(){
@@ -176,6 +190,8 @@ public class VisionSystem extends SubsystemBase {
     public int frontGetTargetId() {
         return limelightFront.getTargetId();
     }
+    public int backGetTargetId(){return limelightBack.getTargetId();}
+
 
     public double getDistanceFront(){
         return limelightFront.getDistance();

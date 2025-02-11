@@ -36,7 +36,6 @@ import swervelib.parser.json.modules.ConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
@@ -201,9 +200,9 @@ public class Swerve extends SubsystemBase {
         PathPlannerPath path;
 
         int id = visionSystem.frontGetTargetId();
-        Pose2d leftPose = visionSystem.getMovingPoseLeft(id);
+        Pose2d leftPose = visionSystem.getMovingPoseReefLeft(id);
 
-        rotate(()-> visionSystem.getMovingAngle(id));
+        rotate(()-> visionSystem.getMovingAngleReef(id));
 
         waypoints = PathPlannerPath.waypointsFromPoses(
                 getPose(),
@@ -215,7 +214,31 @@ public class Swerve extends SubsystemBase {
                 waypoints,
                 constraints,
                 null,
-                new GoalEndState(0.0,new Rotation2d(visionSystem.getMovingAngle(id)))
+                new GoalEndState(0.0,new Rotation2d(visionSystem.getMovingAngleReef(id)))
+        );
+        path.preventFlipping = true;
+        return path;
+    }
+    public PathPlannerPath alignToCoralStation(VisionSystem visionSystem){
+        List<Waypoint> waypoints;
+        PathPlannerPath path;
+
+        int id = visionSystem.backGetTargetId();
+        Pose2d pose = visionSystem.getMovingPoseCoral(id);
+
+        rotate(()-> visionSystem.getMovingAngleCoral(id));
+
+        waypoints = PathPlannerPath.waypointsFromPoses(
+                getPose(),
+                pose
+        );
+        PathConstraints constraints = new PathConstraints(0.5,0.5,Math.PI*16,Math.PI*8);
+
+        path = new PathPlannerPath(
+                waypoints,
+                constraints,
+                null,
+                new GoalEndState(0.0,new Rotation2d(visionSystem.getMovingAngleCoral(id)))
         );
         path.preventFlipping = true;
         return path;

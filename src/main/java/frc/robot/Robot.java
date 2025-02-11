@@ -113,15 +113,12 @@ public class Robot extends TimedRobot {
         new JoystickButton(xbox, XboxController.Button.kB.value)
                 .onTrue(coralLevel2Place());
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
-                .onTrue(coralLevel3Place());
+                .onTrue(Commands.defer(()-> AutoBuilder.followPath(swerve.alignToCoralStation(visionSystem)),Set.of(swerve)));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
-                .onTrue(coralCollect());
+                .onTrue(coralLevel2PlaceAlign());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
-        NamedCommands.registerCommand("dropL3",coralLevel2Place());
-       // NamedCommands.registerCommand("align",new AllignToFrontTarget(swerve,visionSystem));
-        NamedCommands.registerCommand("release",new ReleaseCoral(coralGripper));
-        NamedCommands.registerCommand("collectArm",coralCollect());
-        NamedCommands.registerCommand("collectCoral",new CollectCoral(coralGripper));
+
+        NamedCommands.registerCommand("alignAndShoot",coralLevel2PlaceAlign());
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
@@ -129,6 +126,9 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
+        SmartDashboard.putNumber("robotPoseDegrees",swerve.getPose().getRotation().getDegrees());
+        SmartDashboard.putNumber("robotPoseX",swerve.getPose().getX());
+        SmartDashboard.putNumber("robotPoseY",swerve.getPose().getY());
 
         Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
         //noinspection OptionalIsPresent

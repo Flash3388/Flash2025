@@ -31,30 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "dropL3",
-      "waypointRelativePos": 0.6014888337468941,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "dropL3"
-        }
-      }
-    },
-    {
-      "name": "release",
-      "waypointRelativePos": 0.9750168804861582,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "release"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.44,
     "maxAcceleration": 0.5,
