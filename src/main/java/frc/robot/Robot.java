@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -26,7 +27,10 @@ import frc.robot.subsystems.CoralGripper;
 import frc.robot.subsystems.Dashboard;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.VisionSystem;
+import org.json.simple.parser.ParseException;
 
+import javax.naming.Name;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -104,21 +108,29 @@ public class Robot extends TimedRobot {
         }, Set.of(algaeGripper));
         algaeGripper.setDefaultCommand(checkAlgae);*/
 
+
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(new AllignToFrontTarget(swerve,visionSystem));
+                .onTrue(new RaiseCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kA.value)
                 .onTrue(new LowerCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kX.value)
-                .onTrue(new ExtendedAlgaeArm(algaeArm));
+                .onTrue(coralCollect());
         new JoystickButton(xbox, XboxController.Button.kB.value)
                 .onTrue(coralLevel2Place());
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
-                .onTrue(Commands.defer(()-> AutoBuilder.followPath(swerve.alignToCoralStation(visionSystem)),Set.of(swerve)));
+                .onTrue(new CollectAlgae(algaeGripper));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralLevel2PlaceAlign());
         new POVButton(xbox,180).onTrue(new CollectAlgae(algaeGripper));
 
-        NamedCommands.registerCommand("alignAndShoot",coralLevel2PlaceAlign());
+        NamedCommands.registerCommand("collectAlge",new CollectAlgae(algaeGripper));
+        NamedCommands.registerCommand("raiseArms",new ExtendedAlgaeArm(algaeArm));
+        NamedCommands.registerCommand("raiseElevator",new RaiseCoralElevator(coralElevator));
+        NamedCommands.registerCommand("armToCollect",armToCollect());
+        NamedCommands.registerCommand("lowerElevator",new LowerCoralElevator(coralElevator));
+        NamedCommands.registerCommand("coralCollect",new CollectCoral(coralGripper));
+        NamedCommands.registerCommand("arm",armToRif());
+        NamedCommands.registerCommand("coralDrop",new ReleaseCoral(coralGripper));
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
@@ -208,6 +220,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
+        try {
+            PathPlannerPath pa = PathPlannerPath.fromPathFile("Einav");
+            AutoBuilder.followPath(pa).schedule();
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -256,7 +274,12 @@ public class Robot extends TimedRobot {
                 ),
                 new ReleaseCoral(coralGripper));
     }
-
+    private Command armToCollect(){
+        return Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B));
+    }
+    private Command armToRif(){
+        return Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A));
+    }
     private Command coralCollect(){
         return new SequentialCommandGroup(
                 Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),

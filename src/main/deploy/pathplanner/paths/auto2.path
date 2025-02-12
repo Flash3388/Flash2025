@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 9.60215163934426,
-        "y": 7.225717213114755
+        "x": 13.8,
+        "y": 4.79
       },
       "prevControl": null,
       "nextControl": {
-        "x": 12.682991803278687,
-        "y": 7.189754098360656
+        "x": 14.39975,
+        "y": 5.507000000000001
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.88,
-        "y": 4.79
+        "x": 16.107,
+        "y": 7.2132499999999995
       },
       "prevControl": {
-        "x": 13.844036885245904,
-        "y": 5.892868852459016
+        "x": 15.600000000000001,
+        "y": 6.521
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,20 +33,42 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "arm",
-      "waypointRelativePos": 0.6471464019851118,
+      "name": "lowerElevator",
+      "waypointRelativePos": 0.39900744416873574,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "arm"
+          "name": "lowerElevator"
+        }
+      }
+    },
+    {
+      "name": "armToCollect",
+      "waypointRelativePos": 0.7464019851116647,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "armToCollect"
+        }
+      }
+    },
+    {
+      "name": "coralCollect",
+      "waypointRelativePos": 0.9508684863523574,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "coralCollect"
         }
       }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 0.44,
-    "maxAcceleration": 0.5,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -54,7 +76,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -130.0
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": null,

@@ -146,7 +146,7 @@ public class Swerve extends SubsystemBase {
                 MAX_SPEED
         );
 
-        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.POSE;
 
         swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
         swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
@@ -316,12 +316,12 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+        //SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
 
-        for (int i = 0; i < modulePositions.length; i++) {
+        /*for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
-        }
+        }*/
 
     }
     public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){

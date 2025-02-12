@@ -99,11 +99,11 @@ public class CoralArm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
-        SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
-        SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
-        SmartDashboard.putNumber("CoralArmPositionForFF", getPositionDegreesForFF());
-        SmartDashboard.putNumber("ArmCoralCurrent", motor.getOutputCurrent());
+        //SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
+        //SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
+        //SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
+        //SmartDashboard.putNumber("CoralArmPositionForFF", getPositionDegreesForFF());
+        //SmartDashboard.putNumber("ArmCoralCurrent", motor.getOutputCurrent());
     }
 
 }

@@ -45,8 +45,8 @@ public class AlgaeArm extends SubsystemBase {
 
     @Override
     public void periodic(){
-        SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
-        SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
+        //SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
+        //SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
     }
 
 }
