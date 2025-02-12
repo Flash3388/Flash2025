@@ -133,6 +133,7 @@ public class Robot extends TimedRobot {
 
         swerve.getField().getObject("ReefRight").setPose(reefRight);
         swerve.getField().getObject("ReefLeft").setPose(reefLeft);
+        SmartDashboard.putNumber("rifSetAngle",43);
         SmartDashboard.putNumberArray("ReefRight", new double[]{reefRight.getX(), reefRight.getY(), reefRight.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("ReefLeft", new double[]{reefLeft.getX(), reefLeft.getY(), reefLeft.getRotation().getDegrees()});
     }
@@ -242,7 +243,7 @@ public class Robot extends TimedRobot {
             return new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             AutoBuilder.pathfindToPose(reef,constraints),
-                            Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                            Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(SmartDashboard.getNumber("rifSetAngle",43))),
                             new SequentialCommandGroup(
                                     new RaiseCoralElevator(coralElevator),
                                     coralLevel3Place1(),
