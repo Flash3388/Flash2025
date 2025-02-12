@@ -128,12 +128,12 @@ public class Robot extends TimedRobot {
         new POVButton(xbox,180).onTrue(algaeOut());
         new POVButton(xbox,0).onTrue(algaeCollect());
 
-        Pose2d reefRight = visionSystem.getPoseForReefStand(8, false);
-        Pose2d reefLeft = visionSystem.getPoseForReefStand(8, true);
+        Pose2d reefRight = visionSystem.getPoseForReefStand(id, false);
+        Pose2d reefLeft = visionSystem.getPoseForReefStand(id, true);
 
         swerve.getField().getObject("ReefRight").setPose(reefRight);
         swerve.getField().getObject("ReefLeft").setPose(reefLeft);
-        SmartDashboard.putNumber("rifSetAngle",43);
+        SmartDashboard.putNumber("rifSetAngle",40);
         SmartDashboard.putNumberArray("ReefRight", new double[]{reefRight.getX(), reefRight.getY(), reefRight.getRotation().getDegrees()});
         SmartDashboard.putNumberArray("ReefLeft", new double[]{reefLeft.getX(), reefLeft.getY(), reefLeft.getRotation().getDegrees()});
     }
@@ -243,15 +243,19 @@ public class Robot extends TimedRobot {
             return new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             AutoBuilder.pathfindToPose(reef,constraints),
-                            Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(SmartDashboard.getNumber("rifSetAngle",43))),
-                            new ExtendedAlgaeArm(algaeArm),
-                            new SequentialCommandGroup(
-                                    new RaiseCoralElevator(coralElevator),
-                                    coralLevel3Place1(),
-                                    Commands.waitUntil(()-> !coralGripper.hasCoral())
-                            )
+                            Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(SmartDashboard.getNumber("rifSetAngle",40)))
+                            //new ExtendedAlgaeArm(algaeArm),
+                            //new RaiseCoralElevator(coralElevator)
+
                     ),
-                    new CollectAlgae(algaeGripper)
+                    coralLevel2Place1(),
+                    Commands.waitUntil(()-> !coralGripper.hasCoral()),
+                /*    new CollectAlgae(algaeGripper),
+                    new ParallelCommandGroup(
+                    new LowerCoralElevator(coralElevator),
+                 */
+                    swerve.driveA(()-> -0.1,()->0,()->0)
+
             );
         }, Set.of(swerve));
     }
