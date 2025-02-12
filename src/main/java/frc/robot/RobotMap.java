@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
+
 public class RobotMap {
 
     private RobotMap() {}
@@ -63,5 +65,6 @@ public class RobotMap {
     //vision system
     public static final double OFFSET_ON_STAND  = 0.328676/2;
     public static final double OFFSET_ROBOT = 0.272/2;
+    public static final PathConstraints CONSTRAINTS = new PathConstraints(1,1,Math.PI*2,Math.PI);
 
 }

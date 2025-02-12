@@ -114,11 +114,22 @@ public class VisionSystem extends SubsystemBase {
         }
 
         Pose2d pose = optional.get().toPose2d();
-        Pose2d calculatedPose = calcPose(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_ROBOT, isLeft);
+        Pose2d calculatedPose = calcPoseReef(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_ROBOT, isLeft);
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 
-    public Pose2d calcPose(Pose2d pose, double d1, double d2, boolean isLeft) {
+    public Pose2d getPoseToProcessor(int id) {
+        Optional<Pose3d> optional = layout.getTagPose(id);
+        if (optional.isEmpty()) {
+            throw new Error("wrong apriltag");
+        }
+
+        Pose2d pose = optional.get().toPose2d();
+        Pose2d calculatedPose = calcPoseProcessor(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_ROBOT);
+        return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
+    }
+
+    public Pose2d calcPoseReef(Pose2d pose, double d1, double d2, boolean isLeft) {
 
         double alpha = pose.getRotation().getDegrees();
         double beta = isLeft ? alpha -90: alpha + 90;
@@ -126,6 +137,18 @@ public class VisionSystem extends SubsystemBase {
         Vector2 down = Vector2.create(d1,Math.toRadians(beta));
         Vector2 up = Vector2.create(d2,Math.toRadians(alpha));
         Vector2 result = start.add(down).add(up);
+        double newRotation = (180 + pose.getRotation().getDegrees())%360;
+        return new Pose2d(result.x,result.y,Rotation2d.fromDegrees(newRotation));
+    }
+
+    public Pose2d calcPoseProcessor(Pose2d pose, double d1, double d2){
+        double alpha = pose.getRotation().getDegrees();
+        d2 += 0.1;
+        //double beta = 0;
+        Vector2 start = new Vector2(pose.getX(), pose.getY());
+        //Vector2 down = Vector2.create(d1,Math.toRadians(beta));
+        Vector2 up = Vector2.create(d2,Math.toRadians(alpha));
+        Vector2 result = start.add(up);
         double newRotation = (180 + pose.getRotation().getDegrees())%360;
         return new Pose2d(result.x,result.y,Rotation2d.fromDegrees(newRotation));
     }
