@@ -244,13 +244,14 @@ public class Robot extends TimedRobot {
                     new ParallelCommandGroup(
                             AutoBuilder.pathfindToPose(reef,constraints),
                             Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(SmartDashboard.getNumber("rifSetAngle",43))),
+                            new ExtendedAlgaeArm(algaeArm),
                             new SequentialCommandGroup(
                                     new RaiseCoralElevator(coralElevator),
                                     coralLevel3Place1(),
                                     Commands.waitUntil(()-> !coralGripper.hasCoral())
                             )
                     ),
-                    algaeCollect()
+                    new CollectAlgae(algaeGripper)
             );
         }, Set.of(swerve));
     }
