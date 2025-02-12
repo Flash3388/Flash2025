@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -120,8 +121,11 @@ public class Robot extends TimedRobot {
                 .onTrue(new ReleaseCoral(coralGripper));
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralLevel2Place());
-        new POVButton(xbox,180).onTrue(driveToCoralReef(8));
-        new POVButton(xbox,90).onTrue(algaeOut());
+        SmartDashboard.putNumber("aprilTagId",8);
+        int id = (int) SmartDashboard.getNumber("aprilTagId",8);
+        new POVButton(xbox,270).onTrue(driveToCoralReef(id,true));
+        new POVButton(xbox,90).onTrue(driveToCoralReef(id,false));
+        new POVButton(xbox,180).onTrue(algaeOut());
         new POVButton(xbox,0).onTrue(algaeCollect());
 
         Pose2d reefRight = visionSystem.getPoseForReefStand(8, false);
@@ -231,24 +235,21 @@ public class Robot extends TimedRobot {
 
     }
 
-    private Command driveToCoralReef(int aprilTagId) {
+    private Command driveToCoralReef(int aprilTagId, boolean isLeft) {
         return Commands.defer(()-> {
-            Pose2d robotPose = swerve.getPose();
-            Pose2d reefRight = visionSystem.getPoseForReefStand(aprilTagId, false);
-            Pose2d reefLeft = visionSystem.getPoseForReefStand(aprilTagId, true);
-
+            Pose2d reef = visionSystem.getPoseForReefStand(aprilTagId, isLeft);
+            PathConstraints constraints = new PathConstraints(0.5,0.5,Math.PI*2,Math.PI);
             return new SequentialCommandGroup(
                     new ParallelCommandGroup(
-                            AutoBuilder.followPath(swerve.createToReefPath(robotPose, reefRight)),
+                            AutoBuilder.pathfindToPose(reef,constraints),
+                            Commands.runOnce(()-> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                             new SequentialCommandGroup(
-                                    Commands.waitSeconds(2),
-                                    new RaiseCoralElevator(coralElevator)
+                                    new RaiseCoralElevator(coralElevator),
+                                    coralLevel3Place1(),
+                                    Commands.waitUntil(()-> !coralGripper.hasCoral())
                             )
                     ),
-                    new ParallelCommandGroup(
-                            AutoBuilder.followPath(swerve.createToReefPath(robotPose, reefLeft)),
-                            algaeCollect()
-                    )
+                    algaeCollect()
             );
         }, Set.of(swerve));
     }

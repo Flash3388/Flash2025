@@ -115,8 +115,6 @@ public class VisionSystem extends SubsystemBase {
 
         Pose2d pose = optional.get().toPose2d();
         Pose2d calculatedPose = calcPose(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_ROBOT, isLeft);
-
-         double correctedRotation = (calculatedPose.getRotation().getDegrees() + 180) % 360;
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 
