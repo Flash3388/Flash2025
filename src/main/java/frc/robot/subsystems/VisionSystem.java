@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Limelight;
 import frc.robot.LimelightHelpers;
 import frc.robot.RobotMap;
+import org.dyn4j.geometry.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,16 +121,15 @@ public class VisionSystem extends SubsystemBase {
     }
 
     public Pose2d calcPose(Pose2d pose, double d1, double d2, boolean isLeft) {
-        // beta = alpha - 90
-        // alpha = beta + 90
 
-        double alpha = pose.getRotation().getDegrees() -180;
-        double distance = Math.sqrt(d1 * d1 + d2 * d2);
-        double angle = Math.toRadians(180 - alpha - Math.toDegrees(Math.atan(d2 / d1)));
-        double A = distance * Math.sin(angle);
-        double B = distance * Math.cos(angle);
-
-        return new Pose2d(pose.getX() - A, pose.getY() + B, pose.getRotation());
+        double alpha = pose.getRotation().getDegrees();
+        double beta = isLeft ? alpha -90: alpha + 90;
+        Vector2 start = new Vector2(pose.getX(), pose.getY());
+        Vector2 down = Vector2.create(d1,Math.toRadians(beta));
+        Vector2 up = Vector2.create(d2,Math.toRadians(alpha));
+        Vector2 result = start.add(down).add(up);
+        double newRotation = (180 + pose.getRotation().getDegrees())%360;
+        return new Pose2d(result.x,result.y,Rotation2d.fromDegrees(newRotation));
     }
 
     public double getDistance(){

@@ -61,7 +61,7 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static final double DISTANCE_ON_PANE = 0.165;
-    public static final double DISTANCE_FROM_PANE = -0.432;
+    public static final double OFFSET_ON_STAND  = 0.328676/2;
+    public static final double DISTANCE_FROM_PANE = 0.702/2;
 
 }
