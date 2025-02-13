@@ -83,32 +83,6 @@ public class Robot extends TimedRobot {
             return Commands.idle(algaeArm);
         }, Set.of(algaeArm));
         algaeArm.setDefaultCommand(checkIfAlgaeRetract);
-
-       /* Command checkIfLow = Commands.defer(()-> {
-            if(coralElevator.isRaised()){
-                return new LowerCoralElevator(coralElevator);
-            }
-            return Commands.idle(coralElevator);
-        }, Set.of(coralElevator));
-        coralElevator.setDefaultCommand(checkIfLow);*/
-
-       /* Command checkCoral = Commands.defer(()-> {
-            if (coralGripper.hasCoral()) {
-                return new HoldCoral(coralGripper);
-            }
-            return Commands.idle(coralGripper);
-        }, Set.of(coralGripper));
-        coralGripper.setDefaultCommand(checkCoral);*/
-
-        /*Command checkAlgae = Commands.defer(()-> {
-            if (algaeGripper.hasAlgae()) {
-                return new HoldAlgae(algaeGripper);
-            }
-            return Commands.idle(algaeGripper);
-        }, Set.of(algaeGripper));
-        algaeGripper.setDefaultCommand(checkAlgae);*/
-
-
         new JoystickButton(xbox, XboxController.Button.kY.value)
                 .onTrue(new RaiseCoralElevator(coralElevator));
         new JoystickButton(xbox, XboxController.Button.kA.value)
@@ -179,7 +153,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        compressor.enableAnalog(RobotMap.MIN_PRESSURE,RobotMap.MAX_PRESSURE);
         swerve.setDefaultCommand(swerve.driveA(
                 ()-> MathUtil.applyDeadband(-xbox.getLeftY(), 0.05),
                 ()-> MathUtil.applyDeadband(-xbox.getLeftX(), 0.05),

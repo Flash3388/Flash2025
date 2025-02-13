@@ -1,39 +1,37 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralGripper;
 
-import java.time.Instant;
-
 public class ReleaseCoral extends Command {
     public CoralGripper coralGripper;
-    Instant previousTime = null;
+    private double previousTime = -1;
 
     public ReleaseCoral(CoralGripper coralGripper) {
         this.coralGripper = coralGripper;
-
         addRequirements(coralGripper);
     }
 
     @Override
     public void initialize() {
         coralGripper.rotateRelease();
-        previousTime = null;
+        previousTime = -1;
     }
 
     @Override
     public void execute() {
-        if(!coralGripper.hasCoral()){
-            if(previousTime == null){
-                previousTime = Instant.now();
+        if (!coralGripper.hasCoral()) {
+            if (previousTime == -1) {
+                previousTime = Timer.getFPGATimestamp();
             }
         }
     }
 
     @Override
     public boolean isFinished() {
-        Instant currentTime = Instant.now();
-        return (previousTime!=null)&&(currentTime.isAfter(previousTime.plusMillis(500)));
+        double currentTime = Timer.getFPGATimestamp();
+        return (previousTime != -1) && ((currentTime - previousTime) >= 0.5);
     }
 
     @Override

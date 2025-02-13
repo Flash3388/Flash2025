@@ -29,9 +29,11 @@ public class CoralGripper extends SubsystemBase {
     private final NeutralOut neutralControl;
 
     public CoralGripper() {
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor = new TalonFX(RobotMap.CORAL_GRIPPER_MOTOR);
         motor.getConfigurator().apply(new TalonFXConfiguration());
-        motor.setNeutralMode(NeutralModeValue.Brake);
+        motor.getConfigurator().apply(config);
         limitSwitch = new DigitalInput(RobotMap.CORAL_GRIPPER_LIMIT_SWITCH);
 
         velocitySignal = motor.getVelocity();

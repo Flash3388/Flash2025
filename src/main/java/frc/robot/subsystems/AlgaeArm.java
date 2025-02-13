@@ -9,13 +9,11 @@ import frc.robot.RobotMap;
 
 public class AlgaeArm extends SubsystemBase {
     private final DoubleSolenoid solenoid1;
-    //private final DoubleSolenoid solenoid2;
     private final DigitalInput switchTop;
     private final DigitalInput switchBottom;
 
     public AlgaeArm(){
         this.solenoid1 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL);
-       // this.solenoid2 = new DoubleSolenoid(PneumaticsModuleType.REVPH, RobotMap.ALGEA_ARM_BACKWARD_PISTON_FORWARD_CHANNEL, RobotMap.ALGEA_ARM_BACKWARD_PISTON_REVERSE_CHANNEL);
         this.switchTop = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_TOP);
         this.switchBottom = new DigitalInput(RobotMap.ALGAE_ARM_SWITCH_BOTTOM);
     }
@@ -30,17 +28,14 @@ public class AlgaeArm extends SubsystemBase {
 
     public void extend(){
         solenoid1.set(DoubleSolenoid.Value.kForward);
-        //solenoid2.set(DoubleSolenoid.Value.kForward);
     }
 
     public void retract(){
         solenoid1.set(DoubleSolenoid.Value.kReverse);
-        //solenoid2.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void stop(){
         solenoid1.set(DoubleSolenoid.Value.kOff);
-        //solenoid2.set(DoubleSolenoid.Value.kOff);
     }
 
     @Override
