@@ -249,13 +249,11 @@ public class Robot extends TimedRobot {
     }
 
     private Command driveToCoralReef8SpecialDownAndPlaceCoral(ReefStandRow row, boolean level3) {
-        return Commands.defer(() -> {
-            return new SequentialCommandGroup(
-                    Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                    driveToCoralReefDownAndPlaceCoral(8, row, false),
-                    level3 ? coralLevel3Place(false) : coralLevel2Place(false)
-            );
-        }, Set.of(swerve));
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                driveToCoralReefDownAndPlaceCoral(8, row, false),
+                level3 ? coralLevel3Place(false) : coralLevel2Place(false)
+        );
     }
 
     private Command level3AndAlgaeAndCollectAndPlace(int reefAprilTagId, int feedAprilTagId, int processorAprilTagId) {
@@ -268,57 +266,49 @@ public class Robot extends TimedRobot {
     }
 
     private Command driveToCoralReefUp(int aprilTagId, ReefStandRow row) {
-        return Commands.defer(() -> {
-            return new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                            driveToReef(aprilTagId, row),
-                            new SequentialCommandGroup(
-                                    Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                                    new ExtendedAlgaeArm(algaeArm),
-                                    new RaiseCoralElevator(coralElevator)
-                            )
-                    ),
-                    new ParallelCommandGroup(
-                            coralLevel3Place(false),
-                            new CollectAlgae(algaeGripper)
-                    ),
-                    new LowerCoralElevator(coralElevator)
-            );
-        }, Set.of(swerve));
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        driveToReef(aprilTagId, row),
+                        new SequentialCommandGroup(
+                                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                                new ExtendedAlgaeArm(algaeArm),
+                                new RaiseCoralElevator(coralElevator)
+                        )
+                ),
+                new ParallelCommandGroup(
+                        coralLevel3Place(false),
+                        new CollectAlgae(algaeGripper)
+                ),
+                new LowerCoralElevator(coralElevator)
+        );
     }
 
     private Command driveAndCollectFromFeeder(int aprilTagId, FeederSide side) {
-        return Commands.defer(() -> {
-            return new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                            driveToFeeder(aprilTagId, side),
-                            new SequentialCommandGroup(
-                                    Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
-                                    new LowerCoralElevator(coralElevator),
-                                    new CollectCoral(coralGripper)
-                            )
-                    )
-            );
-        }, Set.of(swerve));
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        driveToFeeder(aprilTagId, side),
+                        new SequentialCommandGroup(
+                                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
+                                new LowerCoralElevator(coralElevator),
+                                new CollectCoral(coralGripper)
+                        )
+                )
+        );
     }
 
     private Command driveToCoralReefDownAndPlaceCoral(int aprilTagId, ReefStandRow row, boolean level3) {
-        return Commands.defer(() -> {
-            return new SequentialCommandGroup(
-                    Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                    driveToReef(aprilTagId, row),
-                    level3 ? coralLevel3Place(false) : coralLevel2Place(false)
-            );
-        }, Set.of(swerve));
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                driveToReef(aprilTagId, row),
+                level3 ? coralLevel3Place(false) : coralLevel2Place(false)
+        );
     }
 
     private Command driveToProcessorAndPlaceAlgae(int aprilTagId) {
-        return Commands.defer(() -> {
-            return new SequentialCommandGroup(
-                    driveToProcessor(aprilTagId),
-                    algaeOut()
-            );
-        }, Set.of(swerve));
+        return new SequentialCommandGroup(
+                driveToProcessor(aprilTagId),
+                algaeOut()
+        );
     }
 
     private Command coralLevel2Place(boolean alsoMoveArm) {
