@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.CoralArm;
 
 public class CoralArmCommand extends Command {
@@ -23,6 +24,7 @@ public class CoralArmCommand extends Command {
     private boolean hasNewTarget;
     private boolean didReachPosition;
     private boolean isHolding;
+    private boolean wasDisabled;
 
     public CoralArmCommand(CoralArm arm) {
         this.arm = arm;
@@ -35,13 +37,19 @@ public class CoralArmCommand extends Command {
     public void initialize() {
         isHolding = false;
         hasNewTarget = true;
+        wasDisabled = DriverStation.isDisabled();
     }
 
     @Override
     public void execute() {
         if (DriverStation.isDisabled()) {
-            hasNewTarget = true;
-            isHolding = false;
+            if (!wasDisabled) {
+                hasNewTarget = true;
+                isHolding = false;
+                wasDisabled = true;
+            }
+        } else if (wasDisabled) {
+            wasDisabled = false;
         }
 
         if (hasNewTarget) {

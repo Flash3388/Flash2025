@@ -21,9 +21,11 @@ public class Limelight {
 
     public double getDistanceToTarget(){
         LimelightHelpers.RawFiducial[] fiducials = LimelightHelpers.getRawFiducials(name);
-        if(fiducials.length >0)
+        if(fiducials.length > 0) {
             return fiducials[0].distToRobot;
-        return 3;
+        }
+
+        return Double.MAX_VALUE;
     }
 
     public int getTargetId(){
