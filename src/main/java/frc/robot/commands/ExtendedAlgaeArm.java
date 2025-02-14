@@ -24,7 +24,7 @@ public class ExtendedAlgaeArm extends Command {
 
     @Override
     public boolean isFinished() {
-        return !algaeArm.isRetracted();
+        return true;//!algaeArm.isRetracted();
     }
 
     @Override

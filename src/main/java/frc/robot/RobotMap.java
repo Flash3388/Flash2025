@@ -63,8 +63,18 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static final double OFFSET_ON_STAND  = 0.328676/2;
-    public static final double OFFSET_ROBOT = 0.272/2;
-    public static final PathConstraints CONSTRAINTS = new PathConstraints(1,1,Math.PI*2,Math.PI);
+    public static final double OFFSET_ON_STAND  = 0.328676 / 2;
+    public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
+    public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
+    public static final double OFFSET_FEEDER = 0.87 / 2; // TODO: RECOMPUTE
+    public static final PathConstraints CONSTRAINTS = new PathConstraints(
+            0.8,1,Math.PI*2, Math.PI);
 
+    // ll_front forward 0.095
+    // ll_back forward 0.3
+
+    public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
+            {9, 8, 7, 6, 11, 10}, // red alliance
+            {20, 21, 22, 17, 18, 19} // blue alliance
+    };
 }
