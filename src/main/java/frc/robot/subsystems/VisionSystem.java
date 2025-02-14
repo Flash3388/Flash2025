@@ -23,14 +23,29 @@ public class VisionSystem extends SubsystemBase {
         limelightBack = new Limelight(LL_NAME_BACK);
         limelightFront = new Limelight(LL_NANE_FRONT);
         layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        layout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
     }
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
-        if (limelightFront.hasDetectedTarget() && limelightFront.getDistanceToTarget() <= 2.7) {
-            return Optional.of(limelightFront.getPoseEstimate());
-        } /*else if (limelightBack.hasDetectedTarget() && limelightBack.getDistanceToTarget() <= 2.5) {
-            //return Optional.of(limelightBack.getPoseEstimate());
-        }*/
+        double distanceToTargetFront = limelightFront.hasDetectedTarget() ?
+                limelightFront.getDistanceToTarget() :
+                Double.MAX_VALUE;
+        double distanceToTargetBack = limelightBack.hasDetectedTarget() ?
+                limelightBack.getDistanceToTarget() :
+                Double.MAX_VALUE;
+
+        // always use the closest measure
+        if (distanceToTargetFront < distanceToTargetBack) {
+            // use front
+            if (distanceToTargetFront <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
+                return Optional.of(limelightFront.getPoseEstimate());
+            }
+        } else {
+            // use back
+            if (distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
+                return Optional.of(limelightBack.getPoseEstimate());
+            }
+        }
 
         return Optional.empty();
     }
@@ -45,22 +60,20 @@ public class VisionSystem extends SubsystemBase {
     }
 
     public Pose2d getPoseForReefStand(int id, ReefStandRow row) {
-        Pose3d pose3d = layout.getTagPose(id).orElseThrow();
-        Pose2d pose = pose3d.toPose2d();
+        Pose2d pose = getAprilTagPose(id);
 
-        Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
+        Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 
     public Pose2d getPoseForFeeder(int id, FeederSide side) {
-        Pose3d pose3d = layout.getTagPose(id).orElseThrow();
-        Pose2d pose = pose3d.toPose2d();
+        Pose2d pose = getAprilTagPose(id);
 
         Pose2d calculatedPose;
         switch (side) {
             case LEFT:
             case RIGHT:
-                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND, RobotMap.OFFSET_FEEDER, side == FeederSide.LEFT);
+                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_FEEDER, RobotMap.OFFSET_FEEDER, side == FeederSide.LEFT);
                 break;
             case CENTER:
                 calculatedPose = calcPoseCenter(pose, RobotMap.OFFSET_FEEDER);
@@ -73,14 +86,13 @@ public class VisionSystem extends SubsystemBase {
     }
 
     public Pose2d getPoseToProcessor(int id) {
-        Pose3d pose3d = layout.getTagPose(id).orElseThrow();
-        Pose2d pose = pose3d.toPose2d();
+        Pose2d pose = getAprilTagPose(id);
 
         Pose2d calculatedPose = calcPoseCenter(pose, RobotMap.OFFSET_PROCESSOR);
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 
-    public Pose2d calcPoseTwoSides(Pose2d pose, double d1, double d2, boolean isLeft) {
+    private Pose2d calcPoseTwoSides(Pose2d pose, double d1, double d2, boolean isLeft) {
         double alpha = pose.getRotation().getDegrees();
         double beta = isLeft ? alpha - 90 : alpha + 90;
 
@@ -93,7 +105,7 @@ public class VisionSystem extends SubsystemBase {
         return new Pose2d(result.x, result.y, Rotation2d.fromDegrees(newRotation));
     }
 
-    public Pose2d calcPoseCenter(Pose2d pose, double d) {
+    private Pose2d calcPoseCenter(Pose2d pose, double d) {
         double alpha = pose.getRotation().getDegrees();
 
         Vector2 start = new Vector2(pose.getX(), pose.getY());

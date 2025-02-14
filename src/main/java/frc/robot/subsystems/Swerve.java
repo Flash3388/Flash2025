@@ -196,72 +196,15 @@ public class Swerve extends SubsystemBase {
             }
     }
 
-    public PathPlannerPath createToReefPath(Pose2d startPose, Pose2d endPose) {
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                startPose,
-                endPose
-        );
-        PathConstraints constraints = new PathConstraints(0.5,0.5,Math.PI*2,Math.PI);
-        PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                null,
-                new GoalEndState(0.0, endPose.getRotation())
-        );
-        path.preventFlipping = true;
-        return path;
-
-    }
-
-    /*public PathPlannerPath createToReefPath(VisionSystem visionSystem){
-        List<Waypoint> waypoints;
-        PathPlannerPath path;
-        Pose2d targetPose;
-
-        int id = visionSystem.frontGetTargetId();
-        // targetPose = visionSystem.getIdPose(id).get();
-        //Pose2d pose = new Pose2d(targetPose.getX()+0.1, targetPose.getY()+0.1, targetPose.getRotation());
-        Pose2d leftPose = Pose2d.kZero;//visionSystem.getPoseForReefStand(id);
-
-        rotate(()-> visionSystem.getMovingAngle(id));
-
-        waypoints = PathPlannerPath.waypointsFromPoses(
-                getPose(),
-                leftPose
-        );
-        PathConstraints constraints = new PathConstraints(0.5,0.5,Math.PI*2,Math.PI);
-
-        path = new PathPlannerPath(
-                waypoints,
-                constraints,
-                null,
-                new GoalEndState(0.0,new Rotation2d(visionSystem.getMovingAngle(id)))
-        );
-        path.preventFlipping = true;
-        return path;
-    }*/
-
-    public boolean isNear(Pose2d otherPose) {
-        double tolerance = 0.05;
-        Pose2d robotPose = getPose();
-        double deltaX = Math.abs(robotPose.getX() - otherPose.getX());
-        double deltaY = Math.abs(robotPose.getY() - otherPose.getY());
-
-        return deltaX <= tolerance && deltaY <= tolerance;
-    }
-
-    public Pose2d getPose()
-    {
+    public Pose2d getPose() {
         return swerveDrive.getPose();
     }
 
-    public void resetOdometry(Pose2d initialHolonomicPose)
-    {
+    public void resetOdometry(Pose2d initialHolonomicPose) {
         swerveDrive.resetOdometry(initialHolonomicPose);
     }
 
-    public ChassisSpeeds getRobotVelocity()
-    {
+    public ChassisSpeeds getRobotVelocity() {
         return swerveDrive.getRobotVelocity();
     }
 
@@ -269,10 +212,32 @@ public class Swerve extends SubsystemBase {
         swerveDrive.resetOdometry(Pose2d.kZero);
     }
 
-    public void setUpPathPlanner(){
+    public ChassisSpeeds getSpeeds(){
+        return swerveDrive.getRobotVelocity();
+    }
+
+    public Command centerModules() {
+        return run(() -> Arrays.asList(swerveDrive.getModules())
+                .forEach(it -> it.setAngle(0.0)));
+    }
+
+    public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){
+        swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
+    }
+
+    @Override
+    public void periodic() {
+        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+        swerveDrive.updateOdometry();
+
+        for (int i = 0; i < modulePositions.length; i++) {
+            moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
+        }
+    }
+
+    private void setUpPathPlanner(){
         RobotConfig config;
-        try
-        {
+        try {
             config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                     this::getPose,
@@ -286,53 +251,23 @@ public class Swerve extends SubsystemBase {
                     config,
                     () -> {
                         var alliance = DriverStation.getAlliance();
-                        if (alliance.isPresent())
-                        {
+                        if (alliance.isPresent()) {
                             return alliance.get() == DriverStation.Alliance.Red;
                         }
                         return false;
                     },
                     this
             );
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new Error(e);
         }
+
         PathfindingCommand.warmupCommand().schedule();
     }
 
-    public ChassisSpeeds getSpeeds(){
-        return swerveDrive.getRobotVelocity();
-    }
-
-    public Command centerModules() {
-        return run(() -> Arrays.asList(swerveDrive.getModules())
-                .forEach(it -> it.setAngle(0.0)));
-    }
-
-
-    @Override
-    public void periodic() {
-        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
-        swerveDrive.updateOdometry();
-
-        for (int i = 0; i < modulePositions.length; i++) {
-            moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
-        }
-
-    }
-    public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){
-            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
-
-    }
-
-
     private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
         if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
-            for (SwerveModule module : swerveDrive.getModules()) {
-                module.getDriveMotor().set(0);
-                module.getAngleMotor().set(0);
-            }
+            stop();
         } else {
             swerveDrive.setChassisSpeeds(speeds);
         }
