@@ -24,11 +24,11 @@ public class RetractAlgaeArm extends Command {
 
     @Override
     public boolean isFinished() {
-        return true;//algaeArm.isRetracted();
+        // TODO: ALGAE ARM SENSORS DON'T WORK
+        return true; // algaeArm.isRetracted();
     }
 
     @Override
     public void end(boolean interrupted) {
     }
-
 }

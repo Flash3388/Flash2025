@@ -21,12 +21,12 @@ public class CoralGripper extends SubsystemBase {
     public static final double ROTATE_COLLECT = -0.8;
     public static final double ROTATE_RELEASE = 0.5;
     public static final double ROTATE_HOLD = -0.08;
-    public static StatusSignal<AngularVelocity> velocitySignal;
 
     private final TalonFX motor;
     private final DigitalInput limitSwitch;
     private final DutyCycleOut dutyCycleControl;
     private final NeutralOut neutralControl;
+    private final StatusSignal<AngularVelocity> velocitySignal;
 
     public CoralGripper() {
         motor = new TalonFX(RobotMap.CORAL_GRIPPER_MOTOR);

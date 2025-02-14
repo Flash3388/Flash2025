@@ -15,26 +15,27 @@ public class AlgaeGripper extends SubsystemBase {
      private static final double COLLECT_SPEED = -0.8;
      private static final double RELEASE_SPEED = 0.8;
      private static final double HOLD_SPEED = 0.8;
+
      private final SparkMax motor;
-     private final SparkBaseConfig config;
      private final SparkMax motor2;
      private final RelativeEncoder encoder;
      private final DigitalInput digitalInput;
 
-
      public AlgaeGripper(){
-          config = new SparkMaxConfig();
-          config.idleMode(SparkBaseConfig.IdleMode.kBrake);
           this.motor = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR1, SparkLowLevel.MotorType.kBrushless);
-          motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
-          this.motor2 = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR2, SparkLowLevel.MotorType.kBrushless);
-          encoder = this.motor.getEncoder();
-
-          this.digitalInput = new DigitalInput(RobotMap.ALGAE_GRIPPER_DIGITALINPUT);
 
           SparkMaxConfig config = new SparkMaxConfig();
+          config.idleMode(SparkBaseConfig.IdleMode.kBrake);
           motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+
+          encoder = this.motor.getEncoder();
+
+          this.motor2 = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR2, SparkLowLevel.MotorType.kBrushless);
+          config = new SparkMaxConfig();
+          config.idleMode(SparkBaseConfig.IdleMode.kBrake);
           motor2.configure(config,SparkBase.ResetMode.kNoResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters);
+
+          this.digitalInput = new DigitalInput(RobotMap.ALGAE_GRIPPER_DIGITALINPUT);
      }
 
      public boolean hasAlgae(){
