@@ -416,25 +416,31 @@ public class Robot extends TimedRobot {
     }
 
     private Command driveToPoseStraight(Pose2d... poses) {
-        List<PathPoint> pathPoints = Arrays.stream(poses)
-                .map((pose)-> new PathPoint(
-                        pose.getTranslation(),
-                        null,
-                        RobotMap.CONSTRAINTS
-                ))
-                .toList();
+        return Commands.defer(()-> {
+            List<Pose2d> posesList = new ArrayList<>();
+            posesList.add(swerve.getPose());
+            posesList.addAll(Arrays.asList(poses));
 
-        PathPlannerPath path = PathPlannerPath.fromPathPoints(
-                pathPoints,
-                RobotMap.CONSTRAINTS,
-                new GoalEndState(0, poses[poses.length - 1].getRotation()));
-        path.preventFlipping = true;
+            List<PathPoint> pathPoints = posesList.stream()
+                    .map((pose)-> new PathPoint(
+                            pose.getTranslation(),
+                            null,
+                            RobotMap.CONSTRAINTS
+                    ))
+                    .toList();
 
-        return new SequentialCommandGroup(
-                Commands.runOnce(()-> swerve.getField().getObject("Target").setPoses(poses)),
-                AutoBuilder.followPath(path),
-                Commands.runOnce(()-> swerve.getField().getObject("Target").setPoses())
-        );
+            PathPlannerPath path = PathPlannerPath.fromPathPoints(
+                    pathPoints,
+                    RobotMap.CONSTRAINTS,
+                    new GoalEndState(0, poses[poses.length - 1].getRotation()));
+            path.preventFlipping = true;
+
+            return new SequentialCommandGroup(
+                    Commands.runOnce(()-> swerve.getField().getObject("Target").setPoses(poses)),
+                    AutoBuilder.followPath(path),
+                    Commands.runOnce(()-> swerve.getField().getObject("Target").setPoses())
+            );
+        }, Set.of(swerve));
     }
 
     private OptionalInt findNearestAprilTagForCurrentPose() {
