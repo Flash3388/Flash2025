@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -111,22 +112,26 @@ public class Robot extends TimedRobot {
         algaeGripper.setDefaultCommand(checkAlgae);*/
 
         new JoystickButton(xbox, XboxController.Button.kY.value)
-                .onTrue(driveToCoralReefDownAndPlaceCoral(8, ReefStandRow.RIGHT, false));
+                .onTrue(driveToFeeder(2,FeederSide.RIGHT));
         new JoystickButton(xbox, XboxController.Button.kA.value)
-                .onTrue(driveToReef8Special(ReefStandRow.RIGHT));
+                .onTrue(driveToCoralReefDownAndPlaceCoral(8,ReefStandRow.RIGHT,false));
         new JoystickButton(xbox, XboxController.Button.kX.value)
-                .onTrue(new ReleaseAlgae(algaeGripper));
+                .onTrue(driveToCoralReefDownAndPlaceCoral(8,ReefStandRow.LEFT,false));
         new JoystickButton(xbox, XboxController.Button.kB.value)
-                .onTrue(driveToNearestReef(ReefStandRow.RIGHT));
+                .onTrue(Commands.runOnce(() ->coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_ALGAE)));
         new JoystickButton(xbox, XboxController.Button.kRightBumper.value)
                 .onTrue(twoCoralsAutoLeftRightSpecialReef8Feeder2());
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralCollect());
         new JoystickButton(xbox,XboxController.Button.kLeftStick.value)
-                .onTrue(new LowerCoralElevator(coralElevator));
-
-        new POVButton(xbox, 270).onTrue(driveToCoralReefUp(8, ReefStandRow.RIGHT));
-        new POVButton(xbox, 90).onTrue(driveAndCollectFromFeeder(2, FeederSide.RIGHT));
+                .onTrue(new SequentialCommandGroup(
+                        coralLevel2Place(true),
+                        new ReleaseCoral(coralGripper)
+                ));
+        new JoystickButton(xbox,XboxController.Button.kRightStick.value)
+                .onTrue( algaeOut());
+        new POVButton(xbox, 270).onTrue(Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)));
+        new POVButton(xbox, 90).onTrue(driveToNearestReef(ReefStandRow.RIGHT));
         new POVButton(xbox, 180).onTrue(driveToFeeder(2, FeederSide.CENTER));
         new POVButton(xbox, 0).onTrue(level3AndAlgaeAndCollectAndPlace(8, 2, 3));
     }
@@ -196,6 +201,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+
     }
 
     @Override
@@ -279,7 +285,8 @@ public class Robot extends TimedRobot {
                 ),
                 new ParallelCommandGroup(
                         coralLevel3Place(false),
-                        new CollectAlgae(algaeGripper)
+                        new CollectAlgae(algaeGripper),
+                        new ReleaseCoral(coralGripper)
                 ),
                 new LowerCoralElevator(coralElevator)
         );
@@ -307,7 +314,8 @@ public class Robot extends TimedRobot {
                 ),
                 new ParallelCommandGroup(
                 new ReleaseCoral(coralGripper),
-                        algaeCollect())
+                        level3 ?
+                        algaeCollect(): Commands.none())
         );
     }
 

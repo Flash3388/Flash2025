@@ -41,6 +41,7 @@ public class RobotMap {
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
     public static final double ARM_CORAL_ANGLE_A = 40;
     public static final double ARM_CORAL_ANGLE_B = 230;
+    public static final double ARM_CORAL_ANGLE_ALGAE = 140;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
     public static final double ARM_CORAL_MIN_ANGLE = 16;
     public static final double ARM_CORAL_MAX_ANGLE = 276.5;
@@ -65,10 +66,10 @@ public class RobotMap {
     //vision system
     public static final double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2.7;
     public static final double OFFSET_ON_STAND_REEF = 0.328676 / 2;
-    public static final double OFFSET_ON_STAND_FEEDER = 0.328676 / 2;
+    public static final double OFFSET_ON_STAND_FEEDER = 0.6;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
-    public static final double OFFSET_FEEDER = 0.87 / 2; // TODO: RECOMPUTE
+    public static final double OFFSET_FEEDER = 0.67 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
             1.65,1,Math.PI*2, Math.PI);
 
