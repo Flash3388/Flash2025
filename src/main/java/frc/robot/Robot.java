@@ -122,6 +122,8 @@ public class Robot extends TimedRobot {
                 .onTrue(twoCoralsAutoLeftRightSpecialReef8Feeder2());
         new JoystickButton(xbox, XboxController.Button.kLeftBumper.value)
                 .onTrue(coralCollect());
+        new JoystickButton(xbox,XboxController.Button.kLeftStick.value)
+                .onTrue(new LowerCoralElevator(coralElevator));
 
         new POVButton(xbox, 270).onTrue(driveToCoralReefUp(8, ReefStandRow.RIGHT));
         new POVButton(xbox, 90).onTrue(driveAndCollectFromFeeder(2, FeederSide.RIGHT));
@@ -240,19 +242,19 @@ public class Robot extends TimedRobot {
 
     private Command twoCoralsAutoLeftRightSpecialReef8Feeder2() {
         return new SequentialCommandGroup(
-                driveToCoralReef8SpecialDownAndPlaceCoral(ReefStandRow.RIGHT, false),
+                driveToCoralReef8SpecialDownAndPlaceCoral(ReefStandRow.RIGHT, true),
                 Commands.runOnce(()-> DriverStation.reportWarning("Go To Feeder", false)),
                 driveAndCollectFromFeeder(2, FeederSide.CENTER),
                 Commands.runOnce(()-> DriverStation.reportWarning("Bitch Please", false)),
-                driveToCoralReefDownAndPlaceCoral(8, ReefStandRow.LEFT, false)
+                driveToCoralReefDownAndPlaceCoral(8, ReefStandRow.LEFT, true)
         );
     }
 
     private Command driveToCoralReef8SpecialDownAndPlaceCoral(ReefStandRow row, boolean level3) {
         return new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                driveToCoralReefDownAndPlaceCoral(8, row, false),
-                level3 ? coralLevel3Place(false) : coralLevel2Place(false)
+                driveToCoralReefDownAndPlaceCoral(8, row, level3)
+                //level3 ? coralLevel3Place(false) : coralLevel2Place(false)
         );
     }
 
@@ -298,9 +300,14 @@ public class Robot extends TimedRobot {
 
     private Command driveToCoralReefDownAndPlaceCoral(int aprilTagId, ReefStandRow row, boolean level3) {
         return new SequentialCommandGroup(
+                new ParallelCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 driveToReef(aprilTagId, row),
                 level3 ? coralLevel3Place(false) : coralLevel2Place(false)
+                ),
+                new ParallelCommandGroup(
+                new ReleaseCoral(coralGripper),
+                        algaeCollect())
         );
     }
 
@@ -319,8 +326,7 @@ public class Robot extends TimedRobot {
                 new ParallelCommandGroup(
                         new LowerCoralElevator(coralElevator),
                         Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
-                ),
-                new ReleaseCoral(coralGripper)
+                )
         );
     }
 
@@ -332,8 +338,7 @@ public class Robot extends TimedRobot {
                 new ParallelCommandGroup(
                         new RaiseCoralElevator(coralElevator),
                         Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
-                ),
-                new ReleaseCoral(coralGripper)
+                )
         );
     }
 

@@ -54,11 +54,6 @@ public class VisionSystem extends SubsystemBase {
         return layout.getTagPose(id).orElseThrow().toPose2d();
     }
 
-    public void changePipeline(int id) {
-        limelightFront.changePipeline(id);
-        limelightBack.changePipeline(id);
-    }
-
     public Pose2d getPoseForReefStand(int id, ReefStandRow row) {
         Pose2d pose = getAprilTagPose(id);
 
