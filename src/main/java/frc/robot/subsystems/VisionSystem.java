@@ -22,7 +22,7 @@ public class VisionSystem extends SubsystemBase {
     public VisionSystem() {
         limelightBack = new Limelight(LL_NAME_BACK);
         limelightFront = new Limelight(LL_NANE_FRONT);
-        layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         layout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
     }
 
