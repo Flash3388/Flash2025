@@ -58,8 +58,8 @@ public class RobotMap {
     public static final int ALGAE_GRIPPER_DIGITALINPUT = 0;
 
     // algae arm
-    public static final int ALGAE_ARM_SWITCH_TOP = 0;
-    public static final int ALGAE_ARM_SWITCH_BOTTOM = 1;
+    public static final int ALGAE_ARM_SWITCH_TOP = 1;
+    public static final int ALGAE_ARM_SWITCH_BOTTOM = 0;
     public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
@@ -71,13 +71,15 @@ public class RobotMap {
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
     public static final double OFFSET_FEEDER = 0.67 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
-            1.65,1,Math.PI*2, Math.PI);
+            2,1.1,Math.PI*2, Math.PI);
 
     // ll_front forward 0.095
     // ll_back forward 0.3
 
     public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
-            {9, 8, 7, 6, 11, 10}, // red alliance
-            {20, 21, 22, 17, 18, 19} // blue alliance
+            {9, 8, 7, 6, 11, 10}, // red alliance reef
+            {20, 21, 22, 17, 18, 19}, // blue alliance reef
+            {1,2}, // red feeders
+            {12,13} // blue feeders
     };
 }

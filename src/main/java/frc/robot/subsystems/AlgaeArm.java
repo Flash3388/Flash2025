@@ -23,7 +23,7 @@ public class AlgaeArm extends SubsystemBase {
     }
 
     public boolean isExtended(){
-        return isConstrained(switchTop.getValue(),MIN_UPPER_INPUT,MAX_UPPER_INPUT);
+        return !isConstrained(switchTop.getValue(),MIN_UPPER_INPUT,MAX_UPPER_INPUT);
     }
 
     public boolean isRetracted(){
