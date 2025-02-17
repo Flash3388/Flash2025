@@ -78,8 +78,14 @@ public class RobotMap {
 
     public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
             {9, 8, 7, 6, 11, 10}, // red alliance reef
-            {20, 21, 22, 17, 18, 19}, // blue alliance reef
+            {22, 17, 18, 19, 20, 21}, // blue alliance reef
             {1,2}, // red feeders
-            {12,13} // blue feeders
+            {13,12},// blue feeders
+            {4,5}, // red cages
+            {15,14} // blue cages
     };
+
+    public static final int LEDS_ID = 0;
+    public static final int LEDS_LENGTH = 5;
+    public static final int LEDS_PER_METER = 60;
 }

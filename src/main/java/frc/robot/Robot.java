@@ -2,8 +2,10 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -15,16 +17,11 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.AlgaeArm;
-import frc.robot.subsystems.AlgaeGripper;
-import frc.robot.subsystems.CoralArm;
-import frc.robot.subsystems.CoralElevator;
-import frc.robot.subsystems.CoralGripper;
-import frc.robot.subsystems.Dashboard;
-import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.VisionSystem;
+import frc.robot.subsystems.*;
 
 import java.util.*;
+
+import static edu.wpi.first.units.Units.*;
 
 public class Robot extends TimedRobot {
 
@@ -35,10 +32,10 @@ public class Robot extends TimedRobot {
     private CoralElevator coralElevator;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
-
     private PneumaticHub pneumaticsHub;
     private Compressor compressor;
     private Dashboard dashboard;
+    private LedLights leds;
 
     private CoralArmCommand coralArmCommand;
 
@@ -66,6 +63,7 @@ public class Robot extends TimedRobot {
         compressor.enableAnalog(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
 
         dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
+        leds = new LedLights();
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
@@ -136,6 +134,21 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+
+        if(coralGripper.hasCoral() && algaeGripper.hasAlgae()){
+            SmartDashboard.putString("ledsMode", "Algae + Coral");
+            leds.runPattern(LEDPattern.solid(Color.kPink).blink(Seconds.of(1)));
+        } else if(algaeGripper.hasAlgae()){
+            SmartDashboard.putString("ledsMode", "Algae");
+            leds.runPattern(LEDPattern.solid(Color.kPaleTurquoise).blink(Seconds.of(1)));
+        } else if(coralGripper.hasCoral()){
+            SmartDashboard.putString("ledsMode", "Coral");
+            leds.runPattern(LEDPattern.solid(Color.kWhite));
+        } else if(!Objects.equals(leds.getCurrentCommand(), leds.getDefaultCommand())) {
+            SmartDashboard.putString("ledsMode", "Default");
+            leds.runPattern(leds.movingRainbow());
+        }
+
         SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
 
         Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
@@ -208,12 +221,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
     }
 
     @Override
     public void teleopPeriodic() {
-
     }
 
     @Override
@@ -254,14 +265,17 @@ public void testExit() {
     }
 
     private Command fullAuto(){
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0:1;
+        int sideIndexFeeder = isRed() ? 2:3;
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                reefAuto(ReefStandRow.RIGHT,8,true),
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][1],true),
                 algaeCollect()),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),2),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][1]),
                 Commands.none(),
-                reefAuto(ReefStandRow.LEFT,8,true),
+                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][1],true),
                 ProcessorAuto()
         );
     }
@@ -431,6 +445,8 @@ public void testExit() {
         DriverStation.Alliance alliance = optionalAlliance.orElse(null);
         return alliance == DriverStation.Alliance.Red;
     }
+
+
 
     /*
         private Command twoCoralsAutoLeftRightSpecialReef8Feeder2() {
