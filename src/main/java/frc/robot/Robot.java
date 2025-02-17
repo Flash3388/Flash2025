@@ -32,7 +32,7 @@ public class Robot extends TimedRobot {
     private CoralElevator coralElevator;
     private CoralGripper coralGripper;
     private CoralArm coralArm;
-    private PneumaticHub pneumaticsHub;
+    //private PneumaticHub pneumaticsHub;
     private Compressor compressor;
     private Dashboard dashboard;
     private LedLights leds;
@@ -58,12 +58,11 @@ public class Robot extends TimedRobot {
         xboxSecond = new XboxController(0);
         xboxMain = new XboxController(1);
 
-        pneumaticsHub = new PneumaticHub();
+       // pneumaticsHub = new PneumaticHub();
         compressor = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
         compressor.enableAnalog(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
 
         dashboard = new Dashboard(algaeArm, algaeGripper, coralElevator, coralArm, coralGripper);
-        leds = new LedLights();
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
@@ -129,27 +128,35 @@ public class Robot extends TimedRobot {
         feederAuto.addOption("right","RIGHT");
         SmartDashboard.putData("feederAutomation",feederAuto);
 
+        leds = new LedLights();
+
     }
 
 
     @Override
     public void robotPeriodic() {
+        LEDPattern newPattern;
 
-        if(coralGripper.hasCoral() && algaeGripper.hasAlgae()){
+        if (coralGripper.hasCoral() && algaeGripper.hasAlgae()) {
             SmartDashboard.putString("ledsMode", "Algae + Coral");
-            leds.runPattern(LEDPattern.solid(Color.kPink).blink(Seconds.of(1)));
-        } else if(algaeGripper.hasAlgae()){
+            newPattern = LEDPattern.solid(Color.kPink);
+        } else if (algaeGripper.hasAlgae()) {
             SmartDashboard.putString("ledsMode", "Algae");
-            leds.runPattern(LEDPattern.solid(Color.kPaleTurquoise).blink(Seconds.of(1)));
-        } else if(coralGripper.hasCoral()){
+            newPattern = LEDPattern.solid(Color.kPaleTurquoise).blink(Seconds.of(1));
+        } else if (coralGripper.hasCoral()) {
             SmartDashboard.putString("ledsMode", "Coral");
-            leds.runPattern(LEDPattern.solid(Color.kWhite));
-        } else if(!Objects.equals(leds.getCurrentCommand(), leds.getDefaultCommand())) {
+            newPattern = LEDPattern.solid(Color.kWhite).blink(Seconds.of(1));
+        } else {
             SmartDashboard.putString("ledsMode", "Default");
-            leds.runPattern(leds.movingRainbow());
+            newPattern = leds.getFlashPattern();
         }
 
-        SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
+        // Only update if the pattern has changed
+        if (!newPattern.equals(leds.getCurrentPattern())) {
+            leds.setPattern(newPattern);
+        }
+
+       // SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
 
         Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
         if (pose.isPresent()) {
