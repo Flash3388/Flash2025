@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -12,8 +14,7 @@ import org.w3c.dom.css.RGBColor;
 
 import java.util.Map;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 public class LedLights extends SubsystemBase {
     private static final int kPort = RobotMap.LEDS_ID;
@@ -26,6 +27,14 @@ public class LedLights extends SubsystemBase {
     private static final LEDPattern FLASH_PATTERN = LEDPattern.steps(Map.of(0,returnRGBToGRB(0,255,255),0.25,Color.kGreen,0.5,returnRGBToGRB(255,255,0),0.75,Color.kGreen))
             .scrollAtAbsoluteSpeed(MetersPerSecond.of(20), kLedSpacing);
 
+    private static final Time fastBlinkRate = Units.Seconds.of(0.1);
+    private static final Time slowBlinkRate = Units.Seconds.of(0.5);
+
+    private static final LEDPattern CRAZY_PATTERN = LEDPattern.rainbow(200, 100)
+            .scrollAtAbsoluteSpeed(MetersPerSecond.of(3),kLedSpacing)
+            .blink(fastBlinkRate)
+            .breathe(Seconds.of(0.8))
+            .blink(slowBlinkRate);
     private final AddressableLED leds;
     private final AddressableLEDBuffer ledBuffer;
     private LEDPattern currentPattern;
@@ -67,6 +76,8 @@ public class LedLights extends SubsystemBase {
     public LEDPattern getFlashPattern(){
         return FLASH_PATTERN;
     }
+
+    public LEDPattern getCrazyPattern(){return CRAZY_PATTERN;}
 
     public static Color returnRGBToGRB(double red, double green, double blue){
         return new Color(green,red,blue);

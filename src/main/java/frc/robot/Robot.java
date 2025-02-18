@@ -147,7 +147,7 @@ public class Robot extends TimedRobot {
             newPattern = LEDPattern.solid(Color.kWhite);
         } else {
             SmartDashboard.putString("ledsMode", "Default");
-            newPattern = leds.getFlashPattern();
+            newPattern = leds.getCrazyPattern();
         }
 
         // Only update if the pattern has changed
