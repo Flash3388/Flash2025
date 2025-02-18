@@ -9,7 +9,7 @@ import frc.robot.subsystems.VisionSystem;
 public class DistanceDelay extends Command {
 
     private double distance;
-    private final double finalDis =3;
+    private final double finalDis =3.5;
     private int aprilTagId;
 
     private VisionSystem visionSystem;

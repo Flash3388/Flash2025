@@ -50,6 +50,10 @@ public class VisionSystem extends SubsystemBase {
         return Optional.empty();
     }
 
+    public void changePipeLine(int id){
+        limelightFront.changePipeline(id);
+    }
+
     public Pose2d getAprilTagPose(int id) {
         return layout.getTagPose(id).orElseThrow().toPose2d();
     }

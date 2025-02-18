@@ -41,6 +41,7 @@ public class RobotMap {
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
     public static final double ARM_CORAL_ANGLE_A = 40;
     public static final double ARM_CORAL_ANGLE_B = 230;
+    public static final double ARM_CORAL_ANGLE_START = 270;
     public static final double ARM_CORAL_ANGLE_ALGAE = 140;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
     public static final double ARM_CORAL_MIN_ANGLE = 16;
@@ -64,14 +65,14 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static final double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2.7;
+    public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2.7;
     public static final double OFFSET_ON_STAND_REEF = 0.328676 / 2;
     public static final double OFFSET_ON_STAND_FEEDER = 0.6;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
     public static final double OFFSET_FEEDER = 0.67 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
-            2,1.1,Math.PI*2, Math.PI);
+            2.6,1.5,Math.PI*2, Math.PI);
 
     // ll_front forward 0.095
     // ll_back forward 0.3
@@ -84,6 +85,12 @@ public class RobotMap {
             {4,5}, // red cages
             {15,14} // blue cages
     };
+
+    public static int[][] CORALS_ON_REEF = new int[4][6];
+
+    public static double REEF_HORIZONTAL_OFFSET = 0.32862/2; // in meters
+    public static double REEF_VERTICAL_OFFSET = 0.4031/2; // in meters
+    public static double HEIGHT = 0.79 + REEF_VERTICAL_OFFSET; // in meters
 
     public static final int LEDS_ID = 0;
     public static final int LEDS_LENGTH = 5;
