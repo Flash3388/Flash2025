@@ -123,13 +123,20 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxSecond, XboxController.Button.kB.value)
                 .onTrue(isAuto ? driveAndCollectFromFeeder(FeederSide.RIGHT) :coralPut());
         new JoystickButton(xboxSecond, XboxController.Button.kRightBumper.value)
-                .onTrue(isAuto ? driveToProcessorAndPlaceAlgae() :Commands.none());
+                .onTrue(isAuto ? driveToProcessorAndPlaceAlgae() :new RemoveSwerveCommand(swerve));
         new JoystickButton(xboxSecond, XboxController.Button.kLeftBumper.value)
-                .onTrue(new RemoveSwerveCommand(swerve));
-        new POVButton(xboxSecond, 315).onTrue(isAuto ? driveToNearestReefAndPut(ReefStandRow.LEFT,true) :algaeCollect());
-        new POVButton(xboxSecond, 135).onTrue(isAuto ? driveToNearestReefAndPut(ReefStandRow.RIGHT,false) :algaeOut());
-        new POVButton(xboxSecond, 45).onTrue(isAuto ? driveToNearestReefAndPut(ReefStandRow.RIGHT,true) :new ExtendedAlgaeArm(algaeArm));
-        new POVButton(xboxSecond, 225).onTrue(isAuto ? driveToNearestReefAndPut(ReefStandRow.LEFT,false) :new RetractAlgaeArm(algaeArm));
+                .onTrue(Commands.none());
+        if(isAuto){
+        new POVButton(xboxSecond, 315).onTrue(driveToNearestReefAndPut(ReefStandRow.LEFT,true));
+        new POVButton(xboxSecond, 135).onTrue(driveToNearestReefAndPut(ReefStandRow.RIGHT,false));
+        new POVButton(xboxSecond, 45).onTrue(driveToNearestReefAndPut(ReefStandRow.RIGHT,true));
+        new POVButton(xboxSecond, 225).onTrue(driveToNearestReefAndPut(ReefStandRow.LEFT,false));
+        }else {
+            new POVButton(xboxSecond,0).onTrue(new ExtendedAlgaeArm(algaeArm));
+            new POVButton(xboxSecond,180).onTrue(new RetractAlgaeArm(algaeArm));
+            new POVButton(xboxSecond,270).onTrue(new CollectAlgae(algaeGripper));
+            new POVButton(xboxSecond,90).onTrue(new ReleaseAlgae(algaeGripper));
+        }
     }
 
 
@@ -150,6 +157,16 @@ public class Robot extends TimedRobot {
             SmartDashboard.putString("ledsMode", "Default");
             newPattern = leds.getFlashPattern();
         }
+
+        Optional<Pose2d> optionalPose2d = visionSystem.returnCoralPose(swerve.getPose());
+        Pose2d pose2d = new Pose2d();
+
+        if(optionalPose2d.isPresent()){
+            pose2d = optionalPose2d.get();
+        }
+
+        swerve.getField().getObject("Detected Coral").setPose(pose2d);
+        SmartDashboard.putNumberArray("Detected Coral Pose",pose2d.toMatrix().getData());
 
         // Only update if the pattern has changed
         if (!newPattern.equals(leds.getCurrentPattern())) {
@@ -200,6 +217,9 @@ public class Robot extends TimedRobot {
             isAuto = isAuto1;
             configureButtons();
         }
+
+        Optional<LimelightHelpers.PoseEstimate> optionalPoseEstimate = visionSystem.getRobotPoseEstimate();
+        SmartDashboard.putBoolean("Pose Exists",optionalPoseEstimate.isPresent());
         CommandScheduler.getInstance().run();
     }
 
@@ -216,7 +236,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
-        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = Double.MAX_VALUE;
+        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 4;
         visionSystem.changePipeLine(0);
     }
 
@@ -224,7 +244,8 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         Optional<LimelightHelpers.PoseEstimate> poseEstimate= visionSystem.getRobotPoseEstimate();
         if(poseEstimate.isPresent()){
-            swerve.updatePoseEstimator(poseEstimate.get());
+            LimelightHelpers.PoseEstimate pose = poseEstimate.get();
+            swerve.updatePoseEstimator(pose);
         }
     }
 
@@ -240,6 +261,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+        if (visionSystem.frontPipelineIndex() == 2 && visionSystem.frontHasDetectedTarget()){
+
+        }
     }
 
     @Override

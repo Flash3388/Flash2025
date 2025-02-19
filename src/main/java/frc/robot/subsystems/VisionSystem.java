@@ -4,6 +4,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.*;
 import org.dyn4j.geometry.Vector2;
@@ -29,11 +30,12 @@ public class VisionSystem extends SubsystemBase {
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
         double distanceToTargetFront = limelightFront.hasDetectedTarget() ?
                 limelightFront.getDistanceToTarget() :
-                Double.MAX_VALUE;
+                10;
         double distanceToTargetBack = limelightBack.hasDetectedTarget() ?
                 limelightBack.getDistanceToTarget() :
-                Double.MAX_VALUE;
-
+                10;
+        System.out.println("dis"+ distanceToTargetBack);
+        System.out.println("back"+(distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT));
         // always use the closest measure
         if (distanceToTargetFront < distanceToTargetBack) {
             // use front
@@ -46,7 +48,6 @@ public class VisionSystem extends SubsystemBase {
                 return Optional.of(limelightBack.getPoseEstimate());
             }
         }
-
         return Optional.empty();
     }
 
@@ -117,8 +118,23 @@ public class VisionSystem extends SubsystemBase {
         return new Pose2d(result.x, result.y, Rotation2d.fromDegrees(newRotation));
     }
 
+    public boolean frontHasDetectedTarget(){
+        return limelightFront.hasDetectedTarget();
+    }
+
+    public Optional<Pose2d> returnCoralPose(Pose2d robotPose){
+            Pose2d targetPose = limelightFront.getTargetPoseRobotSpace();
+            Vector2 vecTarget = new Vector2(targetPose.getX(), targetPose.getY());
+            Vector2 vecRobot = new Vector2(robotPose.getX(), robotPose.getY());
+            Vector2 vecFinal = vecRobot.add(vecTarget);
+            return Optional.of(new Pose2d(vecFinal.x, vecFinal.y, Rotation2d.kZero));
+    }
+
+    public int frontPipelineIndex(){
+        return limelightFront.getCurrentPipeLine();
+    }
+
     @Override
     public void periodic() {
-
     }
 }

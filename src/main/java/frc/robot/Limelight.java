@@ -39,6 +39,7 @@ public class Limelight {
     public void changePipeline(int id){
             LimelightHelpers.setPipelineIndex(name,id);
     }
+    public int getCurrentPipeLine(){return (int)LimelightHelpers.getCurrentPipelineIndex(name);}
 
     public LimelightHelpers.PoseEstimate getPoseEstimate(){
         return LimelightHelpers.getBotPoseEstimate_wpiBlue(name);
