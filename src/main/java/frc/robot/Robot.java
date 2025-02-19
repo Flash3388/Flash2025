@@ -64,10 +64,11 @@ public class Robot extends TimedRobot {
 
         coralArmCommand = new CoralArmCommand(coralArm);
         coralArm.setDefaultCommand(coralArmCommand);
-
+        boolean isRed = isRed();
+        int dir = isRed? -1:1;
         swerve.setDefaultCommand(swerve.driveA(
-                () -> MathUtil.applyDeadband(-xboxMain.getLeftY(), 0.05),
-                () -> MathUtil.applyDeadband(-xboxMain.getLeftX(), 0.05),
+                () -> MathUtil.applyDeadband(-xboxMain.getLeftY()*dir, 0.05),
+                () -> MathUtil.applyDeadband(-xboxMain.getLeftX()*dir, 0.05),
                 () -> MathUtil.applyDeadband(-xboxMain.getRightX(), 0.05)
         ));
        /* Command checkIfAlgaeRetract = Commands.defer(()->{
@@ -127,15 +128,10 @@ public class Robot extends TimedRobot {
         new JoystickButton(xboxSecond, XboxController.Button.kLeftBumper.value)
                 .onTrue(Commands.none());
         if(isAuto){
-        new POVButton(xboxSecond, 315).onTrue(driveToNearestReefAndPut(ReefStandRow.LEFT,true));
-        new POVButton(xboxSecond, 135).onTrue(driveToNearestReefAndPut(ReefStandRow.RIGHT,false));
-        new POVButton(xboxSecond, 45).onTrue(driveToNearestReefAndPut(ReefStandRow.RIGHT,true));
-        new POVButton(xboxSecond, 225).onTrue(driveToNearestReefAndPut(ReefStandRow.LEFT,false));
-        }else {
-            new POVButton(xboxSecond,0).onTrue(new ExtendedAlgaeArm(algaeArm));
-            new POVButton(xboxSecond,180).onTrue(new RetractAlgaeArm(algaeArm));
-            new POVButton(xboxSecond,270).onTrue(new CollectAlgae(algaeGripper));
-            new POVButton(xboxSecond,90).onTrue(new ReleaseAlgae(algaeGripper));
+        new POVButton(xboxSecond, 315).onTrue(isAuto? driveToNearestReefAndPut(ReefStandRow.LEFT,true):new ExtendedAlgaeArm(algaeArm));
+        new POVButton(xboxSecond, 135).onTrue(isAuto? driveToNearestReefAndPut(ReefStandRow.RIGHT,false):new RetractAlgaeArm(algaeArm));
+        new POVButton(xboxSecond, 45).onTrue(isAuto? driveToNearestReefAndPut(ReefStandRow.RIGHT,true):new ReleaseAlgae(algaeGripper));
+        new POVButton(xboxSecond, 225).onTrue(isAuto? driveToNearestReefAndPut(ReefStandRow.LEFT,false):new CollectAlgae(algaeGripper));
         }
     }
 
@@ -145,36 +141,18 @@ public class Robot extends TimedRobot {
         LEDPattern newPattern;
 
         if (coralGripper.hasCoral() && algaeGripper.hasAlgae()) {
-            SmartDashboard.putString("ledsMode", "Algae + Coral");
             newPattern = LEDPattern.solid(Color.kTurquoise);
         } else if (algaeGripper.hasAlgae()) {
-            SmartDashboard.putString("ledsMode", "Algae");
             newPattern = LEDPattern.solid(Color.kPurple);
         } else if (coralGripper.hasCoral()) {
-            SmartDashboard.putString("ledsMode", "Coral");
             newPattern = LEDPattern.solid(Color.kWhite);
         } else {
-            SmartDashboard.putString("ledsMode", "Default");
             newPattern = leds.getFlashPattern();
         }
 
         // Only update if the pattern has changed
         if (!newPattern.equals(leds.getCurrentPattern())) {
             leds.setPattern(newPattern);
-        }
-
-       SmartDashboard.putNumber("Pressure", pneumaticsHub.getPressure(0));
-
-        Optional<LimelightHelpers.PoseEstimate> pose = visionSystem.getRobotPoseEstimate();
-        if (pose.isPresent()) {
-            LimelightHelpers.PoseEstimate poseEstimate = pose.get();
-            swerve.updatePoseEstimator(poseEstimate);
-
-            if (poseEstimate.rawFiducials.length > 0) {
-                SmartDashboard.putNumber("AprilTagID", poseEstimate.rawFiducials[0].id);
-            }
-        } else {
-            SmartDashboard.putNumber("AprilTagID", -1);
         }
 
         OptionalInt nearestAprilTagOpt = findNearestAprilTagForCurrentPose(0,1);
@@ -186,7 +164,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("NearestAprilTagID", aprilTagId);
         } else {
             swerve.getField().getObject("NearestAprilTag").setPoses();
-            SmartDashboard.putNumber("NearestAprilTagID", 8);
+            SmartDashboard.putNumber("NearestAprilTagID", -1);
         }
 
 
@@ -199,7 +177,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("NearestAprilTagFeederID", aprilTagId);
         } else {
             swerve.getField().getObject("NearestAprilTagFeeder").setPoses();
-            SmartDashboard.putNumber("NearestAprilTagFeederID", 2);
+            SmartDashboard.putNumber("NearestAprilTagFeederID", -1);
         }
 
         boolean isAuto1 = SmartDashboard.getBoolean("isAuto",true);
@@ -208,8 +186,12 @@ public class Robot extends TimedRobot {
             configureButtons();
         }
 
-        Optional<LimelightHelpers.PoseEstimate> optionalPoseEstimate = visionSystem.getRobotPoseEstimate();
-        SmartDashboard.putBoolean("Pose Exists",optionalPoseEstimate.isPresent());
+        Optional<LimelightHelpers.PoseEstimate> poseEstimate= visionSystem.getRobotPoseEstimate();
+        if(poseEstimate.isPresent()){
+            LimelightHelpers.PoseEstimate pose = poseEstimate.get();
+            swerve.updatePoseEstimator(pose);
+        }
+
         CommandScheduler.getInstance().run();
     }
 
@@ -232,11 +214,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        Optional<LimelightHelpers.PoseEstimate> poseEstimate= visionSystem.getRobotPoseEstimate();
-        if(poseEstimate.isPresent()){
-            LimelightHelpers.PoseEstimate pose = poseEstimate.get();
-            swerve.updatePoseEstimator(pose);
-        }
+
     }
 
     @Override
@@ -263,8 +241,10 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         boolean isLeft = SmartDashboard.getBoolean("isLeft",true);
-        autoCommand = orbitAuto();
+        autoCommand = twoHighCoral(isLeft);
         autoCommand.schedule();
+
+        compressor.disable();
     }
 
     @Override
@@ -275,6 +255,7 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousExit() {
         autoCommand.cancel();
+        compressor.enableAnalog(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
     }
 
     @Override
@@ -303,7 +284,28 @@ public void testExit() {
         );
     }
 
-    private Command threeCorals(boolean isLeft){
+    private Command oneHighAndTwoLow(boolean isLeft){
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0:1;
+        int sideIndexFeeder = isRed() ? 2:3;
+        int indexReef = isLeft ? 1:3;
+        int indexFeeder = isLeft? 1 : 0;
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true),
+                        algaeCollect()),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],false),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],false)
+        );
+    }
+
+    private Command twoHighCoral(boolean isLeft){
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
         int sideIndexReef = isRed() ? 0:1;
         int sideIndexFeeder = isRed() ? 2:3;
@@ -318,9 +320,7 @@ public void testExit() {
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],true),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],false)
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder])
         );
     }
 

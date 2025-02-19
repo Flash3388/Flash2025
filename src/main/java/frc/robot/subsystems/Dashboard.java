@@ -81,7 +81,8 @@ public class Dashboard extends SubsystemBase {
                 .withPosition(0, 1)
                 .withSize(2, 1);
 
-        algaeTab.addBoolean("Arm Is Retracted", algaeArm::isRetracted)
+        algaeTab.addBoolean("Arm Is Retracted", algaeArm::
+                        isRetracted)
                 .withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 2)
                 .withSize(2, 1);

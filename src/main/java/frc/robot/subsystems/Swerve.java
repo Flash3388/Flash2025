@@ -147,7 +147,7 @@ public class Swerve extends SubsystemBase {
                 MAX_SPEED
         );
 
-        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.POSE;
 
         swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
         swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
@@ -161,6 +161,7 @@ public class Swerve extends SubsystemBase {
         mechanism = new Mechanism2d(50, 50);
         moduleMechanisms = createMechanismDisplay(mechanism);
         SmartDashboard.putData("SwerveMechanism", mechanism);
+
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
@@ -178,15 +179,6 @@ public class Swerve extends SubsystemBase {
                     true,
                     false);
         },this::stop);
-    }
-
-    public void rotate(DoubleSupplier rotationX){
-        swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                        0,
-                        0), 0.8),
-                rotationX.getAsDouble() * swerveDrive.getMaximumChassisAngularVelocity(),
-                false,
-                false);
     }
     
     public void stop(){
@@ -233,6 +225,7 @@ public class Swerve extends SubsystemBase {
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
         }
+
     }
 
     private void setUpPathPlanner(){

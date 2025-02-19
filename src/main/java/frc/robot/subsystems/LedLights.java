@@ -45,9 +45,6 @@ public class LedLights extends SubsystemBase {
             currentPattern.atBrightness(Percent.of(10)).applyTo(ledBuffer);
             leds.setData(ledBuffer);
         }
-
-        assert currentPattern != null;
-        SmartDashboard.putString("Current Pattern",currentPattern.toString());
     }
 
     public void setPattern(LEDPattern pattern) {
