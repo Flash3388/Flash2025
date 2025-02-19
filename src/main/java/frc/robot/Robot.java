@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
     private XboxController xboxSecond;
     private XboxController xboxMain;
 
-    private boolean isAuto = false;
+    private boolean isAuto = true;
     private SendableChooser<String> feederAuto;
 
     @Override
@@ -103,14 +103,14 @@ public class Robot extends TimedRobot {
 
         algaeGripper.setDefaultCommand(checkAlgae);*/
         configureButtons();
-        SmartDashboard.putBoolean("isAuto",false);
+        SmartDashboard.putBoolean("isAuto",true);
 
         feederAuto = new SendableChooser<String>();
         feederAuto.setDefaultOption("center","CENTER");
         feederAuto.addOption("left","LEFT");
         feederAuto.addOption("right","RIGHT");
         SmartDashboard.putData("feederAutomation",feederAuto);
-
+        SmartDashboard.putBoolean("isLeft",true);
     }
 
     public void configureButtons(){
@@ -158,16 +158,6 @@ public class Robot extends TimedRobot {
             newPattern = leds.getFlashPattern();
         }
 
-        Optional<Pose2d> optionalPose2d = visionSystem.returnCoralPose(swerve.getPose());
-        Pose2d pose2d = new Pose2d();
-
-        if(optionalPose2d.isPresent()){
-            pose2d = optionalPose2d.get();
-        }
-
-        swerve.getField().getObject("Detected Coral").setPose(pose2d);
-        SmartDashboard.putNumberArray("Detected Coral Pose",pose2d.toMatrix().getData());
-
         // Only update if the pattern has changed
         if (!newPattern.equals(leds.getCurrentPattern())) {
             leds.setPattern(newPattern);
@@ -212,7 +202,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.putNumber("NearestAprilTagFeederID", 2);
         }
 
-        boolean isAuto1 = SmartDashboard.getBoolean("isAuto",false);
+        boolean isAuto1 = SmartDashboard.getBoolean("isAuto",true);
         if(isAuto1 != isAuto){
             isAuto = isAuto1;
             configureButtons();
@@ -261,9 +251,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        if (visionSystem.frontPipelineIndex() == 2 && visionSystem.frontHasDetectedTarget()){
 
-        }
     }
 
     @Override
@@ -274,7 +262,8 @@ public class Robot extends TimedRobot {
     Command autoCommand;
     @Override
     public void autonomousInit() {
-        autoCommand = threeCorals();
+        boolean isLeft = SmartDashboard.getBoolean("isLeft",true);
+        autoCommand = orbitAuto();
         autoCommand.schedule();
     }
 
@@ -303,26 +292,39 @@ public void testExit() {
 
     }
 
-    private Command threeCorals(){
+    private Command orbitAuto(){
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
         int sideIndexReef = isRed() ? 0:1;
-        int sideIndexFeeder = isRed() ? 2:3;
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][1],true),
-                algaeCollect()),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][1]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][1],true),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][1]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][1],false)
+                        reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][5],true),
+                        algaeCollect()),
+                ProcessorAuto()
         );
     }
 
-    private Command algaeAuto(){
+    private Command threeCorals(boolean isLeft){
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0:1;
+        int sideIndexFeeder = isRed() ? 2:3;
+        int indexReef = isLeft ? 1:3;
+        int indexFeeder = isLeft? 1 : 0;
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true),
+                algaeCollect()),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],true),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],false)
+        );
+    }
+
+    private Command algaeAuto(boolean isLeft){
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
         int sideIndexReef = isRed() ? 0:1;
         int sideIndexFeeder = isRed() ? 2:3;

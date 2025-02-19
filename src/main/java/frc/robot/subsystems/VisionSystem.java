@@ -34,8 +34,6 @@ public class VisionSystem extends SubsystemBase {
         double distanceToTargetBack = limelightBack.hasDetectedTarget() ?
                 limelightBack.getDistanceToTarget() :
                 10;
-        System.out.println("dis"+ distanceToTargetBack);
-        System.out.println("back"+(distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT));
         // always use the closest measure
         if (distanceToTargetFront < distanceToTargetBack) {
             // use front
