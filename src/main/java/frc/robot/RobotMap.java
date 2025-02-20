@@ -41,11 +41,7 @@ public class RobotMap {
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
     public static final double ARM_CORAL_ANGLE_A = 40;
     public static final double ARM_CORAL_ANGLE_B = 230;
-    public static final double ARM_CORAL_ANGLE_START = 270;
-    public static final double ARM_CORAL_ANGLE_ALGAE = 140;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
-    public static final double ARM_CORAL_MIN_ANGLE = 16;
-    public static final double ARM_CORAL_MAX_ANGLE = 276.5;
 
     // coral elevator
     public static final int CORAL_ELEVATOR_UPPER_LIMIT_SWITCH = 3;
@@ -59,8 +55,6 @@ public class RobotMap {
     public static final int ALGAE_GRIPPER_DIGITALINPUT = 0;
 
     // algae arm
-    public static final int ALGAE_ARM_SWITCH_TOP = 1;
-    public static final int ALGAE_ARM_SWITCH_BOTTOM = 0;
     public static final int ALGEA_ARM_FORWARD_PISTON_FORWARD_CHANNEL = 12;
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
@@ -74,9 +68,6 @@ public class RobotMap {
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
             2.6,1.5,Math.PI*2, Math.PI);
 
-    // ll_front forward 0.095
-    // ll_back forward 0.3
-
     public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
             {9, 8, 7, 6, 11, 10}, // red alliance reef
             {22, 17, 18, 19, 20, 21}, // blue alliance reef
@@ -85,12 +76,6 @@ public class RobotMap {
             {4,5}, // red cages
             {15,14} // blue cages
     };
-
-    public static int[][] CORALS_ON_REEF = new int[4][6];
-
-    public static double REEF_HORIZONTAL_OFFSET = 0.32862/2; // in meters
-    public static double REEF_VERTICAL_OFFSET = 0.4031/2; // in meters
-    public static double HEIGHT = 0.79 + REEF_VERTICAL_OFFSET; // in meters
 
     public static final int LEDS_ID = 0;
     public static final int LEDS_LENGTH = 5;

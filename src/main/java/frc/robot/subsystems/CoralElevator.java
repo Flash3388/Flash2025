@@ -47,10 +47,6 @@ public class CoralElevator extends SubsystemBase {
 
     @Override
     public void periodic() {
-//        SmartDashboard.putBoolean("CoralElevatorRaised", isRaised());
-//        SmartDashboard.putBoolean("CoralElevatorLowered", isLowered());
-//        SmartDashboard.putNumber("lowerVoltage",LowerLimitSwitch.getValue());
-//        SmartDashboard.putNumber("upperVoltage",UpperLimitSwitch.getValue());
     }
 
     private boolean isConstrained(double value, double min, double max){

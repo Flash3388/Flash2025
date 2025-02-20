@@ -24,8 +24,7 @@ public class ExtendedAlgaeArm extends Command {
 
     @Override
     public boolean isFinished() {
-        // TODO: ALGAE ARM SENSORS DON'T WORK
-        return true; // !algaeArm.isRetracted();
+        return true;
     }
 
     @Override

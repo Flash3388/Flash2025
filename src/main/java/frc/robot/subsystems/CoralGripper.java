@@ -44,10 +44,6 @@ public class CoralGripper extends SubsystemBase {
         return !limitSwitch.get();
     }
 
-    public double getVelocityRPM(){
-        return velocitySignal.getValue().in(Units.RPM);
-    }
-
     public final void rotateCollect() {
         motor.setControl(dutyCycleControl.withOutput(ROTATE_COLLECT));
     }
@@ -67,7 +63,6 @@ public class CoralGripper extends SubsystemBase {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(velocitySignal);
-        //SmartDashboard.putBoolean("HasCoral", hasCoral());
     }
 }
 

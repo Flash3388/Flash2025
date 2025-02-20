@@ -34,14 +34,11 @@ public class VisionSystem extends SubsystemBase {
         double distanceToTargetBack = limelightBack.hasDetectedTarget() ?
                 limelightBack.getDistanceToTarget() :
                 10;
-        // always use the closest measure
         if (distanceToTargetFront < distanceToTargetBack) {
-            // use front
             if (distanceToTargetFront <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
                 return Optional.of(limelightFront.getPoseEstimate());
             }
         } else {
-            // use back
             if (distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
                 return Optional.of(limelightBack.getPoseEstimate());
             }
@@ -114,22 +111,6 @@ public class VisionSystem extends SubsystemBase {
 
         double newRotation = (180 + pose.getRotation().getDegrees()) % 360;
         return new Pose2d(result.x, result.y, Rotation2d.fromDegrees(newRotation));
-    }
-
-    public boolean frontHasDetectedTarget(){
-        return limelightFront.hasDetectedTarget();
-    }
-
-    public Optional<Pose2d> returnCoralPose(Pose2d robotPose){
-            Pose2d targetPose = limelightFront.getTargetPoseRobotSpace();
-            Vector2 vecTarget = new Vector2(targetPose.getX(), targetPose.getY());
-            Vector2 vecRobot = new Vector2(robotPose.getX(), robotPose.getY());
-            Vector2 vecFinal = vecRobot.add(vecTarget);
-            return Optional.of(new Pose2d(vecFinal.x, vecFinal.y, Rotation2d.kZero));
-    }
-
-    public int frontPipelineIndex(){
-        return limelightFront.getCurrentPipeLine();
     }
 
     @Override

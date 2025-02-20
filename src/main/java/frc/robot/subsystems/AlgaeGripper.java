@@ -18,7 +18,6 @@ public class AlgaeGripper extends SubsystemBase {
 
      private final SparkMax motor;
      private final SparkMax motor2;
-     private final RelativeEncoder encoder;
      private final DigitalInput digitalInput;
 
      public AlgaeGripper(){
@@ -27,8 +26,6 @@ public class AlgaeGripper extends SubsystemBase {
           SparkMaxConfig config = new SparkMaxConfig();
           config.idleMode(SparkBaseConfig.IdleMode.kBrake);
           motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
-
-          encoder = this.motor.getEncoder();
 
           this.motor2 = new SparkMax(RobotMap.ALGAE_GRIPPER_MOTOR2, SparkLowLevel.MotorType.kBrushless);
           config = new SparkMaxConfig();
@@ -40,10 +37,6 @@ public class AlgaeGripper extends SubsystemBase {
 
      public boolean hasAlgae(){
           return !digitalInput.get();
-     }
-
-     public double getVelocityRpm(){
-          return encoder.getVelocity();
      }
 
      public void rotateCollect(){
@@ -68,6 +61,5 @@ public class AlgaeGripper extends SubsystemBase {
 
      @Override
      public void periodic(){
-        //  SmartDashboard.putBoolean("HasAlgae", hasAlgae());
      }
 }
