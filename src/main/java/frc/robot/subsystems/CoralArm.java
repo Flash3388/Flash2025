@@ -83,7 +83,7 @@ public class CoralArm extends SubsystemBase {
     public void setMoveToPosition(double positionDegrees) {
         double currentPositionForFF = getPositionDegreesForFF();
         double ff = RobotMap.ARM_CORAL_KF * Math.cos(Math.toRadians(currentPositionForFF));
-        SmartDashboard.putNumber("ArmCoralFF", ff);
+      //  SmartDashboard.putNumber("ArmCoralFF", ff);
 
         double positionRotations = positionDegrees / 360.0;
         controller.setReference(positionRotations, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, ff, SparkClosedLoopController.ArbFFUnits.kPercentOut);
@@ -99,11 +99,11 @@ public class CoralArm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
-        SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
-        SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
-        SmartDashboard.putNumber("CoralArmPositionForFF", getPositionDegreesForFF());
-        SmartDashboard.putNumber("ArmCoralCurrent", motor.getOutputCurrent());
+//        SmartDashboard.putBoolean("CoralArmAtForwardLimit", isAtForwardLimit());
+//        SmartDashboard.putBoolean("CoralArmAtReverseLimit", isAtReverseLimit());
+//        SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
+//        SmartDashboard.putNumber("CoralArmPositionForFF", getPositionDegreesForFF());
+//        SmartDashboard.putNumber("ArmCoralCurrent", motor.getOutputCurrent());
     }
 
 }

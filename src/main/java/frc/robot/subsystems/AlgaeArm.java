@@ -44,10 +44,10 @@ public class AlgaeArm extends SubsystemBase {
 
     @Override
     public void periodic(){
-        SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
-        SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
-        SmartDashboard.putNumber("BottomValue",switchBottom.getValue());
-        SmartDashboard.putNumber("TopValue",switchTop.getValue());
+//        SmartDashboard.putBoolean("AlgaeArmExtended", isExtended());
+//        SmartDashboard.putBoolean("AlgaeArmRetracted", isRetracted());
+//        SmartDashboard.putNumber("BottomValue",switchBottom.getValue());
+//        SmartDashboard.putNumber("TopValue",switchTop.getValue());
     }
 
     private boolean isConstrained(double value, double min, double max){

@@ -67,7 +67,7 @@ public class CoralGripper extends SubsystemBase {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(velocitySignal);
-        SmartDashboard.putBoolean("HasCoral", hasCoral());
+        //SmartDashboard.putBoolean("HasCoral", hasCoral());
     }
 }
 

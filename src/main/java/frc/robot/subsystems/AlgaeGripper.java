@@ -68,6 +68,6 @@ public class AlgaeGripper extends SubsystemBase {
 
      @Override
      public void periodic(){
-          SmartDashboard.putBoolean("HasAlgae", hasAlgae());
+        //  SmartDashboard.putBoolean("HasAlgae", hasAlgae());
      }
 }

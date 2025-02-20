@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.Swerve;
 
 public class RemoveSwerveCommand extends Command {
@@ -12,7 +14,7 @@ public class RemoveSwerveCommand extends Command {
 
     @Override
     public void initialize() {
-        CommandScheduler.getInstance().removeComposedCommand(swerve.getCurrentCommand());
+        AutoBuilder.pathfindToPose(swerve.getPose(), RobotMap.CONSTRAINTS);
     }
 
     @Override
@@ -27,6 +29,6 @@ public class RemoveSwerveCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return true;
+        return false;
     }
 }

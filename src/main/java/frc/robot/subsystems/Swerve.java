@@ -46,8 +46,8 @@ public class Swerve extends SubsystemBase {
     private static final double MAX_SPEED = 4;
     private final SwerveDrive swerveDrive;
 
-    private final Mechanism2d mechanism;
-    private final MechanismLigament2d[] moduleMechanisms;
+  //  private final Mechanism2d mechanism;
+   // private final MechanismLigament2d[] moduleMechanisms;
 
 
     public Swerve() {
@@ -147,20 +147,20 @@ public class Swerve extends SubsystemBase {
                 MAX_SPEED
         );
 
-        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.POSE;
+        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.MACHINE;
 
-        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
+        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, new Pose2d(3,3,Rotation2d.fromDegrees(0)));
         swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
         swerveDrive.setCosineCompensator(false);
         swerveDrive.setAngularVelocityCompensation(false, false, 0);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        swerveDrive.resetOdometry(Pose2d.kZero);
+        swerveDrive.resetOdometry(new Pose2d(3,3,Rotation2d.fromDegrees(0)));
 
-        mechanism = new Mechanism2d(50, 50);
-        moduleMechanisms = createMechanismDisplay(mechanism);
-        SmartDashboard.putData("SwerveMechanism", mechanism);
+       // mechanism = new Mechanism2d(50, 50);
+        //moduleMechanisms = createMechanismDisplay(mechanism);
+      //  SmartDashboard.putData("SwerveMechanism", mechanism);
 
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
@@ -219,12 +219,13 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
+       // SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
         swerveDrive.updateOdometry();
-
+/*
         for (int i = 0; i < modulePositions.length; i++) {
             moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
         }
+ */
 
     }
 

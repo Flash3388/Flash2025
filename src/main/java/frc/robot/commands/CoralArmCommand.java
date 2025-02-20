@@ -57,18 +57,18 @@ public class CoralArmCommand extends Command {
             hasNewTarget = false;
             didReachPosition = false;
 
-            SmartDashboard.putBoolean("ArmCommandReached", false);
+         //   SmartDashboard.putBoolean("ArmCommandReached", false);
 
             if (isHolding) {
                 motionProfile = new TrapezoidProfile(constraints);
                 motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
                 motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
 
-                SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
+           //     SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
             } else {
                 arm.stop();
 
-                SmartDashboard.putNumber("ArmCommandTarget", -1);
+           //     SmartDashboard.putNumber("ArmCommandTarget", -1);
             }
         }
 
@@ -78,7 +78,7 @@ public class CoralArmCommand extends Command {
 
         if (!didReachPosition && arm.didReachPosition(targetPositionDegrees)) {
             didReachPosition = true;
-            SmartDashboard.putBoolean("ArmCommandReached", true);
+           // SmartDashboard.putBoolean("ArmCommandReached", true);
         }
 
         if (didReachPosition) {
