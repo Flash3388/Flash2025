@@ -40,6 +40,11 @@ public class Swerve extends SubsystemBase {
     private long lastTelematryUpdate = 0;
     private static final long TELEMATRY_INTERVAL_MS = 100;
 
+    private double lastXSpeed = 0;
+    private double lastYSpeed = 0;
+    private double lastRotation = 0;
+    private static final double MAX_DELTA = 0.5;
+
     private final SwerveDrive swerveDrive;
 
     public Swerve() {
@@ -142,7 +147,7 @@ public class Swerve extends SubsystemBase {
         SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.MACHINE;
 
         swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, new Pose2d(3,3,Rotation2d.fromDegrees(0)));
-        swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
+        swerveDrive.setHeadingCorrection(false);
         swerveDrive.setCosineCompensator(false);
         swerveDrive.setAngularVelocityCompensation(false, false, 0);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
@@ -171,6 +176,23 @@ public class Swerve extends SubsystemBase {
             xSpeed *= swerveDrive.getMaximumChassisVelocity();
             ySpeed *= swerveDrive.getMaximumChassisVelocity();
             rotation *= swerveDrive.getMaximumChassisAngularVelocity();
+
+            double deltaX = xSpeed - lastXSpeed;
+            if (Math.abs(deltaX) > MAX_DELTA){
+                xSpeed = lastXSpeed + Math.signum(deltaX) * MAX_DELTA;
+            }
+            double deltaY = ySpeed - lastYSpeed;
+            if (Math.abs(deltaY) > MAX_DELTA){
+                ySpeed = lastYSpeed + Math.signum(deltaY) * MAX_DELTA;
+            }
+
+            double deltaRot = rotation - lastRotation;
+            if (Math.abs(deltaRot) > MAX_DELTA) {
+                rotation = lastRotation + Math.signum(deltaRot) * MAX_DELTA;
+            }
+            lastXSpeed = xSpeed;
+            lastYSpeed = ySpeed;
+            lastRotation = rotation;
 
             xSpeed = MathUtil.clamp(xSpeed,-3.5,3.5);
             ySpeed = MathUtil.clamp(ySpeed,-3.5,3.5);
