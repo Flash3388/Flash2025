@@ -10,7 +10,7 @@ import frc.robot.subsystems.CoralArm;
 
 public class CoralArmCommand extends Command {
 
-    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 174;
+    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 178;
     private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 174 * 2;
 
     private final CoralArm arm;

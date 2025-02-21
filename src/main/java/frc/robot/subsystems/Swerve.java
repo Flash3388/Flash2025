@@ -8,6 +8,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -35,6 +36,10 @@ public class Swerve extends SubsystemBase {
     private static final double WIDTH = 0.707;
     private static final double LENGTH = 0.702;
     private static final double MAX_SPEED = 4;
+
+    private long lastTelematryUpdate = 0;
+    private static final long TELEMATRY_INTERVAL_MS = 100;
+
     private final SwerveDrive swerveDrive;
 
     public Swerve() {
@@ -154,12 +159,30 @@ public class Swerve extends SubsystemBase {
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
         return runEnd(() -> {
-            swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
-                    Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+            double xSpeed = MathUtil.applyDeadband(translationX.getAsDouble(),0.05);
+            double ySpeed = MathUtil.applyDeadband(translationY.getAsDouble(),0.05);
+            double rotation = MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.05);
+
+            if (Math.abs(xSpeed) < 0.02 && Math.abs(ySpeed) < 0.02 && Math.abs(rotation) < 0.02){
+                stop();
+                return;
+            }
+
+            xSpeed *= swerveDrive.getMaximumChassisVelocity();
+            ySpeed *= swerveDrive.getMaximumChassisVelocity();
+            rotation *= swerveDrive.getMaximumChassisAngularVelocity();
+
+            xSpeed = MathUtil.clamp(xSpeed,-3.5,3.5);
+            ySpeed = MathUtil.clamp(ySpeed,-3.5,3.5);
+            rotation = MathUtil.clamp(rotation,-Math.PI,Math.PI);
+
+            swerveDrive.drive(
+                    SwerveMath.scaleTranslation(new Translation2d(xSpeed, ySpeed),0.8),
+                    rotation,
                     true,
-                    false);
+                    false
+            );
+
         },this::stop);
     }
     
@@ -189,7 +212,6 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic() {
         swerveDrive.updateOdometry();
-
     }
 
     private void setUpPathPlanner(){

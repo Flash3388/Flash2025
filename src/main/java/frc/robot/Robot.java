@@ -95,6 +95,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+
         LEDPattern newPattern;
 
         if (coralGripper.hasCoral() && algaeGripper.hasAlgae()) {
@@ -248,8 +249,7 @@ public void testExit() {
         int indexFeeder = isLeft? 1 : 0;
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true),
-                algaeCollect()),
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true)),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
@@ -385,9 +385,9 @@ public void testExit() {
 
     private Command coralCollect() {
         return new ParallelCommandGroup(
-                new CollectCoral(coralGripper),
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
-                new LowerCoralElevator(coralElevator)
+            new LowerCoralElevator(coralElevator),
+            new CollectCoral(coralGripper),
+            Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
         );
     }
 
@@ -462,6 +462,9 @@ public void testExit() {
     private boolean isRed(){
         Optional<DriverStation.Alliance> optionalAlliance = DriverStation.getAlliance();
         DriverStation.Alliance alliance = optionalAlliance.orElse(null);
+        if(alliance == null){
+            return isRed();
+        }
         return alliance == DriverStation.Alliance.Red;
     }
 
@@ -481,12 +484,7 @@ public void testExit() {
         return Commands.defer(this::driveToProcessorAndPlaceAlgae,Set.of());
     }
     private Command leftBumperButton(){
-        return Commands.defer(()-> swerve.getCurrentCommand().deadlineFor(new Command() {
-            @Override
-            public boolean isFinished() {
-                return true;
-            }
-        }),Set.of());
+        return Commands.defer(()-> new StopSwerveCommand(swerve),Set.of());
                 //AutoBuilder.pathfindToPose(swerve.getPose(), RobotMap.CONSTRAINTS),Set.of());
     }
     private Command POVButtonLeftUp(){

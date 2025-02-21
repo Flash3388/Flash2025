@@ -20,30 +20,42 @@ public class VisionSystem extends SubsystemBase {
     private final Limelight limelightFront;
     private final AprilTagFieldLayout layout;
 
+    private volatile LimelightHelpers.PoseEstimate latestPoseEstimate = null;
+
     public VisionSystem() {
         limelightBack = new Limelight(LL_NAME_BACK);
         limelightFront = new Limelight(LL_NANE_FRONT);
         layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         layout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+
+        new Thread(() -> {
+            while(!Thread.currentThread().isInterrupted()){
+                try{
+                    double distanceToTargetFront = limelightFront.hasDetectedTarget() ? limelightFront.getDistanceToTarget() : 10;
+                    double distanceToTargetBack = limelightBack.hasDetectedTarget() ? limelightBack.getDistanceToTarget() : 10;
+                    if (distanceToTargetFront < distanceToTargetBack){
+                        if (distanceToTargetFront <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT){
+                            latestPoseEstimate = limelightFront.getPoseEstimate();
+                        } else {
+                            latestPoseEstimate = null;
+                        }
+                    } else {
+                        if (distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT){
+                            latestPoseEstimate = limelightBack.getPoseEstimate();
+                        } else {
+                            latestPoseEstimate = null;
+                        }
+                    }
+                    Thread.sleep(100);
+                } catch (InterruptedException e){
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }, "VisionThread").start();
     }
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
-        double distanceToTargetFront = limelightFront.hasDetectedTarget() ?
-                limelightFront.getDistanceToTarget() :
-                10;
-        double distanceToTargetBack = limelightBack.hasDetectedTarget() ?
-                limelightBack.getDistanceToTarget() :
-                10;
-        if (distanceToTargetFront < distanceToTargetBack) {
-            if (distanceToTargetFront <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
-                return Optional.of(limelightFront.getPoseEstimate());
-            }
-        } else {
-            if (distanceToTargetBack <= RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT) {
-                return Optional.of(limelightBack.getPoseEstimate());
-            }
-        }
-        return Optional.empty();
+        return Optional.ofNullable(latestPoseEstimate);
     }
 
     public void changePipeLine(int id){
