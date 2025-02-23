@@ -3,10 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,6 +23,7 @@ public class LedLights extends SubsystemBase {
     private static final LEDPattern RAINBOW_PATTERN = LEDPattern.rainbow(255, 255);
 
     private static final LEDPattern FLASH_PATTERN = LEDPattern.steps(Map.of(0,returnRGBToGRB(255,200,0),0.25,returnRGBToGRB(200,0,0),0.5,returnRGBToGRB(255,200,0),0.75,returnRGBToGRB(200,0,0)));
+
     private final AddressableLED leds;
     private final AddressableLEDBuffer ledBuffer;
     private LEDPattern currentPattern;
@@ -42,7 +40,8 @@ public class LedLights extends SubsystemBase {
     @Override
     public void periodic() {
         if (currentPattern != null) {
-            currentPattern.atBrightness(Percent.of(10)).applyTo(ledBuffer);
+            currentPattern.atBrightness(Percent.of(20)).applyTo(ledBuffer);
+
             leds.setData(ledBuffer);
         }
     }
@@ -67,6 +66,10 @@ public class LedLights extends SubsystemBase {
 
     public static Color returnRGBToGRB(double red, double green, double blue){
         return new Color(green,red,blue);
+    }
+
+    public LEDPattern getWhiteBreathe(){
+        return LEDPattern.solid(Color.kWhite).breathe(Second.of(0.5));
     }
 
     public LEDPattern returnRGBPattern(double red,double green,double blue){

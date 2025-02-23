@@ -30,7 +30,7 @@ public class RobotMap {
 
     // coral arm
     public static final int ARM_CORAL_MOTOR = 5;
-    public static final double ARM_CORAL_KP = 5;
+    public static final double ARM_CORAL_KP = 5.5;
     public static final double ARM_CORAL_KI = 0;
     public static final double ARM_CORAL_KD = 0;
     public static final double ARM_CORAL_IZONE = 0;
@@ -41,6 +41,7 @@ public class RobotMap {
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
     public static final double ARM_CORAL_ANGLE_A = 40;
     public static final double ARM_CORAL_ANGLE_B = 230;
+    public static final double ARM_CORAL_ANGLE_C = 50;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
 
     // coral elevator
@@ -64,7 +65,7 @@ public class RobotMap {
     public static final double OFFSET_ON_STAND_FEEDER = 0.6;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
-    public static final double OFFSET_FEEDER = 0.67 / 2; // TODO: RECOMPUTE
+    public static final double OFFSET_FEEDER = 0.71 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
             2.6,1.5,Math.PI*2, Math.PI);
 

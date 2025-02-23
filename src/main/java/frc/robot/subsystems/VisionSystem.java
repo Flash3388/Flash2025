@@ -66,10 +66,24 @@ public class VisionSystem extends SubsystemBase {
         return layout.getTagPose(id).orElseThrow().toPose2d();
     }
 
+    public Pose2d getPoseForReefStandWithOffset(int id, ReefStandRow row, double offset) {
+        Pose2d pose = getAprilTagPose(id);
+
+        Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF + offset, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
+        return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
+    }
+
     public Pose2d getPoseForReefStand(int id, ReefStandRow row) {
         Pose2d pose = getAprilTagPose(id);
 
         Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
+        return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
+    }
+
+    public Pose2d getPoseForReefAlgae(int id){
+        Pose2d pose = getAprilTagPose(id);
+
+        Pose2d calculatedPose = calcPoseCenter(pose,RobotMap.OFFSET_REEF);
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 

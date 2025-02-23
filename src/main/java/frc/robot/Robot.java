@@ -3,7 +3,9 @@ package frc.robot;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -38,6 +40,7 @@ public class Robot extends TimedRobot {
     private XboxController xboxSecond;
     private XboxController xboxMain;
 
+    private LEDPattern newPattern;
     private boolean isAuto = true;
     private SendableChooser<String> feederAuto;
     private SendableChooser<Command> autoChooser;
@@ -95,9 +98,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-
-        LEDPattern newPattern;
-
         if (coralGripper.hasCoral() && algaeGripper.hasAlgae()) {
             newPattern = LEDPattern.solid(Color.kTurquoise);
         } else if (algaeGripper.hasAlgae()) {
@@ -332,6 +332,32 @@ public void testExit() {
         );
     }
 
+    public Command driveAndCollectAlgae(){
+        return Commands.defer(
+                this::goAndCollectAlgae,Set.of(swerve)
+        );
+    }
+
+    private Command goAndCollectAlgae(){
+        if(algaeGripper.hasAlgae()){
+            return Commands.none();
+        }
+        OptionalInt OptionalAprilTagId = findNearestAprilTagForCurrentPose(0,1);
+        if(OptionalAprilTagId.isEmpty()){
+            return Commands.none();
+        }
+        int aprilTagId = OptionalAprilTagId.getAsInt();
+        return new ParallelCommandGroup(
+            algaeCollect(),
+            driveToReef(aprilTagId,null),
+            new SequentialCommandGroup(
+                new DistanceDelay(visionSystem,swerve,aprilTagId),
+                new RaiseCoralElevator(coralElevator)
+            )
+        );
+
+    }
+
     private Command goAndCollectFromFeeder(FeederSide side) {
 
         OptionalInt OptionalAprilTagId = findNearestAprilTagForCurrentPose(2,3);
@@ -374,6 +400,14 @@ public void testExit() {
         );
     }
 
+    private Command algaeRemoveFromTop(){
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_C)),
+                Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition()),
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
+        );
+    }
+
     private Command coralPut() {
         return new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
@@ -407,8 +441,28 @@ public void testExit() {
     }
 
     public Command driveToReef(int aprilTagId, ReefStandRow row) {
-        Pose2d pose = visionSystem.getPoseForReefStand(aprilTagId, row);
+        Pose2d pose;
+        if(row == null){
+            pose = visionSystem.getPoseForReefAlgae(aprilTagId);
+        }else {
+            pose = visionSystem.getPoseForReefStand(aprilTagId, row);
+        }
         return driveToPose(pose);
+    }
+
+    public Command driveToReefAndKnockAlgae(){
+        OptionalInt OptionalAprilTagId = findNearestAprilTagForCurrentPose(0,1);
+        if(OptionalAprilTagId.isEmpty()){
+            return Commands.none();
+        }
+        int aprilTagId = OptionalAprilTagId.getAsInt();
+
+        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(aprilTagId, ReefStandRow.RIGHT, -0.11);
+
+        return new ParallelCommandGroup(
+                driveToPose(pose),
+                algaeRemoveFromTop()
+        );
     }
 
     public Command driveToProcessor() {
@@ -475,17 +529,16 @@ public void testExit() {
         return Commands.defer(()-> isAuto ? driveAndCollectFromFeeder(FeederSide.LEFT) :coralCollect(),Set.of());
     }
     private Command aButton(){
-        return Commands.defer(()-> new LowerCoralElevator(coralElevator),Set.of());
+        return Commands.defer(() -> isAuto ? driveToReefAndKnockAlgae() : algaeRemoveFromTop() ,Set.of());
     }
     private Command bButton(){
         return Commands.defer(()-> isAuto ? driveAndCollectFromFeeder(FeederSide.RIGHT) :coralPut(),Set.of());
     }
     private Command rightBumperButton(){
-        return Commands.defer(this::driveToProcessorAndPlaceAlgae,Set.of());
+        return Commands.defer(() -> isAuto ? driveToProcessorAndPlaceAlgae() : Commands.none(), Set.of());
     }
     private Command leftBumperButton(){
-        return Commands.defer(()-> new StopSwerveCommand(swerve),Set.of());
-                //AutoBuilder.pathfindToPose(swerve.getPose(), RobotMap.CONSTRAINTS),Set.of());
+        return Commands.defer(()->isAuto ? driveAndCollectAlgae():Commands.none(),Set.of());
     }
     private Command POVButtonLeftUp(){
         return Commands.defer(()->isAuto? driveToNearestReefAndPut(ReefStandRow.LEFT,true): algaeCollect(),Set.of());
@@ -513,6 +566,8 @@ public void testExit() {
         new POVButton(xboxSecond,45).onTrue(POVButtonRightUp());
         new POVButton(xboxSecond,225).onTrue(POVButtonLeftDown());
 
-        new JoystickButton(xboxMain,XboxController.Button.kLeftBumper.value).onTrue(leftBumperButton());
+        new JoystickButton(xboxMain,XboxController.Button.kRightBumper.value).onTrue(Commands.defer(()-> new LowerCoralElevator(coralElevator),Set.of()));
+
+     //   new JoystickButton(xboxMain,XboxController.Button.kLeftBumper.value).onTrue(leftBumperButton());
     }
 }

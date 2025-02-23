@@ -37,9 +37,6 @@ public class Swerve extends SubsystemBase {
     private static final double LENGTH = 0.702;
     private static final double MAX_SPEED = 4;
 
-    private long lastTelematryUpdate = 0;
-    private static final long TELEMATRY_INTERVAL_MS = 100;
-
     private double lastXSpeed = 0;
     private double lastYSpeed = 0;
     private double lastRotation = 0;
