@@ -67,7 +67,7 @@ public class RobotMap {
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
     public static final double OFFSET_FEEDER = 0.71 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
-            2.6,1.5,Math.PI*2, Math.PI);
+            2.8 ,1.4,Math.PI*2, Math.PI);
 
     public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
             {9, 8, 7, 6, 11, 10}, // red alliance reef

@@ -10,8 +10,8 @@ import frc.robot.subsystems.CoralArm;
 
 public class CoralArmCommand extends Command {
 
-    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 178;
-    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 174 * 2;
+    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 185;
+    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 175 * 2;
 
     private final CoralArm arm;
     private final TrapezoidProfile.Constraints constraints;
@@ -57,18 +57,19 @@ public class CoralArmCommand extends Command {
             hasNewTarget = false;
             didReachPosition = false;
 
-         //   SmartDashboard.putBoolean("ArmCommandReached", false);
+            SmartDashboard.putBoolean("ArmCommandReached", false);
 
             if (isHolding) {
                 motionProfile = new TrapezoidProfile(constraints);
                 motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
                 motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
 
-           //     SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
+                SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
+                System.out.println("YES HOLDING");
             } else {
                 arm.stop();
-
-           //     SmartDashboard.putNumber("ArmCommandTarget", -1);
+                SmartDashboard.putNumber("ArmCommandTarget", -1);
+                System.out.println("NOT HOLDING");
             }
         }
 
@@ -78,7 +79,7 @@ public class CoralArmCommand extends Command {
 
         if (!didReachPosition && arm.didReachPosition(targetPositionDegrees)) {
             didReachPosition = true;
-           // SmartDashboard.putBoolean("ArmCommandReached", true);
+            SmartDashboard.putBoolean("ArmCommandReached", true);
         }
 
         if (didReachPosition) {
@@ -108,6 +109,7 @@ public class CoralArmCommand extends Command {
         this.targetPositionDegrees = positionDegrees;
         this.hasNewTarget = true;
         isHolding = true;
+        System.out.println("HEY111111: " + positionDegrees);
     }
 
     public boolean didReachTargetPosition() {

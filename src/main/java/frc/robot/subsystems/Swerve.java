@@ -259,8 +259,6 @@ public class Swerve extends SubsystemBase {
         } catch (Exception e) {
             throw new Error(e);
         }
-
-        PathfindingCommand.warmupCommand().schedule();
     }
 
     private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {

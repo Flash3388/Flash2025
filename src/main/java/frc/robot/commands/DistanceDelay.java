@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.subsystems.Swerve;
@@ -9,15 +10,16 @@ import frc.robot.subsystems.VisionSystem;
 public class DistanceDelay extends Command {
 
     private double distance;
-    private final double finalDis =3.5;
+    private double finalDis;
     private int aprilTagId;
 
     private VisionSystem visionSystem;
     private Swerve swerve;
-    public DistanceDelay(VisionSystem visionSystem,Swerve swerve , int aprilTagId) {
+    public DistanceDelay(VisionSystem visionSystem,Swerve swerve , int aprilTagId, double distance) {
             this.aprilTagId = aprilTagId;
             this.visionSystem = visionSystem;
             this.swerve = swerve;
+            finalDis = distance;
     }
 
     @Override
@@ -28,6 +30,7 @@ public class DistanceDelay extends Command {
     @Override
     public void execute() {
         distance = getAprilTagDistance(aprilTagId);
+        SmartDashboard.putNumber("DistanceDelay", distance);
     }
 
     @Override

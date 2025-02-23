@@ -1,14 +1,17 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
@@ -37,8 +40,10 @@ public class Robot extends TimedRobot {
 
     private CoralArmCommand coralArmCommand;
 
-    private XboxController xboxSecond;
-    private XboxController xboxMain;
+    private CommandXboxController xboxSecond;
+    private CommandXboxController xboxMain;
+    private EventLoop autoEventLoop;
+    private EventLoop manualEventLoop;
 
     private LEDPattern newPattern;
     private boolean isAuto = true;
@@ -55,8 +60,10 @@ public class Robot extends TimedRobot {
         coralGripper = new CoralGripper();
         coralArm = new CoralArm();
 
-        xboxSecond = new XboxController(0);
-        xboxMain = new XboxController(1);
+        xboxSecond = new CommandXboxController(0);
+        xboxMain = new CommandXboxController(1);
+        autoEventLoop = new EventLoop();
+        manualEventLoop = new EventLoop();
 
         compressor = new Compressor(RobotMap.COMPRESSION_PORT, PneumaticsModuleType.REVPH);
         compressor.enableAnalog(RobotMap.MIN_PRESSURE, RobotMap.MAX_PRESSURE);
@@ -74,14 +81,15 @@ public class Robot extends TimedRobot {
         ));
 
         configureButtons();
-        SmartDashboard.putBoolean("isAuto",true);
+        SmartDashboard.putBoolean("isAuto", true);
+        CommandScheduler.getInstance().setActiveButtonLoop(autoEventLoop);
 
-        feederAuto = new SendableChooser<String>();
+        feederAuto = new SendableChooser<>();
         feederAuto.setDefaultOption("center","CENTER");
         feederAuto.addOption("left","LEFT");
         feederAuto.addOption("right","RIGHT");
         SmartDashboard.putData("feederAutomation",feederAuto);
-        autoChooser = new SendableChooser<Command>();
+        autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("twoHighCoralsLeft",twoHighCoral(true));
         autoChooser.addOption("twoHighCoralsRight",twoHighCoral(false));
         autoChooser.addOption("orbitAuto",orbitAuto());
@@ -89,8 +97,12 @@ public class Robot extends TimedRobot {
         autoChooser.addOption("oneHighAndTwoLowCoralsRight",oneHighAndTwoLow(false));
         autoChooser.addOption("twoHighCoralsAndAlgaeLeft",algaeAuto(true));
         autoChooser.addOption("twoHighCoralsAndAlgaeRight",algaeAuto(false));
+        autoChooser.addOption("oneHighOneLowAndAlgaeLeft",oneHighOneLowAndAlgae(true));
+        autoChooser.addOption("oneHighOneLowAndAlgaeRight",oneHighOneLowAndAlgae(false));
         SmartDashboard.putData("autoChooser",autoChooser);
         SmartDashboard.putBoolean("isLeft",true);
+
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
@@ -98,6 +110,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        SmartDashboard.putNumber("pressure",compressor.getPressure());
         if (coralGripper.hasCoral() && algaeGripper.hasAlgae()) {
             newPattern = LEDPattern.solid(Color.kTurquoise);
         } else if (algaeGripper.hasAlgae()) {
@@ -115,11 +128,8 @@ public class Robot extends TimedRobot {
         boolean isAuto1 = SmartDashboard.getBoolean("isAuto",true);
         if(isAuto1 != isAuto){
             isAuto = isAuto1;
-            configureButtons();
+            CommandScheduler.getInstance().setActiveButtonLoop(isAuto ? autoEventLoop : manualEventLoop);
         }
-
-
-
 
         poseEstimate= visionSystem.getRobotPoseEstimate();
         if(poseEstimate.isPresent()){
@@ -205,9 +215,10 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-public void testExit() {
+    public void testExit() {
 
     }
+
 
     private Command orbitAuto(){
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
@@ -216,6 +227,22 @@ public void testExit() {
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][5],true),
                         algaeCollect()),
+                ProcessorAuto()
+        );
+    }
+
+    public Command oneHighOneLowAndAlgae(boolean isLeft){
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0:1;
+        int sideIndexFeeder = isRed() ? 2:3;
+        int indexReef = isLeft ? 1:3;
+        int indexFeeder = isLeft? 1 : 0;
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true),
+                algaeCollect()),
+                feederAuto(FeederSide.CENTER,aprilTags[sideIndexFeeder][indexFeeder]),
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],false),
                 ProcessorAuto()
         );
     }
@@ -263,14 +290,16 @@ public void testExit() {
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
         int sideIndexReef = isRed() ? 0:1;
         int sideIndexFeeder = isRed() ? 2:3;
+        int indexReef = isLeft ? 1:3;
+        int indexFeeder = isLeft? 1 : 0;
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][1],true),
+                reefAuto(ReefStandRow.RIGHT,aprilTags[sideIndexReef][indexReef],true),
                 algaeCollect()),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][1]),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()),aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
-                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][1],true),
+                reefAuto(ReefStandRow.LEFT,aprilTags[sideIndexReef][indexReef],true),
                 ProcessorAuto()
         );
     }
@@ -287,8 +316,13 @@ public void testExit() {
     private Command feederAuto(FeederSide side,int aprilTagId){
         return new ParallelCommandGroup(
             driveToFeeder(aprilTagId,side),
-            coralCollect()
-        );
+            new LowerCoralElevator(coralElevator),
+            new CollectCoral(coralGripper),
+            new SequentialCommandGroup(
+            new DistanceDelay(visionSystem,swerve,aprilTagId,1.5),
+            Commands.runOnce(()-> System.out.println("HEY23258964yk6t43fk")),
+            Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
+        ));
     }
 
     private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3) {
@@ -297,7 +331,7 @@ public void testExit() {
                 driveToReef(aprilTagId,row),
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 new SequentialCommandGroup(
-                new DistanceDelay(visionSystem,swerve,aprilTagId),
+                new DistanceDelay(visionSystem,swerve,aprilTagId,3),
                 level3 ? new RaiseCoralElevator(coralElevator) : Commands.none())),
                 new ReleaseCoral(coralGripper)
         );
@@ -326,10 +360,7 @@ public void testExit() {
     }
 
     public Command driveToNearestReefAndPut(ReefStandRow row, boolean level3){
-        return Commands.defer(
-                ()-> goToNearestReefAndPut(row,level3),
-                Set.of(swerve)
-        );
+        return goToNearestReefAndPut(row,level3);
     }
 
     public Command driveAndCollectAlgae(){
@@ -351,7 +382,7 @@ public void testExit() {
             algaeCollect(),
             driveToReef(aprilTagId,null),
             new SequentialCommandGroup(
-                new DistanceDelay(visionSystem,swerve,aprilTagId),
+                new DistanceDelay(visionSystem,swerve,aprilTagId,3),
                 new RaiseCoralElevator(coralElevator)
             )
         );
@@ -369,10 +400,11 @@ public void testExit() {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         driveToFeeder(aprilTagId, side),
-                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                         new LowerCoralElevator(coralElevator)
                 ),
-                new CollectCoral(coralGripper)
+                new CollectCoral(coralGripper),
+                new DistanceDelay(visionSystem,swerve,aprilTagId,1.5),
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
         );
     }
 
@@ -391,7 +423,7 @@ public void testExit() {
                         Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                         driveToReef(aprilTagId,row),
                         new SequentialCommandGroup(
-                                new DistanceDelay(visionSystem,swerve,aprilTagId),
+                                new DistanceDelay(visionSystem,swerve,aprilTagId,3),
                                 level3 ? new RaiseCoralElevator(coralElevator) : Commands.none()
                         )
                 ),
@@ -521,41 +553,34 @@ public void testExit() {
         }
         return alliance == DriverStation.Alliance.Red;
     }
-
-    private Command yButton(){
-        return Commands.defer(()-> isAuto ? driveAndCollectFromFeeder(FeederSide.CENTER) : new RaiseCoralElevator(coralElevator),Set.of());
-    }
-    private Command xButton(){
-        return Commands.defer(()-> isAuto ? driveAndCollectFromFeeder(FeederSide.LEFT) :coralCollect(),Set.of());
-    }
-    private Command aButton(){
-        return Commands.defer(() -> isAuto ? driveToReefAndKnockAlgae() : algaeRemoveFromTop() ,Set.of());
-    }
-    private Command bButton(){
-        return Commands.defer(()-> isAuto ? driveAndCollectFromFeeder(FeederSide.RIGHT) :coralPut(),Set.of());
-    }
-    private Command rightBumperButton(){
-        return Commands.defer(() -> isAuto ? driveToProcessorAndPlaceAlgae() : Commands.none(), Set.of());
-    }
-    private Command leftBumperButton(){
-        return Commands.defer(()->isAuto ? driveAndCollectAlgae():Commands.none(),Set.of());
-    }
-    private Command POVButtonLeftUp(){
-        return Commands.defer(()->isAuto? driveToNearestReefAndPut(ReefStandRow.LEFT,true): algaeCollect(),Set.of());
-    }
-    private Command POVButtonRightUp(){
-        return Commands.defer(()->isAuto? driveToNearestReefAndPut(ReefStandRow.RIGHT,true):new ExtendedAlgaeArm(algaeArm),Set.of());
-    }
-    private Command POVButtonRightDown(){
-        return Commands.defer(()->isAuto? driveToNearestReefAndPut(ReefStandRow.RIGHT,false):algaeOut(),Set.of());
-    }
-    private Command POVButtonLeftDown(){
-        return Commands.defer(()->isAuto? driveToNearestReefAndPut(ReefStandRow.LEFT,false):new RetractAlgaeArm(algaeArm),Set.of());
-    }
-
-
     public void configureButtons(){
-        new JoystickButton(xboxSecond, XboxController.Button.kY.value).onTrue(yButton());
+        xboxSecond.a(manualEventLoop).onTrue(algaeRemoveFromTop());
+        xboxSecond.y(manualEventLoop).onTrue(new RaiseCoralElevator(coralElevator));
+        xboxSecond.b(manualEventLoop).onTrue(coralPut());
+        xboxSecond.x(manualEventLoop).onTrue(coralCollect());
+        xboxSecond.leftBumper(manualEventLoop).onTrue(Commands.none());
+        xboxSecond.rightBumper(manualEventLoop).onTrue(Commands.none());
+        xboxSecond.pov(0, 45, manualEventLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
+        xboxSecond.pov(0, 135, manualEventLoop).onTrue(algaeOut());
+        xboxSecond.pov(0, 225, manualEventLoop).onTrue(new RetractAlgaeArm(algaeArm));
+        xboxSecond.pov(0, 315, manualEventLoop).onTrue(algaeCollect());
+
+        xboxSecond.a(autoEventLoop).onTrue(Commands.defer(()-> driveToReefAndKnockAlgae(), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.y(autoEventLoop).onTrue(Commands.defer(()-> driveAndCollectFromFeeder(FeederSide.CENTER), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.b(autoEventLoop).onTrue(Commands.defer(()-> driveAndCollectFromFeeder(FeederSide.RIGHT), Set.of(swerve, algaeArm, coralArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.x(autoEventLoop).onTrue(Commands.defer(()-> driveAndCollectFromFeeder(FeederSide.LEFT), Set.of(swerve, algaeArm, coralArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.leftBumper(autoEventLoop).onTrue(Commands.defer(()-> driveAndCollectAlgae(), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.rightBumper(autoEventLoop).onTrue(Commands.defer(()-> driveToProcessorAndPlaceAlgae(), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.pov(0, 45, autoEventLoop).onTrue(Commands.defer(()-> goToNearestReefAndPut(ReefStandRow.RIGHT,true), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.pov(0, 135, autoEventLoop).onTrue(Commands.defer(()-> goToNearestReefAndPut(ReefStandRow.RIGHT,false), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.pov(0, 225, autoEventLoop).onTrue(Commands.defer(()-> goToNearestReefAndPut(ReefStandRow.LEFT,false), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+        xboxSecond.pov(0, 315, autoEventLoop).onTrue(Commands.defer(()-> goToNearestReefAndPut(ReefStandRow.LEFT,true), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper)));
+
+
+        xboxMain.rightBumper(manualEventLoop).onTrue(new LowerCoralElevator(coralElevator));
+        xboxMain.rightBumper(autoEventLoop).onTrue(new LowerCoralElevator(coralElevator));
+
+        /*new JoystickButton(xboxSecond, XboxController.Button.kY.value).onTrue(yButton());
         new JoystickButton(xboxSecond, XboxController.Button.kA.value).onTrue(aButton());
         new JoystickButton(xboxSecond, XboxController.Button.kX.value).onTrue(xButton());
         new JoystickButton(xboxSecond, XboxController.Button.kB.value).onTrue(bButton());
@@ -564,9 +589,9 @@ public void testExit() {
         new POVButton(xboxSecond,315).onTrue(POVButtonLeftUp());
         new POVButton(xboxSecond,135).onTrue(POVButtonRightDown());
         new POVButton(xboxSecond,45).onTrue(POVButtonRightUp());
-        new POVButton(xboxSecond,225).onTrue(POVButtonLeftDown());
+        new POVButton(xboxSecond,225).onTrue(POVButtonLeftDown());*/
 
-        new JoystickButton(xboxMain,XboxController.Button.kRightBumper.value).onTrue(Commands.defer(()-> new LowerCoralElevator(coralElevator),Set.of()));
+        //new JoystickButton(xboxMain,XboxController.Button.kRightBumper.value).onTrue(Commands.defer(()-> ,Set.of(coralElevator)));
 
      //   new JoystickButton(xboxMain,XboxController.Button.kLeftBumper.value).onTrue(leftBumperButton());
     }
