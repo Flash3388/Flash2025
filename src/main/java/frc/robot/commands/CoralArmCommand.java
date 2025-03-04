@@ -64,7 +64,7 @@ public class CoralArmCommand extends Command {
                 motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
                 motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
 
-               // SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
+               //SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
             } else {
                 arm.stop();
                 //SmartDashboard.putNumber("ArmCommandTarget", -1);

@@ -81,6 +81,7 @@ public class CoralArm extends SubsystemBase {
 
     @Override
     public void periodic() {
+        //SmartDashboard.putNumber("CoralArmPosition", getPositionDegrees());
     }
 
 }

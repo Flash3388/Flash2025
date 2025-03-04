@@ -297,39 +297,36 @@ public class Robot extends TimedRobot {
         autoCommandsController.button(25, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
 
         // manual red
-        manualCommandsController.button(23, redTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
-        manualCommandsController.button(24, redTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
-        manualCommandsController.button(25, redTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
-        manualCommandsController.button(26, redTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
-        manualCommandsController.button(29, redTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
-        manualCommandsController.button(30, redTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
-        manualCommandsController.button(29, redTeamLoop).onTrue(new CollectCoral(coralGripper));
-        manualCommandsController.button(30, redTeamLoop).onTrue(new ReleaseCoral(coralGripper));
-        manualCommandsController.button(31, redTeamLoop).onTrue(new SequentialCommandGroup(
+        manualCommandsController.button(1, redTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
+        manualCommandsController.button(2, redTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
+        manualCommandsController.button(3, redTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
+        manualCommandsController.button(4, redTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
+        manualCommandsController.button(5, redTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
+        manualCommandsController.button(6, redTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
+        manualCommandsController.button(7, redTeamLoop).onTrue(new CollectCoral(coralGripper));
+        manualCommandsController.button(8, redTeamLoop).onTrue(new ReleaseCoral(coralGripper));
+        manualCommandsController.button(9, redTeamLoop).onTrue(new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
-        manualCommandsController.button(32, redTeamLoop).onTrue(new SequentialCommandGroup(
+        manualCommandsController.button(10, redTeamLoop).onTrue(new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
         // manual blue
-        manualCommandsController.button(20, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L1));
-        manualCommandsController.button(21, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L2));
-        manualCommandsController.button(22, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
-        manualCommandsController.button(23, blueTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
-        manualCommandsController.button(24, blueTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
-        manualCommandsController.button(25, blueTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
-        manualCommandsController.button(26, blueTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
-        manualCommandsController.button(29, blueTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
-        manualCommandsController.button(30, blueTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
-        manualCommandsController.button(29, blueTeamLoop).onTrue(new CollectCoral(coralGripper));
-        manualCommandsController.button(30, blueTeamLoop).onTrue(new ReleaseCoral(coralGripper));
-        manualCommandsController.button(31, blueTeamLoop).onTrue(new SequentialCommandGroup(
+        manualCommandsController.button(1, blueTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
+        manualCommandsController.button(2, blueTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
+        manualCommandsController.button(3, blueTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
+        manualCommandsController.button(4, blueTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
+        manualCommandsController.button(5, blueTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
+        manualCommandsController.button(6, blueTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
+        manualCommandsController.button(7, blueTeamLoop).onTrue(new CollectCoral(coralGripper));
+        manualCommandsController.button(8, blueTeamLoop).onTrue(new ReleaseCoral(coralGripper));
+        manualCommandsController.button(9, blueTeamLoop).onTrue(new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
-        manualCommandsController.button(32, blueTeamLoop).onTrue(new SequentialCommandGroup(
+        manualCommandsController.button(10, blueTeamLoop).onTrue(new SequentialCommandGroup(
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
