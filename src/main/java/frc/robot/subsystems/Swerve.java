@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -161,12 +162,16 @@ public class Swerve extends SubsystemBase {
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
         return runEnd(() -> {
+            double timestamp = Timer.getFPGATimestamp();
+
             double xSpeed = MathUtil.applyDeadband(translationX.getAsDouble(),0.05);
             double ySpeed = MathUtil.applyDeadband(translationY.getAsDouble(),0.05);
             double rotation = MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.05);
 
             if (Math.abs(xSpeed) < 0.02 && Math.abs(ySpeed) < 0.02 && Math.abs(rotation) < 0.02){
                 stop();
+                double end = Timer.getFPGATimestamp();
+                SmartDashboard.putNumber("SwerveTime", end - timestamp);
                 return;
             }
 
@@ -202,6 +207,8 @@ public class Swerve extends SubsystemBase {
                     false
             );
 
+            double end = Timer.getFPGATimestamp();
+            SmartDashboard.putNumber("SwerveTime", end - timestamp);
         },this::stop);
     }
     
@@ -230,7 +237,7 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        swerveDrive.updateOdometry();
+
     }
 
     private void setUpPathPlanner(){
