@@ -115,6 +115,17 @@ public class Robot extends TimedRobot {
         visionSystem.changePipeLine(0);
 
         PathfindingCommand.warmupCommand().schedule();
+
+        // TODO: REMOVE
+        CommandScheduler.getInstance().onCommandInitialize((command)-> {
+            System.out.printf("COMMAND INIT %s, %s\n", command.getName(), command.getClass().getSimpleName());
+        });
+        CommandScheduler.getInstance().onCommandInterrupt((command)-> {
+            System.out.printf("COMMAND INTERRUPT %s, %s\n", command.getName(), command.getClass().getSimpleName());
+        });
+        CommandScheduler.getInstance().onCommandFinish((command)-> {
+            System.out.printf("COMMAND FINISH %s, %s\n", command.getName(), command.getClass().getSimpleName());
+        });
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
@@ -238,6 +249,8 @@ public class Robot extends TimedRobot {
     }
 
     private void configureButtons() {
+        Command cancelCommand = Commands.runOnce(()->{}, swerve, algaeArm, coralElevator, coralGripper, algaeGripper);
+
         // red team
         autoCommandsController.button(1, redTeamLoop).onTrue(goAndCollectFromFeeder(1, FeederSide.RIGHT));
         autoCommandsController.button(2, redTeamLoop).onTrue(goAndCollectFromFeeder(1, FeederSide.CENTER));
@@ -313,6 +326,7 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
+        manualCommandsController.button(11, redTeamLoop).onTrue(cancelCommand);
         // manual blue
         manualCommandsController.button(1, blueTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
         manualCommandsController.button(2, blueTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
@@ -330,6 +344,7 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
+        manualCommandsController.button(11, redTeamLoop).onTrue(cancelCommand);
 
         xboxMain.leftBumper(blueTeamLoop).whileTrue(createSwerveDriveCommand());
         xboxMain.leftBumper(redTeamLoop).whileTrue(createSwerveDriveCommand());
