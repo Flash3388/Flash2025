@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Velocity;
@@ -17,19 +18,20 @@ import frc.robot.RobotMap;
 
 public class CoralGripper extends SubsystemBase {
 
-    public static final double ROTATE_COLLECT = 0.8;
-    public static final double ROTATE_RELEASE = -0.5;
-    public static final double ROTATE_HOLD = 0.2;
-    public static StatusSignal<AngularVelocity> velocitySignal;
+    public static final double ROTATE_COLLECT = -0.8;
+    public static final double ROTATE_RELEASE = 0.5;
+    public static final double ROTATE_HOLD = -0.08;
 
     private final TalonFX motor;
     private final DigitalInput limitSwitch;
     private final DutyCycleOut dutyCycleControl;
     private final NeutralOut neutralControl;
+    private final StatusSignal<AngularVelocity> velocitySignal;
 
     public CoralGripper() {
         motor = new TalonFX(RobotMap.CORAL_GRIPPER_MOTOR);
         motor.getConfigurator().apply(new TalonFXConfiguration());
+        motor.setNeutralMode(NeutralModeValue.Brake);
         limitSwitch = new DigitalInput(RobotMap.CORAL_GRIPPER_LIMIT_SWITCH);
 
         velocitySignal = motor.getVelocity();
@@ -40,10 +42,6 @@ public class CoralGripper extends SubsystemBase {
 
     public boolean hasCoral() {
         return !limitSwitch.get();
-    }
-
-    public double getVelocityRPM(){
-        return velocitySignal.getValue().in(Units.RPM);
     }
 
     public final void rotateCollect() {
@@ -65,7 +63,6 @@ public class CoralGripper extends SubsystemBase {
     @Override
     public void periodic() {
         BaseStatusSignal.refreshAll(velocitySignal);
-        SmartDashboard.putBoolean("HasCoral", hasCoral());
     }
 }
 

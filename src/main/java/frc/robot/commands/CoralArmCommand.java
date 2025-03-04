@@ -5,12 +5,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotMap;
 import frc.robot.subsystems.CoralArm;
 
 public class CoralArmCommand extends Command {
 
-    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 174;
-    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 174 * 2;
+    private static final double MAX_VELOCITY_DEGREES_PER_SEC = 185;
+    private static final double MAX_ACCELERATION_DEGREES_PER_SEC_PER_SEC = 175 * 2;
 
     private final CoralArm arm;
     private final TrapezoidProfile.Constraints constraints;
@@ -23,6 +24,7 @@ public class CoralArmCommand extends Command {
     private boolean hasNewTarget;
     private boolean didReachPosition;
     private boolean isHolding;
+    private boolean wasDisabled;
 
     public CoralArmCommand(CoralArm arm) {
         this.arm = arm;
@@ -35,13 +37,19 @@ public class CoralArmCommand extends Command {
     public void initialize() {
         isHolding = false;
         hasNewTarget = true;
+        wasDisabled = DriverStation.isDisabled();
     }
 
     @Override
     public void execute() {
         if (DriverStation.isDisabled()) {
-            hasNewTarget = true;
-            isHolding = false;
+            if (!wasDisabled) {
+                hasNewTarget = true;
+                isHolding = false;
+                wasDisabled = true;
+            }
+        } else if (wasDisabled) {
+            wasDisabled = false;
         }
 
         if (hasNewTarget) {
@@ -49,18 +57,17 @@ public class CoralArmCommand extends Command {
             hasNewTarget = false;
             didReachPosition = false;
 
-            SmartDashboard.putBoolean("ArmCommandReached", false);
+            //SmartDashboard.putBoolean("ArmCommandReached", false);
 
             if (isHolding) {
                 motionProfile = new TrapezoidProfile(constraints);
                 motionProfileGoal = new TrapezoidProfile.State(targetPositionDegrees,0);
                 motionProfileSetPoint = new TrapezoidProfile.State(arm.getPositionDegrees(),0);
 
-                SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
+               //SmartDashboard.putNumber("ArmCommandTarget", targetPositionDegrees);
             } else {
                 arm.stop();
-
-                SmartDashboard.putNumber("ArmCommandTarget", -1);
+                //SmartDashboard.putNumber("ArmCommandTarget", -1);
             }
         }
 
@@ -70,7 +77,7 @@ public class CoralArmCommand extends Command {
 
         if (!didReachPosition && arm.didReachPosition(targetPositionDegrees)) {
             didReachPosition = true;
-            SmartDashboard.putBoolean("ArmCommandReached", true);
+            //SmartDashboard.putBoolean("ArmCommandReached", true);
         }
 
         if (didReachPosition) {

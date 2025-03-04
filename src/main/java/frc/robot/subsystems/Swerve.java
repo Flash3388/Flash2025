@@ -8,14 +8,15 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.*;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -29,28 +30,28 @@ import swervelib.motors.SparkFlexSwerve;
 import swervelib.parser.*;
 import swervelib.parser.json.modules.ConversionFactorsJson;
 import swervelib.telemetry.SwerveDriveTelemetry;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
 
-    private static final double WIDTH = 0.707;
-    private static final double LENGTH = 0.702;
+    private static final double WIDTH = 0.84;
+    private static final double LENGTH = 0.85;
     private static final double MAX_SPEED = 4;
+
+    private double lastXSpeed = 0;
+    private double lastYSpeed = 0;
+    private double lastRotation = 0;
+    private static final double MAX_DELTA = 0.5;
+
     private final SwerveDrive swerveDrive;
 
-    private final Mechanism2d mechanism;
-    private final MechanismLigament2d[] moduleMechanisms;
-
-
     public Swerve() {
-        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.50, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.5, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
         conversionFactor.drive.factor = 0;
-        conversionFactor.drive.diameter = 2 * 2;
+        conversionFactor.drive.diameter = 3.89;
         conversionFactor.angle.gearRatio = 12.8;
         conversionFactor.angle.factor = 0;
 
@@ -141,20 +142,16 @@ public class Swerve extends SubsystemBase {
                 MAX_SPEED
         );
 
-        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.HIGH;
+        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.POSE;
 
-        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, Pose2d.kZero);
-        swerveDrive.setHeadingCorrection(false); // TODO : try running with heading correction.
+        swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, new Pose2d(3,3,Rotation2d.fromDegrees(0)));
+        swerveDrive.setHeadingCorrection(false);
         swerveDrive.setCosineCompensator(false);
         swerveDrive.setAngularVelocityCompensation(false, false, 0);
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        swerveDrive.resetOdometry(Pose2d.kZero);
-
-        mechanism = new Mechanism2d(50, 50);
-        moduleMechanisms = createMechanismDisplay(mechanism);
-        SmartDashboard.putData("SwerveMechanism", mechanism);
+        swerveDrive.resetOdometry(new Pose2d(0,0,Rotation2d.fromDegrees(0)));
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
@@ -165,12 +162,46 @@ public class Swerve extends SubsystemBase {
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
         return runEnd(() -> {
-            swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
-                    Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
-                    false,
-                    false);
+            double xSpeed = MathUtil.applyDeadband(translationX.getAsDouble(),0.05);
+            double ySpeed = MathUtil.applyDeadband(translationY.getAsDouble(),0.05);
+            double rotation = MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.05);
+
+            if (Math.abs(xSpeed) < 0.02 && Math.abs(ySpeed) < 0.02 && Math.abs(rotation) < 0.02){
+                stop();
+                return;
+            }
+
+            xSpeed *= swerveDrive.getMaximumChassisVelocity();
+            ySpeed *= swerveDrive.getMaximumChassisVelocity();
+            rotation *= swerveDrive.getMaximumChassisAngularVelocity();
+
+            double deltaX = xSpeed - lastXSpeed;
+            if (Math.abs(deltaX) > MAX_DELTA){
+                xSpeed = lastXSpeed + Math.signum(deltaX) * MAX_DELTA;
+            }
+            double deltaY = ySpeed - lastYSpeed;
+            if (Math.abs(deltaY) > MAX_DELTA){
+                ySpeed = lastYSpeed + Math.signum(deltaY) * MAX_DELTA;
+            }
+
+            double deltaRot = rotation - lastRotation;
+            if (Math.abs(deltaRot) > MAX_DELTA) {
+                rotation = lastRotation + Math.signum(deltaRot) * MAX_DELTA;
+            }
+            lastXSpeed = xSpeed;
+            lastYSpeed = ySpeed;
+            lastRotation = rotation;
+
+            xSpeed = MathUtil.clamp(xSpeed,-3.5,3.5);
+            ySpeed = MathUtil.clamp(ySpeed,-3.5,3.5);
+            rotation = MathUtil.clamp(rotation,-Math.PI,Math.PI);
+
+            swerveDrive.drive(
+                    SwerveMath.scaleTranslation(new Translation2d(xSpeed, ySpeed),0.8),
+                    rotation,
+                    true,
+                    false
+            );
         },this::stop);
     }
     
@@ -181,29 +212,30 @@ public class Swerve extends SubsystemBase {
             }
     }
 
-    public Pose2d getPose()
-    {
+    public Pose2d getPose() {
         return swerveDrive.getPose();
     }
 
-    public void resetOdometry(Pose2d initialHolonomicPose)
-    {
+    public void resetOdometry(Pose2d initialHolonomicPose) {
         swerveDrive.resetOdometry(initialHolonomicPose);
     }
 
-    public ChassisSpeeds getRobotVelocity()
-    {
+    public ChassisSpeeds getRobotVelocity() {
         return swerveDrive.getRobotVelocity();
     }
 
-    public void resetOdometeryToStart() {
-        swerveDrive.resetOdometry(Pose2d.kZero);
+    public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){
+        swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
     }
 
-    public void setUpPathPlanner(){
+    @Override
+    public void periodic() {
+
+    }
+
+    private void setUpPathPlanner(){
         RobotConfig config;
-        try
-        {
+        try {
             config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                     this::getPose,
@@ -217,89 +249,27 @@ public class Swerve extends SubsystemBase {
                     config,
                     () -> {
                         var alliance = DriverStation.getAlliance();
-                        if (alliance.isPresent())
-                        {
+                        if (alliance.isPresent()) {
                             return alliance.get() == DriverStation.Alliance.Red;
                         }
                         return false;
                     },
                     this
             );
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new Error(e);
         }
-        PathfindingCommand.warmupCommand().schedule();
     }
-
-    public ChassisSpeeds getSpeeds(){
-        return swerveDrive.getRobotVelocity();
-    }
-
-    public Command centerModules() {
-        return run(() -> Arrays.asList(swerveDrive.getModules())
-                .forEach(it -> it.setAngle(0.0)));
-    }
-
-
-    @Override
-    public void periodic() {
-        SwerveModulePosition[] modulePositions = swerveDrive.getModulePositions();
-        swerveDrive.updateOdometry();
-
-        for (int i = 0; i < modulePositions.length; i++) {
-            moduleMechanisms[i].setAngle(modulePositions[i].angle.getDegrees() + 90);
-        }
-
-    }
-    public void updatePoseEstimator(LimelightHelpers.PoseEstimate poseEstimate){
-            swerveDrive.swerveDrivePoseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
-
-    }
-
 
     private void setSpeeds(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
         if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
-            for (SwerveModule module : swerveDrive.getModules()) {
-                module.getDriveMotor().set(0);
-                module.getAngleMotor().set(0);
-            }
+            stop();
         } else {
             swerveDrive.setChassisSpeeds(speeds);
         }
     }
 
-    private MechanismLigament2d[] createMechanismDisplay(Mechanism2d mechanism) {
-        final double BOTTOM = 5;
-        final double TOP = 45;
-        final double BEAM_LENGTH = 40;
-        final double BEAM_WIDTH = 2;
-        final double WHEEL_DIR_LENGTH = 5;
-        final double WHEEL_DIR_WIDTH = 10;
-        final Color8Bit BEAM_COLOR = new Color8Bit(0, 254, 52);
-        final Color8Bit WHEEL_DIR_COLOR = new Color8Bit(255, 0, 0);
-
-        MechanismRoot2d driveBaseMechanismBottomLeft = mechanism.getRoot("drivebase-bottomleft", BOTTOM, BOTTOM);
-        MechanismRoot2d driveBaseMechanismTopRight = mechanism.getRoot("drivebase-topright", TOP, TOP);
-        MechanismRoot2d driveBaseMechanismBottomRight = mechanism.getRoot("drivebase-bottomright", TOP, BOTTOM);
-        MechanismRoot2d driveBaseMechanismTopLeft = mechanism.getRoot("drivebase-topleft", BOTTOM, TOP);
-
-        driveBaseMechanismBottomLeft.append(new MechanismLigament2d("bottom", BEAM_LENGTH, 0, BEAM_WIDTH, BEAM_COLOR));
-        driveBaseMechanismBottomLeft.append(new MechanismLigament2d("left", BEAM_LENGTH, 90, BEAM_WIDTH, BEAM_COLOR));
-        driveBaseMechanismTopRight.append(new MechanismLigament2d("top", BEAM_LENGTH, 180, BEAM_WIDTH, BEAM_COLOR));
-        driveBaseMechanismTopRight.append(new MechanismLigament2d("right", BEAM_LENGTH, 270, BEAM_WIDTH, BEAM_COLOR));
-
-        MechanismLigament2d mechanismBottomLeft = driveBaseMechanismBottomLeft.append(new MechanismLigament2d("module-bottomleft", WHEEL_DIR_LENGTH, 90, WHEEL_DIR_WIDTH, WHEEL_DIR_COLOR));
-        MechanismLigament2d mechanismBottomRight = driveBaseMechanismBottomRight.append(new MechanismLigament2d("module-bottomright", WHEEL_DIR_LENGTH, 90, WHEEL_DIR_WIDTH, WHEEL_DIR_COLOR));
-        MechanismLigament2d mechanismTopLeft = driveBaseMechanismTopLeft.append(new MechanismLigament2d("module-topleft", WHEEL_DIR_LENGTH, 90, WHEEL_DIR_WIDTH, WHEEL_DIR_COLOR));
-        MechanismLigament2d mechanismTopRight = driveBaseMechanismTopRight.append(new MechanismLigament2d("module-topright", WHEEL_DIR_LENGTH, 90, WHEEL_DIR_WIDTH, WHEEL_DIR_COLOR));
-
-        return new MechanismLigament2d[] {
-                mechanismTopLeft,
-                mechanismTopRight,
-                mechanismBottomLeft,
-                mechanismBottomRight
-        };
+    public Field2d getField() {
+        return swerveDrive.field;
     }
-
 }
