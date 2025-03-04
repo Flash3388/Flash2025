@@ -15,6 +15,7 @@ public class ExtendedAlgaeArm extends Command {
     @Override
     public void initialize() {
         algaeArm.extend();
+        System.out.println("Extended Arms");
     }
 
     @Override

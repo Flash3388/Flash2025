@@ -33,8 +33,8 @@ import java.util.function.DoubleSupplier;
 
 public class Swerve extends SubsystemBase {
 
-    private static final double WIDTH = 0.707;
-    private static final double LENGTH = 0.702;
+    private static final double WIDTH = 0.84;
+    private static final double LENGTH = 0.85;
     private static final double MAX_SPEED = 4;
 
     private double lastXSpeed = 0;
@@ -45,12 +45,12 @@ public class Swerve extends SubsystemBase {
     private final SwerveDrive swerveDrive;
 
     public Swerve() {
-        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.50, 0, 0);
+        PIDFConfig drivePidf = new PIDFConfig(0.001153, 0, 0.5, 0, 0);
         PIDFConfig steerPidf = new PIDFConfig(0.01, 0, 0, 0, 0);
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
         conversionFactor.drive.factor = 0;
-        conversionFactor.drive.diameter = 2 * 2;
+        conversionFactor.drive.diameter = 3.89;
         conversionFactor.angle.gearRatio = 12.8;
         conversionFactor.angle.factor = 0;
 
@@ -141,7 +141,7 @@ public class Swerve extends SubsystemBase {
                 MAX_SPEED
         );
 
-        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.MACHINE;
+        SwerveDriveTelemetry.verbosity = SwerveDriveTelemetry.TelemetryVerbosity.POSE;
 
         swerveDrive = new SwerveDrive(configuration, controllerConfiguration, MAX_SPEED, new Pose2d(3,3,Rotation2d.fromDegrees(0)));
         swerveDrive.setHeadingCorrection(false);
@@ -150,7 +150,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        swerveDrive.resetOdometry(new Pose2d(3,3,Rotation2d.fromDegrees(0)));
+        swerveDrive.resetOdometry(new Pose2d(0,0,Rotation2d.fromDegrees(0)));
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);

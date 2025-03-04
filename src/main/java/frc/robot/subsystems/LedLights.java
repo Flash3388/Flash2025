@@ -39,16 +39,14 @@ public class LedLights extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (currentPattern != null) {
-            currentPattern.atBrightness(Percent.of(20)).applyTo(ledBuffer);
 
-            leds.setData(ledBuffer);
-        }
     }
 
     public void setPattern(LEDPattern pattern) {
         if (pattern != currentPattern) {  // Only update if the pattern has changed
             this.currentPattern = pattern;
+            currentPattern.atBrightness(Percent.of(20)).applyTo(ledBuffer);
+            leds.setData(ledBuffer);
         }
     }
 
@@ -74,5 +72,9 @@ public class LedLights extends SubsystemBase {
 
     public LEDPattern returnRGBPattern(double red,double green,double blue){
         return LEDPattern.solid(returnRGBToGRB(red,green,blue));
+    }
+
+    public void waitTime(double startTime, double waitTime, SubsystemBase subsystemBase){
+
     }
 }

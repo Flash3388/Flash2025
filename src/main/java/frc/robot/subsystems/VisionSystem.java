@@ -138,8 +138,4 @@ public class VisionSystem extends SubsystemBase {
         double newRotation = (180 + pose.getRotation().getDegrees()) % 360;
         return new Pose2d(result.x, result.y, Rotation2d.fromDegrees(newRotation));
     }
-
-    @Override
-    public void periodic() {
-    }
 }

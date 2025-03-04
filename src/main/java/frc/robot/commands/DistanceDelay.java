@@ -30,7 +30,6 @@ public class DistanceDelay extends Command {
     @Override
     public void execute() {
         distance = getAprilTagDistance(aprilTagId);
-        SmartDashboard.putNumber("DistanceDelay", distance);
     }
 
     @Override
