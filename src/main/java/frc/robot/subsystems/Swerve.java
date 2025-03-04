@@ -162,16 +162,12 @@ public class Swerve extends SubsystemBase {
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
         return runEnd(() -> {
-            double timestamp = Timer.getFPGATimestamp();
-
             double xSpeed = MathUtil.applyDeadband(translationX.getAsDouble(),0.05);
             double ySpeed = MathUtil.applyDeadband(translationY.getAsDouble(),0.05);
             double rotation = MathUtil.applyDeadband(angularRotationX.getAsDouble(),0.05);
 
             if (Math.abs(xSpeed) < 0.02 && Math.abs(ySpeed) < 0.02 && Math.abs(rotation) < 0.02){
                 stop();
-                double end = Timer.getFPGATimestamp();
-                SmartDashboard.putNumber("SwerveTime", end - timestamp);
                 return;
             }
 
@@ -206,9 +202,6 @@ public class Swerve extends SubsystemBase {
                     true,
                     false
             );
-
-            double end = Timer.getFPGATimestamp();
-            SmartDashboard.putNumber("SwerveTime", end - timestamp);
         },this::stop);
     }
     
