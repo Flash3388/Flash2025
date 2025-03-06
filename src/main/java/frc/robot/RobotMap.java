@@ -65,7 +65,7 @@ public class RobotMap {
     public static final double OFFSET_ON_STAND_FEEDER = 0.6;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
-    public static final double OFFSET_FEEDER = 0.71 / 2; // TODO: RECOMPUTE
+    public static final double OFFSET_FEEDER = 1.01 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
             2.8 ,1.4,Math.PI*2, Math.PI);
 

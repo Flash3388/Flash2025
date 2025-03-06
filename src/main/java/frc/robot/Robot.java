@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -76,6 +77,8 @@ public class Robot extends TimedRobot {
         swerveDriveDir = 1;
         swerve.setDefaultCommand(createSwerveDriveCommand());
 
+        new JoystickButton(xboxMain.getHID(), XboxController.Button.kRightBumper.value).onTrue(new LowerCoralElevator(coralElevator));
+
         // DON'T DELETE: FIX TO HIGH SMARTDASHBOARD USAGE
         try {
             Field field = SmartDashboard.class.getDeclaredField("tablesToData");
@@ -117,15 +120,15 @@ public class Robot extends TimedRobot {
         PathfindingCommand.warmupCommand().schedule();
 
         // TODO: REMOVE
-        CommandScheduler.getInstance().onCommandInitialize((command)-> {
-            System.out.printf("COMMAND INIT %s, %s\n", command.getName(), command.getClass().getSimpleName());
-        });
-        CommandScheduler.getInstance().onCommandInterrupt((command)-> {
-            System.out.printf("COMMAND INTERRUPT %s, %s\n", command.getName(), command.getClass().getSimpleName());
-        });
-        CommandScheduler.getInstance().onCommandFinish((command)-> {
-            System.out.printf("COMMAND FINISH %s, %s\n", command.getName(), command.getClass().getSimpleName());
-        });
+//        CommandScheduler.getInstance().onCommandInitialize((command)-> {
+//            System.out.printf("COMMAND INIT %s, %s\n", command.getName(), command.getClass().getSimpleName());
+//        });
+//        CommandScheduler.getInstance().onCommandInterrupt((command)-> {
+//            System.out.printf("COMMAND INTERRUPT %s, %s\n", command.getName(), command.getClass().getSimpleName());
+//        });
+//        CommandScheduler.getInstance().onCommandFinish((command)-> {
+//            System.out.printf("COMMAND FINISH %s, %s\n", command.getName(), command.getClass().getSimpleName());
+//        });
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
@@ -277,8 +280,10 @@ public class Robot extends TimedRobot {
             CommandScheduler.getInstance().setActiveButtonLoop(blueTeamLoop);
             SmartDashboard.putString("AllianceMode", "Blue");
         }));
-        autoCommandsController.button(24, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L2));
-        autoCommandsController.button(25, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
+        autoCommandsController.button(24, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L1));
+        autoCommandsController.button(25, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L2));
+        autoCommandsController.button(26, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
+        autoCommandsController.button(27, redTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3ALGAE));
 
         // blue team
         autoCommandsController.button(1, blueTeamLoop).onTrue(goAndCollectFromFeeder(12, FeederSide.RIGHT));
@@ -306,8 +311,10 @@ public class Robot extends TimedRobot {
             CommandScheduler.getInstance().setActiveButtonLoop(redTeamLoop);
             SmartDashboard.putString("AllianceMode", "Red");
         }));
-        autoCommandsController.button(24, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L2));
-        autoCommandsController.button(25, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
+        autoCommandsController.button(24, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L1));
+        autoCommandsController.button(25, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L2));
+        autoCommandsController.button(26, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3));
+        autoCommandsController.button(27, blueTeamLoop).onTrue(Commands.runOnce(()-> nextSelectedLevel = ReefLevel.L3ALGAE));
 
         // manual red
         manualCommandsController.button(1, redTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
@@ -356,7 +363,7 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][5], true),
-                        algaeCollect()),
+                        algaeCollect(4.6)),
                 ProcessorAuto()
         );
     }
@@ -370,7 +377,7 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect()),
+                        algaeCollect(4.6)),
                 feederAuto(FeederSide.CENTER, aprilTags[sideIndexFeeder][indexFeeder]),
                 reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
                 ProcessorAuto()
@@ -386,7 +393,7 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect()),
+                        algaeCollect(4.6)),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
@@ -407,7 +414,7 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect()),
+                        algaeCollect(4.6)),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
@@ -426,7 +433,7 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect()),
+                        algaeCollect(4.6)),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
@@ -468,30 +475,12 @@ public class Robot extends TimedRobot {
         );
     }
 
-    private Command driveToNearestL1Reef(){
-        OptionalInt optionalAprilTag = findNearestAprilTagForCurrentPose(0,1);
-        if(optionalAprilTag.isEmpty()){
-            DriverStation.reportWarning("No nearest AprilTag", true);
-            return Commands.none();
-        }
-        int aprilTagId = optionalAprilTag.getAsInt();
-        System.out.println("Going to AprilTag: " + aprilTagId);
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        goToReefAndPutToL1(aprilTagId),
-                        new LowerCoralElevator(coralElevator),
-                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A))
-                ),
-                Commands.waitUntil(()->coralArmCommand.didReachTargetPosition()),
-                new ReleaseCoral(coralGripper)
-        );
-    }
+    private Command goToReefL1(int id){
+        double offsetRight =1.225-RobotMap.OFFSET_REEF;
+        double offsetOther =-0.22;
+        double offsetAngle =73;
 
-    private Command goToReefAndPutToL1(int id){
-        double offsetRight =0.45-RobotMap.OFFSET_REEF;
-        double offsetAngle =7.7;
-
-        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(id,ReefStandRow.RIGHT,offsetRight);
+        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(id,ReefStandRow.RIGHT,offsetRight,offsetOther);
         double rotDegrees = pose.getRotation().getDegrees()+offsetAngle;
         Pose2d targetPose = new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(rotDegrees));
         return driveToPose(targetPose);
@@ -513,7 +502,7 @@ public class Robot extends TimedRobot {
         }
         int aprilTagId = OptionalAprilTagId.getAsInt();
         return new ParallelCommandGroup(
-                algaeCollect(),
+                algaeCollect(3),
                 driveToReef(aprilTagId, null),
                 new SequentialCommandGroup(
                         new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
@@ -550,11 +539,38 @@ public class Robot extends TimedRobot {
         );
     }
 
-    private Command goToReefAndPut(int aprilTagId, ReefStandRow row, boolean level3, BooleanSupplier releaseCoral) {
+    private Command goToReefAndGetAlgae(int aprilTagId, ReefStandRow row) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kLeftRumble,0.3)),
                         driveToReef(aprilTagId, row),
+                        new SequentialCommandGroup(
+                                new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
+                                new RaiseCoralElevator(coralElevator)
+                        ),
+                        new ExtendedAlgaeArm(algaeArm)
+                ),
+                new ParallelDeadlineGroup(
+                        new SequentialCommandGroup(
+                                new CollectAlgae(algaeGripper, 4),
+                                Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0))
+                        ),
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kLeftRumble,0)),
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kRightRumble,0.75)),
+                        createSwerveDriveCommand()
+                )
+        );
+    }
+
+    private Command goToReefAndPut(int aprilTagId, ReefStandRow row, ReefLevel currentLevel, BooleanSupplier releaseCoral) {
+        boolean level3 = currentLevel == ReefLevel.L3;
+        boolean level1 = currentLevel == ReefLevel.L1;
+
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kLeftRumble,0.3)),
+                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                        level1 ? goToReefL1(aprilTagId) : driveToReef(aprilTagId, row),
                         new SequentialCommandGroup(
                                 new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
                                 level3 ? new RaiseCoralElevator(coralElevator) : Commands.none()
@@ -562,9 +578,17 @@ public class Robot extends TimedRobot {
                 ),
                 new ParallelDeadlineGroup(
                         new SequentialCommandGroup(
-                                Commands.waitUntil(()-> releaseCoral.getAsBoolean()),
-                                new ReleaseCoral(coralGripper)
+                                new ParallelCommandGroup(
+                                        level3 ? algaeCollect(2) : Commands.none(),
+                                        new SequentialCommandGroup(
+                                                Commands.waitUntil(releaseCoral),
+                                                new ReleaseCoral(coralGripper),
+                                                Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0))
+                                        )
+                                )
                         ),
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kLeftRumble,0)),
+                        Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kRightRumble,0.75)),
                         createSwerveDriveCommand()
                 )
         );
@@ -572,12 +596,11 @@ public class Robot extends TimedRobot {
 
     private Command createCommandToReef(int aprilTagId, ReefStandRow row) {
         return Commands.defer(()-> {
-            if(!coralGripper.hasCoral()) {
+            if(!coralGripper.hasCoral() && !(nextSelectedLevel == ReefLevel.L3ALGAE)) {
                 return Commands.none();
             }
 
-            boolean level3 = nextSelectedLevel == ReefLevel.L3;
-            return goToReefAndPut(aprilTagId, row, level3, ()-> xboxMain.getHID().getAButton());
+            return nextSelectedLevel == ReefLevel.L3ALGAE ? goToReefAndGetAlgae(aprilTagId, row) : goToReefAndPut(aprilTagId, row, nextSelectedLevel, ()-> xboxMain.getHID().getAButton());
         }, Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
     }
 
@@ -610,7 +633,7 @@ public class Robot extends TimedRobot {
         }
         int aprilTagId = OptionalAprilTagId.getAsInt();
 
-        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(aprilTagId, ReefStandRow.RIGHT, -0.11);
+        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(aprilTagId, ReefStandRow.RIGHT, -0.11,0);
 
         return new ParallelCommandGroup(
                 driveToPose(pose),
@@ -643,10 +666,10 @@ public class Robot extends TimedRobot {
         );
     }
 
-    private Command algaeCollect() {
+    private Command algaeCollect(double waitTime) {
         return new SequentialCommandGroup(
                 new ExtendedAlgaeArm(algaeArm),
-                new CollectAlgae(algaeGripper,4.6)
+                new CollectAlgae(algaeGripper,waitTime)
         );
     }
 

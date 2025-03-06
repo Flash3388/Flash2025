@@ -28,7 +28,7 @@ public class CollectAlgae extends Command {
 
     @Override
     public void execute() {
-        if (DriverStation.isAutonomous() && Timer.getTimestamp() - startTime >= waitTime) {
+        if (Timer.getTimestamp() - startTime >= waitTime) {
             finished = true;
         }
     }
