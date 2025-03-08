@@ -93,10 +93,10 @@ public class VisionSystem extends SubsystemBase {
         Pose2d calculatedPose;
         switch (side) {
             case LEFT:
-                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_FEEDER, RobotMap.OFFSET_FEEDER, true);
+                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_FEEDER_L, RobotMap.OFFSET_FEEDER, true);
                 break;
             case RIGHT:
-                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_FEEDER, RobotMap.OFFSET_FEEDER, false);
+                calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_FEEDER_R, RobotMap.OFFSET_FEEDER, false);
                 break;
             case CENTER:
                 calculatedPose = calcPoseCenter(pose, RobotMap.OFFSET_FEEDER);

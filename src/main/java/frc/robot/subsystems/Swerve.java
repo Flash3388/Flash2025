@@ -51,7 +51,7 @@ public class Swerve extends SubsystemBase {
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
         conversionFactor.drive.factor = 0;
-        conversionFactor.drive.diameter = 3.89;
+        conversionFactor.drive.diameter = 4;
         conversionFactor.angle.gearRatio = 12.8;
         conversionFactor.angle.factor = 0;
 

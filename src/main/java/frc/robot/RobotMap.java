@@ -62,10 +62,11 @@ public class RobotMap {
     //vision system
     public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 3.4;
     public static final double OFFSET_ON_STAND_REEF = 0.328676 / 2;
-    public static final double OFFSET_ON_STAND_FEEDER = 0.6;
+    public static final double OFFSET_ON_STAND_FEEDER_R = 0.66;
+    public static final double OFFSET_ON_STAND_FEEDER_L = 0.66;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
-    public static final double OFFSET_FEEDER = 1.01 / 2; // TODO: RECOMPUTE
+    public static final double OFFSET_FEEDER = 0.81 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
             2.8 ,1.4,Math.PI*2, Math.PI);
 

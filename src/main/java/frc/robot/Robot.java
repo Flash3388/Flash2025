@@ -77,8 +77,6 @@ public class Robot extends TimedRobot {
         swerveDriveDir = 1;
         swerve.setDefaultCommand(createSwerveDriveCommand());
 
-        new JoystickButton(xboxMain.getHID(), XboxController.Button.kRightBumper.value).onTrue(new LowerCoralElevator(coralElevator));
-
         // DON'T DELETE: FIX TO HIGH SMARTDASHBOARD USAGE
         try {
             Field field = SmartDashboard.class.getDeclaredField("tablesToData");
@@ -106,6 +104,10 @@ public class Robot extends TimedRobot {
         autoChooser.setDefaultOption("twoHighCoralsLeft", Commands.defer(()-> twoHighCoral(true),Set.of(swerve)));
         autoChooser.addOption("twoHighCoralsRight",Commands.defer(()-> twoHighCoral(false),Set.of(swerve)));
         autoChooser.addOption("orbitAuto", Commands.defer(()->orbitAuto(),Set.of()));
+        autoChooser.addOption("twoLowCoralsLeft",Commands.defer(() -> twoLowCorals(true),Set.of(swerve)));
+        autoChooser.addOption("twoLowCoralsRight",Commands.defer(() -> twoLowCorals(false),Set.of(swerve)));
+        autoChooser.addOption("oneConveyorOneCoralLeft",Commands.defer(() -> oneConveyorOneLowCoral(true),Set.of(swerve)));
+        autoChooser.addOption("oneConveyorOneCoralRight",Commands.defer(() -> oneConveyorOneLowCoral(false),Set.of(swerve)));
         autoChooser.addOption("oneHighAndTwoLowCoralsLeft", Commands.defer(()->oneHighAndTwoLow(true),Set.of(swerve)));
         autoChooser.addOption("oneHighAndTwoLowCoralsRight",Commands.defer(()-> oneHighAndTwoLow(false),Set.of(swerve)));
         autoChooser.addOption("twoHighCoralsAndAlgaeLeft", Commands.defer(()-> algaeAuto(true),Set.of(swerve)));
@@ -180,7 +182,8 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 4;
-        visionSystem.changePipeLine(0);
+        visionSystem.changePipeLine(1);
+        isGoingToFeeder = false;
     }
 
     @Override
@@ -196,7 +199,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-
+        xboxMain.rightBumper().onTrue(new LowerCoralElevator(coralElevator));
     }
 
     @Override
@@ -238,7 +241,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
+        Pose2d pose = new Pose2d(swerve.getPose().getX() + 3,swerve.getPose().getY(),swerve.getPose().getRotation());
 
+        Commands.defer(() -> driveToPose(pose), Set.of(swerve)).schedule();
+        swerve.getField().getObject("Target").setPose(pose);
     }
 
     @Override
@@ -333,6 +339,7 @@ public class Robot extends TimedRobot {
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition())
         ));
+
         manualCommandsController.button(11, redTeamLoop).onTrue(cancelCommand);
         // manual blue
         manualCommandsController.button(1, blueTeamLoop).onTrue(new RaiseCoralElevator(coralElevator));
@@ -424,6 +431,40 @@ public class Robot extends TimedRobot {
         );
     }
 
+    private Command twoLowCorals(boolean isLeft) {
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0 : 1;
+        int sideIndexFeeder = isRed() ? 2 : 3;
+        int indexReef = isLeft ? 0 : 4;
+        int indexFeeder = isLeft ? 1 : 0;
+        return new SequentialCommandGroup(
+                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder])
+        );
+    }
+
+    private Command oneConveyorOneLowCoral(boolean isLeft) {
+        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+        int sideIndexReef = isRed() ? 0 : 1;
+        int sideIndexFeeder = isRed() ? 2 : 3;
+        int indexReef = isLeft ? 0 : 4;
+        int indexFeeder = isLeft ? 1 : 0;
+        return new SequentialCommandGroup(
+                reefAutoLow(aprilTags[sideIndexReef][indexReef]),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                Commands.none(),
+                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
+                Commands.none(),
+                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder])
+        );
+    }
+
     private Command algaeAuto(boolean isLeft) {
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
         int sideIndexReef = isRed() ? 0 : 1;
@@ -471,6 +512,16 @@ public class Robot extends TimedRobot {
                         new SequentialCommandGroup(
                                 new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
                                 level3 ? new RaiseCoralElevator(coralElevator) : Commands.none())),
+                new ReleaseCoral(coralGripper)
+        );
+    }
+
+    private Command reefAutoLow(int aprilTagId) {
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        goToReefL1(aprilTagId),
+                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A))
+                ),
                 new ReleaseCoral(coralGripper)
         );
     }
