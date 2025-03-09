@@ -266,7 +266,7 @@ class RobotControlUI:
             fg="white",
             width=8,
             height=2,
-            command=lambda: self.press_button(10, "Cancel Automation", joystick_num=2)
+            command=lambda: self.press_button(11, "Cancel Automation", joystick_num=2)
         )
         self.cancel_automation_btn.pack(fill=tk.X, pady=5)
 
@@ -502,13 +502,13 @@ class RobotControlUI:
         # Also bind Escape key to exit fullscreen
         self.root.bind("<Escape>", self.exit_fullscreen)
         
-        # Initialize selected team color and riff level
+        # Initialize selected team color and reef level
         self.current_team_color = "red"  # Default is red
-        self.current_riff_level = "L1"   # Default is L1
+        self.current_reef_level = "L3"   # Default is L3
         
         # Set initial button states
         self.red_btn.config(relief=tk.SUNKEN, bg="#cc0000")  # Start with red selected
-        self.l1_btn.config(relief=tk.SUNKEN, bg="#00cc00")   # Start with L1 selected
+        self.l3_btn.config(relief=tk.SUNKEN, bg="#00cc00")   # Start with L1 selected
         
         # Load field image
         self.load_field_image("red")  # Default to red team
@@ -549,12 +549,12 @@ class RobotControlUI:
         print(f"Team color changed to {color}")
     
     def select_reef_level(self, level):
-        """Select the riff level (L1, L2, L3 or L3A)"""
+        """Select the reef level (L1, L2, L3 or L3A)"""
         # Only make changes if the level is actually changing
-        if self.current_riff_level == level:
+        if self.current_reef_level == level:
             return
             
-        self.current_riff_level = level
+        self.current_reef_level = level
         
         # Update buttons to show which is selected
         self.l1_btn.config(relief=tk.RAISED, bg="#00ff00")
@@ -756,53 +756,53 @@ class RobotControlUI:
             # Original red team button positions
             button_positions = [
                 # Positions - adjust according to your specific image
-                (78,  674,   '1L',  1, "#ff99cc"),   # ID 1R
+                (78,  674,   '1R',  1, "#ff99cc"),   # ID 1R
                 (113, 717,   '1C',  2, "#ff99cc"),   # ID 1C
-                (142, 760,   '1R',  3, "#ff99cc"),   # ID 1L
-                (639, 674,   '2R',  4, "#ff99cc"),   # ID 2L
+                (142, 760,   '1L',  3, "#ff99cc"),   # ID 1L
+                (639, 674,   '2L',  4, "#ff99cc"),   # ID 2L
                 (610, 717,   '2C',  5, "#ff99cc"),   # ID 2C
-                (573, 760,   '2L',  6, "#ff99cc"),   # ID 2R
+                (573, 760,   '2R',  6, "#ff99cc"),   # ID 2R
                 (653, 322,    '3',  7, "#ff99cc"),   # ID 3
                 (526, 172,    '4',  8, "#ff99cc"),   # ID 4
                 (191, 172,    '5',  9, "#ff99cc"),   # ID 5
-                (267, 525,   '6L', 11, "#ff99cc"),   # ID 6R
-                (240, 480,   '6R', 10, "#ff99cc"),   # ID 6L
-                (391, 553,   '7L', 13, "#ff99cc"),   # ID 7R
-                (327, 553,   '7R', 12, "#ff99cc"),   # ID 7L
-                (479, 480,   '8L', 15, "#ff99cc"),   # ID 8R
-                (452, 525,   '8R', 14, "#ff99cc"),   # ID 8L
-                (452, 357,   '9L', 17, "#ff99cc"),   # ID 9R
-                (479, 402,   '9R', 16, "#ff99cc"),   # ID 9L
-                (391, 325,  '10R', 18, "#ff99cc"),   # ID 10R
-                (327, 325,  '10L', 19, "#ff99cc"),   # ID 10L
-                (267, 357,  '11R', 20, "#ff99cc"),   # ID 11R
-                (240, 402,  '11L', 21, "#ff99cc"),   # ID 11L
+                (267, 525,   '6R', 11, "#ff99cc"),   # ID 6R
+                (240, 480,   '6L', 10, "#ff99cc"),   # ID 6L
+                (391, 553,   '7R', 13, "#ff99cc"),   # ID 7R
+                (327, 553,   '7L', 12, "#ff99cc"),   # ID 7L
+                (479, 480,   '8R', 15, "#ff99cc"),   # ID 8R
+                (452, 525,   '8L', 14, "#ff99cc"),   # ID 8L
+                (452, 357,   '9R', 17, "#ff99cc"),   # ID 9R
+                (479, 402,   '9L', 16, "#ff99cc"),   # ID 9L
+                (391, 325,  '10L', 18, "#ff99cc"),   # ID 10R
+                (327, 325,  '10R', 19, "#ff99cc"),   # ID 10L
+                (267, 357,  '11L', 20, "#ff99cc"),   # ID 11R
+                (240, 402,  '11R', 21, "#ff99cc"),   # ID 11L
             ]
         else:
             # Blue team button positions
             button_positions = [
                 # Positions - using the provided list for blue team
-                (78,  674,   '12L',  1, "#99ccff"),   # ID 12R
+                (78,  674,   '12R',  1, "#99ccff"),   # ID 12R
                 (113, 717,   '12C',  2, "#99ccff"),   # ID 12C
-                (142, 760,   '12R',  3, "#99ccff"),   # ID 12L
-                (639, 674,   '13R',  4, "#99ccff"),   # ID 13L
+                (142, 760,   '12L',  3, "#99ccff"),   # ID 12L
+                (639, 674,   '13L',  4, "#99ccff"),   # ID 13L
                 (610, 717,   '13C',  5, "#99ccff"),   # ID 13C
-                (573, 760,   '13L',  6, "#99ccff"),   # ID 13R
+                (573, 760,   '13R',  6, "#99ccff"),   # ID 13R
                 (653, 322,    '16',  7, "#99ccff"),   # ID 16
                 (526, 172,    '14',  8, "#99ccff"),   # ID 14
                 (191, 172,    '15',  9, "#99ccff"),   # ID 15
-                (267, 525,   '17L', 10, "#99ccff"),   # ID 17R
-                (240, 480,   '17R', 11, "#99ccff"),   # ID 17L
-                (391, 553,   '18L', 12, "#99ccff"),   # ID 18R
-                (327, 553,   '18R', 13, "#99ccff"),   # ID 18L
-                (479, 480,   '19L', 14, "#99ccff"),   # ID 19R
-                (452, 525,   '19R', 15, "#99ccff"),   # ID 19L
-                (452, 357,   '20L', 16, "#99ccff"),   # ID 20R
-                (479, 402,   '20R', 17, "#99ccff"),   # ID 20L
-                (391, 325,   '21R', 18, "#99ccff"),   # ID 21R
-                (327, 325,   '21L', 19, "#99ccff"),   # ID 21L
-                (267, 357,   '22R', 20, "#99ccff"),   # ID 22R
-                (240, 402,   '22L', 21, "#99ccff"),   # ID 22L
+                (267, 525,   '17R', 10, "#99ccff"),   # ID 17R
+                (240, 480,   '17L', 11, "#99ccff"),   # ID 17L
+                (391, 553,   '18R', 12, "#99ccff"),   # ID 18R
+                (327, 553,   '18L', 13, "#99ccff"),   # ID 18L
+                (479, 480,   '19R', 14, "#99ccff"),   # ID 19R
+                (452, 525,   '19L', 15, "#99ccff"),   # ID 19L
+                (452, 357,   '20R', 16, "#99ccff"),   # ID 20R
+                (479, 402,   '20L', 17, "#99ccff"),   # ID 20L
+                (391, 325,   '21L', 18, "#99ccff"),   # ID 21R
+                (327, 325,   '21R', 19, "#99ccff"),   # ID 21L
+                (267, 357,   '22L', 20, "#99ccff"),   # ID 22R
+                (240, 402,   '22R', 21, "#99ccff"),   # ID 22L
             ]
         
         print(f"Creating {len(button_positions)} buttons for {team_color} team")
