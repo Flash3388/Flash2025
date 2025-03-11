@@ -30,17 +30,17 @@ public class RobotMap {
 
     // coral arm
     public static final int ARM_CORAL_MOTOR = 5;
-    public static final double ARM_CORAL_KP = 5.5;
+    public static final double ARM_CORAL_KP = 5;
     public static final double ARM_CORAL_KI = 0;
     public static final double ARM_CORAL_KD = 0;
     public static final double ARM_CORAL_IZONE = 0;
     public static final double ARM_CORAL_KF = 0.015;
     public static final double ARM_CORAL_TOLERANCE_POSITION_DEGREES = 1.3;
     public static final double ARM_CORAL_TOLERANCE_VELOCITY_RPM = 7;
-    public static final double ARM_CORAL_ZERO_OFFSET = 0.6838749;
+    public static final double ARM_CORAL_ZERO_OFFSET = 0.0466972;
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
-    public static final double ARM_CORAL_ANGLE_A = 40;
-    public static final double ARM_CORAL_ANGLE_B = 223;
+    public static final double ARM_CORAL_ANGLE_A = 26.64;
+    public static final double ARM_CORAL_ANGLE_B = 209.64;
     public static final double ARM_CORAL_ANGLE_C = 50;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
 
@@ -60,7 +60,7 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 3.6;
+    public static final double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 3.6;
     public static final double OFFSET_ON_STAND_REEF = 0.328676 / 2;
     public static final double OFFSET_ON_STAND_FEEDER_R = 0.66;
     public static final double OFFSET_ON_STAND_FEEDER_L = 0.66;
@@ -68,7 +68,7 @@ public class RobotMap {
     public static final double OFFSET_PROCESSOR = 0.87 / 2 - 0.05; // TODO: RECOMPUTE
     public static final double OFFSET_FEEDER = 0.81 / 2; // TODO: RECOMPUTE
     public static final PathConstraints CONSTRAINTS = new PathConstraints(
-            2.8 ,1.4,Math.PI*2, Math.PI);
+            2 ,1.4,Math.PI*2, Math.PI);
 
     public static final int[][] REEF_APRIL_TAGS_BY_ALLIANCE = {
             {9, 8, 7, 6, 11, 10}, // red alliance reef

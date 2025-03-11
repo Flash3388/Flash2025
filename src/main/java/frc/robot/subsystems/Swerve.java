@@ -51,7 +51,7 @@ public class Swerve extends SubsystemBase {
         ConversionFactorsJson conversionFactor = new ConversionFactorsJson();
         conversionFactor.drive.gearRatio = 6.75;
         conversionFactor.drive.factor = 0;
-        conversionFactor.drive.diameter = 4;
+        conversionFactor.drive.diameter = 3.92;
         conversionFactor.angle.gearRatio = 12.8;
         conversionFactor.angle.factor = 0;
 
@@ -151,7 +151,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        swerveDrive.resetOdometry(new Pose2d(3,3,Rotation2d.fromDegrees(0)));
+        swerveDrive.resetOdometry(new Pose2d(8,6,Rotation2d.fromDegrees(0)));
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);

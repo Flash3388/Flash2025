@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
     private LEDPattern newPattern;
     private boolean isGoingToFeeder = false;
     private int swerveDriveDir;
-    private SendableChooser<String> feederAuto;
+  //  private SendableChooser<String> feederAuto;
     private SendableChooser<Command> autoChooser;
 
     @Override
@@ -94,15 +94,15 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().setActiveButtonLoop(redTeamLoop);
         SmartDashboard.putString("AllianceMode", "Red");
 
-        feederAuto = new SendableChooser<>();
-        feederAuto.setDefaultOption("center", "CENTER");
-        feederAuto.addOption("left", "LEFT");
-        feederAuto.addOption("right", "RIGHT");
-        SmartDashboard.putData("feederAutomation", feederAuto);
+//        feederAuto = new SendableChooser<>();
+//        feederAuto.setDefaultOption("center", "CENTER");
+//        feederAuto.addOption("left", "LEFT");
+//        feederAuto.addOption("right", "RIGHT");
+//        SmartDashboard.putData("feederAutomation", feederAuto);
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("twoHighCoralsLeft", Commands.defer(()-> twoHighCoral(true),Set.of(swerve)));
         autoChooser.addOption("twoHighCoralsRight",Commands.defer(()-> twoHighCoral(false),Set.of(swerve)));
-        autoChooser.addOption("orbitAuto", Commands.defer(()->orbitAuto(),Set.of()));
+        autoChooser.addOption("orbitAuto", Commands.defer(this::orbitAuto,Set.of(swerve)));
         autoChooser.addOption("twoLowCoralsLeft",Commands.defer(() -> twoLowCorals(true),Set.of(swerve)));
         autoChooser.addOption("twoLowCoralsRight",Commands.defer(() -> twoLowCorals(false),Set.of(swerve)));
         autoChooser.addOption("oneConveyorOneCoralLeft",Commands.defer(() -> oneConveyorOneLowCoral(true),Set.of(swerve)));
@@ -206,18 +206,19 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-/*
+
         autoCommand = autoChooser.getSelected();
         if (autoCommand != null) {
             autoCommand.schedule();
         }
- */
 
+/*
         swerve.driveA(
                 () -> 0.3,
                 () -> 0,
                 () -> 0
         ).schedule();
+ */
 
         compressor.disable();
     }
@@ -257,7 +258,7 @@ public class Robot extends TimedRobot {
     }
 
     private void configureButtons() {
-        Command cancelCommand = Commands.runOnce(()->{xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0);}, swerve, algaeArm, coralElevator, coralGripper, algaeGripper);
+        Command cancelCommand = Commands.runOnce(()->{xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0);}, swerve, algaeArm, coralElevator, coralGripper, algaeGripper );
 
         // red team
         autoCommandsController.button(1, redTeamLoop).onTrue(goAndCollectFromFeeder(1, FeederSide.RIGHT));
@@ -363,6 +364,12 @@ public class Robot extends TimedRobot {
         xboxMain.leftBumper(redTeamLoop).whileTrue(createSwerveDriveCommand());
         xboxMain.rightBumper(blueTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
         xboxMain.rightBumper(redTeamLoop).onTrue(new LowerCoralElevator(coralElevator));
+        xboxMain.a(redTeamLoop).onTrue(new ParallelCommandGroup(
+                new ReleaseCoral(coralGripper),
+                Commands.runOnce(()->xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0))));
+        xboxMain.a(blueTeamLoop).onTrue(new ParallelCommandGroup(
+                new ReleaseCoral(coralGripper),
+                Commands.runOnce(()->xboxMain.setRumble(GenericHID.RumbleType.kBothRumble,0))));
     }
 
     private Command orbitAuto() {
@@ -403,11 +410,11 @@ public class Robot extends TimedRobot {
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
                         algaeCollect(4.6)),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false)
         );
@@ -422,13 +429,13 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect(4.6)),
+                        algaeCollect(4)),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder])
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
         );
     }
 
@@ -441,11 +448,11 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder])
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
         );
     }
 
@@ -458,11 +465,11 @@ public class Robot extends TimedRobot {
         return new SequentialCommandGroup(
                 reefAutoLow(aprilTags[sideIndexReef][indexReef]),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder])
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
         );
     }
 
@@ -477,7 +484,7 @@ public class Robot extends TimedRobot {
                         reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
                         algaeCollect(4.6)),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf(feederAuto.getSelected()), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
                 reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
                 ProcessorAuto()
@@ -494,6 +501,7 @@ public class Robot extends TimedRobot {
     }
 
     private Command feederAuto(FeederSide side, int aprilTagId) {
+        System.out.println("working");
         return new ParallelCommandGroup(
                 driveToFeeder(aprilTagId, side),
                 new LowerCoralElevator(coralElevator),
@@ -649,7 +657,7 @@ public class Robot extends TimedRobot {
                 return Commands.none();
             }
 
-            return nextSelectedLevel == ReefLevel.L3ALGAE ? goToReefAndGetAlgae(aprilTagId, row) : goToReefAndPut(aprilTagId, row, nextSelectedLevel, ()-> xboxMain.getHID().getAButton());
+            return nextSelectedLevel == ReefLevel.L3ALGAE ? goToReefAndGetAlgae(aprilTagId, row) : goToReefAndPut(aprilTagId, row, nextSelectedLevel, ()-> xboxMain.a().getAsBoolean());
         }, Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
     }
 
