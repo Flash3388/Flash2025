@@ -60,6 +60,7 @@ public class VisionSystem extends SubsystemBase {
 
     public void changePipeLine(int id){
         limelightFront.changePipeline(id);
+        limelightBack.changePipeline(id);
     }
 
     public Pose2d getAprilTagPose(int id) {
@@ -77,6 +78,7 @@ public class VisionSystem extends SubsystemBase {
         Pose2d pose = getAprilTagPose(id);
 
         Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
+
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 

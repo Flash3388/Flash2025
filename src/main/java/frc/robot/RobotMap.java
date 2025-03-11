@@ -40,7 +40,7 @@ public class RobotMap {
     public static final double ARM_CORAL_ZERO_OFFSET = 0.6838749;
     public static final double ARM_CORAL_GEAR_RATIO = 200.0 / 1.0;
     public static final double ARM_CORAL_ANGLE_A = 40;
-    public static final double ARM_CORAL_ANGLE_B = 230;
+    public static final double ARM_CORAL_ANGLE_B = 223;
     public static final double ARM_CORAL_ANGLE_C = 50;
     public static final double ARM_CORAL_FF_POS_OFFSET = 62.3;
 
@@ -60,7 +60,7 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 3.4;
+    public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 3.6;
     public static final double OFFSET_ON_STAND_REEF = 0.328676 / 2;
     public static final double OFFSET_ON_STAND_FEEDER_R = 0.66;
     public static final double OFFSET_ON_STAND_FEEDER_L = 0.66;

@@ -151,7 +151,7 @@ public class Swerve extends SubsystemBase {
         swerveDrive.setModuleEncoderAutoSynchronize(false, 1);
         swerveDrive.pushOffsetsToEncoders();
 
-        swerveDrive.resetOdometry(new Pose2d(0,0,Rotation2d.fromDegrees(0)));
+        swerveDrive.resetOdometry(new Pose2d(3,3,Rotation2d.fromDegrees(0)));
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);
