@@ -328,7 +328,7 @@ public class Robot extends TimedRobot {
         manualCommandsController.button(3, redTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
         manualCommandsController.button(4, redTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
         manualCommandsController.button(5, redTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
-        manualCommandsController.button(6, redTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
+        manualCommandsController.button(6, redTeamLoop).onTrue(algaeRelease());
         manualCommandsController.button(7, redTeamLoop).onTrue(new CollectCoral(coralGripper));
         manualCommandsController.button(8, redTeamLoop).onTrue(new ReleaseCoral(coralGripper));
         manualCommandsController.button(9, redTeamLoop).onTrue(new SequentialCommandGroup(
@@ -347,7 +347,7 @@ public class Robot extends TimedRobot {
         manualCommandsController.button(3, blueTeamLoop).onTrue(new ExtendedAlgaeArm(algaeArm));
         manualCommandsController.button(4, blueTeamLoop).onTrue(new RetractAlgaeArm(algaeArm));
         manualCommandsController.button(5, blueTeamLoop).onTrue(new CollectAlgae(algaeGripper, 4.6));
-        manualCommandsController.button(6, blueTeamLoop).onTrue(new ReleaseAlgae(algaeGripper));
+        manualCommandsController.button(6, blueTeamLoop).onTrue(algaeRelease());
         manualCommandsController.button(7, blueTeamLoop).onTrue(new CollectCoral(coralGripper));
         manualCommandsController.button(8, blueTeamLoop).onTrue(new ReleaseCoral(coralGripper));
         manualCommandsController.button(9, blueTeamLoop).onTrue(new SequentialCommandGroup(
@@ -427,13 +427,11 @@ public class Robot extends TimedRobot {
         int indexReef = isLeft ? 1 : 3;
         int indexFeeder = isLeft ? 1 : 0;
         return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect(4)),
+                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
+                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true,0),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
         );
@@ -496,35 +494,39 @@ public class Robot extends TimedRobot {
                 new ParallelCommandGroup(
                         driveToProcessor(),
                         new LowerCoralElevator(coralElevator)),
-                algaeOut()
+                algaeRelease()
         );
     }
 
     private Command feederAuto(FeederSide side, int aprilTagId) {
-        System.out.println("working");
-        return new ParallelCommandGroup(
+        return  new ParallelCommandGroup(
                 driveToFeeder(aprilTagId, side),
-                new LowerCoralElevator(coralElevator),
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 new SequentialCommandGroup(
-                        new DistanceDelay(visionSystem, swerve, aprilTagId, 1.5),
-                        new ParallelCommandGroup(
-                                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
-                                new SequentialCommandGroup(
-                                Commands.waitSeconds(0.5),
-                                new CollectCoral(coralGripper))
-                        )));
+                Commands.waitSeconds(0.5),
+                new ParallelCommandGroup(
+                new CollectCoral(coralGripper),
+                new LowerCoralElevator(coralElevator)),
+                algaeRelease())
+                );
     }
 
-    private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3) {
+    private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3, double algaeWaitTime){
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
                         driveToReef(aprilTagId, row),
                         Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
                         new SequentialCommandGroup(
                                 new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
-                                level3 ? new RaiseCoralElevator(coralElevator) : Commands.none())),
+                                level3 ? new ParallelCommandGroup(
+                                        new RaiseCoralElevator(coralElevator),
+                                        algaeCollect(algaeWaitTime)) : Commands.none())),
                 new ReleaseCoral(coralGripper)
         );
+    }
+
+    private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3) {
+        return reefAuto(row,aprilTagId,level3,4);
     }
 
     private Command reefAutoLow(int aprilTagId) {
@@ -546,26 +548,6 @@ public class Robot extends TimedRobot {
         double rotDegrees = pose.getRotation().getDegrees()+offsetAngle;
         Pose2d targetPose = new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(rotDegrees));
         return driveToPose(targetPose);
-    }
-
-    private Command goAndCollectAlgae() {
-        if (algaeGripper.hasAlgae()) {
-            return Commands.none();
-        }
-        OptionalInt OptionalAprilTagId = findNearestAprilTagForCurrentPose(0, 1);
-        if (OptionalAprilTagId.isEmpty()) {
-            return Commands.none();
-        }
-        int aprilTagId = OptionalAprilTagId.getAsInt();
-        return new ParallelCommandGroup(
-                algaeCollect(3),
-                driveToReef(aprilTagId, null),
-                new SequentialCommandGroup(
-                        new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
-                        new RaiseCoralElevator(coralElevator)
-                )
-        );
-
     }
 
     private Command goAndCollectFromFeeder(int aprilTagId, FeederSide side) {
@@ -652,22 +634,12 @@ public class Robot extends TimedRobot {
     }
 
     private Command createCommandToReef(int aprilTagId, ReefStandRow row) {
-        return Commands.defer(()-> {
-            if(!coralGripper.hasCoral() && !(nextSelectedLevel == ReefLevel.L3ALGAE)) {
-                return Commands.none();
-            }
-
-            return nextSelectedLevel == ReefLevel.L3ALGAE ? goToReefAndGetAlgae(aprilTagId, row) : goToReefAndPut(aprilTagId, row, nextSelectedLevel, ()-> xboxMain.a().getAsBoolean());
-        }, Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
+        return Commands.defer(()-> nextSelectedLevel == ReefLevel.L3ALGAE ? goToReefAndGetAlgae(aprilTagId, row) : goToReefAndPut(aprilTagId, row, nextSelectedLevel, ()-> xboxMain.a().getAsBoolean()), Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
     }
 
     private Command createCommandToProcessor(int aprilTagId) {
         return Commands.defer(()-> {
-            if (!algaeGripper.hasAlgae()) {
-                return Commands.none();
-            }
-
-            return new SequentialCommandGroup(
+           return new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             driveToProcessor(aprilTagId),
                             new LowerCoralElevator(coralElevator)
@@ -675,7 +647,7 @@ public class Robot extends TimedRobot {
                     new ParallelDeadlineGroup(
                             new SequentialCommandGroup(
                                     Commands.waitUntil(()-> xboxMain.getHID().getAButton()),
-                                    algaeOut()
+                                    algaeRelease()
                             ),
                             createSwerveDriveCommand()
                     )
@@ -684,43 +656,10 @@ public class Robot extends TimedRobot {
         }, Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
     }
 
-    private Command algaeRemoveFromTop() {
-        return new SequentialCommandGroup(
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_C)),
-                Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition()),
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
-        );
-    }
-
-    private Command coralPut() {
-        return new SequentialCommandGroup(
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
-                Commands.waitUntil(() -> coralArmCommand.didReachTargetPosition()),
-                new ReleaseCoral(coralGripper)
-
-        );
-    }
-
-    private Command coralCollect() {
-        return new ParallelCommandGroup(
-                new LowerCoralElevator(coralElevator),
-                new CollectCoral(coralGripper),
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
-        );
-    }
-
     private Command algaeCollect(double waitTime) {
         return new SequentialCommandGroup(
                 new ExtendedAlgaeArm(algaeArm),
                 new CollectAlgae(algaeGripper,waitTime)
-        );
-    }
-
-    private Command algaeOut() {
-        return new SequentialCommandGroup(
-                new LowerCoralElevator(coralElevator),
-                new ReleaseAlgae(algaeGripper),
-                new RetractAlgaeArm(algaeArm)
         );
     }
 
@@ -745,7 +684,6 @@ public class Robot extends TimedRobot {
     }
 
     private Command driveToFeeder(int aprilTagId, FeederSide side) {
-        if(coralGripper.hasCoral()) return Commands.none();
         Pose2d pose = visionSystem.getPoseForFeeder(aprilTagId, side);
 
         Pose2d rotated = new Pose2d(pose.getX(), pose.getY(), pose.getRotation().rotateBy(Rotation2d.k180deg));
@@ -805,6 +743,14 @@ public class Robot extends TimedRobot {
                 () -> MathUtil.applyDeadband(-xboxMain.getLeftY() * swerveDriveDir, 0.05),
                 () -> MathUtil.applyDeadband(-xboxMain.getLeftX() * swerveDriveDir, 0.05),
                 () -> MathUtil.applyDeadband(-xboxMain.getRightX(), 0.05)
+        );
+    }
+
+    private Command algaeRelease(){
+        return new ParallelCommandGroup(
+                new RetractAlgaeArm(algaeArm),
+                new ReleaseAlgae(algaeGripper),
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A))
         );
     }
 }

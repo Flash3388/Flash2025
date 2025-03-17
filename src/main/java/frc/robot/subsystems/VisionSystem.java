@@ -4,7 +4,6 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.*;
 import org.dyn4j.geometry.Vector2;
@@ -69,15 +68,17 @@ public class VisionSystem extends SubsystemBase {
 
     public Pose2d getPoseForReefStandWithOffset(int id, ReefStandRow row, double offset, double offset2) {
         Pose2d pose = getAprilTagPose(id);
+        boolean isLeft = row == ReefStandRow.LEFT;
 
-        Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF + offset, RobotMap.OFFSET_REEF + offset2, row == ReefStandRow.LEFT);
+        Pose2d calculatedPose = calcPoseTwoSides(pose, isLeft ? RobotMap.OFFSET_ON_STAND_REEF_LEFT + offset: RobotMap.OFFSET_ON_STAND_REEF_RIGHT+offset, RobotMap.OFFSET_REEF + offset2, isLeft);
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }
 
     public Pose2d getPoseForReefStand(int id, ReefStandRow row) {
         Pose2d pose = getAprilTagPose(id);
+        boolean isLeft = row == ReefStandRow.LEFT;
 
-        Pose2d calculatedPose = calcPoseTwoSides(pose, RobotMap.OFFSET_ON_STAND_REEF, RobotMap.OFFSET_REEF, row == ReefStandRow.LEFT);
+        Pose2d calculatedPose = calcPoseTwoSides(pose, isLeft? RobotMap.OFFSET_ON_STAND_REEF_LEFT: RobotMap.OFFSET_ON_STAND_REEF_RIGHT, RobotMap.OFFSET_REEF, isLeft);
 
         return new Pose2d(calculatedPose.getX(), calculatedPose.getY(), calculatedPose.getRotation());
     }

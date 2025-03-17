@@ -2,10 +2,14 @@ package frc.robot.subsystems;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.MathUtil;
@@ -13,9 +17,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -127,11 +131,12 @@ public class Swerve extends SubsystemBase {
                 "BackRight",
                 false
         );
+        Pigeon2Swerve pigeon = new Pigeon2Swerve(RobotMap.SWERVE_PIGEON);
         SwerveDriveConfiguration configuration = new SwerveDriveConfiguration(
                 new SwerveModuleConfiguration[] {
                         frontLeft, frontRight, backLeft, backRight
                 },
-                new Pigeon2Swerve(RobotMap.SWERVE_PIGEON),
+                pigeon,
                 false,
                 characteristics
         );
@@ -158,6 +163,18 @@ public class Swerve extends SubsystemBase {
         });
 
         setUpPathPlanner();
+
+//        new Thread(()->{
+//
+//                while (!Thread.currentThread().isInterrupted()) {
+//                    try {
+//                    swerveDrive.swerveDrivePoseEstimator.update(pigeon.getRawRotation3d().toRotation2d(), getModulePositions());
+//                        Thread.sleep(4);
+//                    }catch (InterruptedException e){
+//                        Thread.currentThread().interrupt();
+//                    }
+//            }
+//        },"odometry").start();
     }
 
     public Command driveA(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
@@ -210,6 +227,15 @@ public class Swerve extends SubsystemBase {
                 module.getDriveMotor().set(0);
                 module.getAngleMotor().set(0);
             }
+    }
+
+    public SwerveModulePosition[] getModulePositions(){
+        SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[4];
+        int i =0;
+        for(SwerveModule module: swerveDrive.getModules()){
+            swerveModulePositions[i] = module.getPosition();
+        }
+        return swerveModulePositions;
     }
 
     public Pose2d getPose() {

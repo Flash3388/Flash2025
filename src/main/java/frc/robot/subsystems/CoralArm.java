@@ -37,12 +37,16 @@ public class CoralArm extends SubsystemBase {
                 .outputRange(-1, 1)
                 .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kAbsoluteEncoder);
         config.idleMode(SparkBaseConfig.IdleMode.kBrake);
-        config.inverted(true);
+      //  config.inverted(true);
         config.voltageCompensation(12);
         config.encoder
                 .positionConversionFactor(1 / RobotMap.ARM_CORAL_GEAR_RATIO)
                 .velocityConversionFactor(1 / RobotMap.ARM_CORAL_GEAR_RATIO);
         config.idleMode(SparkBaseConfig.IdleMode.kBrake);
+        config.absoluteEncoder
+                .positionConversionFactor(1)
+                .velocityConversionFactor(1);
+
         motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
         absEncoder = motor.getAbsoluteEncoder();
