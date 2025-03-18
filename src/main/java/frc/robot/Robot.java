@@ -1,6 +1,10 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.*;
@@ -120,11 +124,21 @@ public class Robot extends TimedRobot {
 
         PathfindingCommand.warmupCommand().schedule();
 
+        CommandScheduler.getInstance().onCommandInitialize((command)-> {
+            System.out.printf("COMMAND INIT %s.%s\n", command.getName(), command.getClass().getSimpleName());
+        });
+        CommandScheduler.getInstance().onCommandFinish((command)-> {
+            System.out.printf("COMMAND FINISH %s.%s\n", command.getName(), command.getClass().getSimpleName());
+        });
+        CommandScheduler.getInstance().onCommandInterrupt((command)-> {
+            System.out.printf("COMMAND INTERRUPT %s.%s\n", command.getName(), command.getClass().getSimpleName());
+        });
+
        // Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is ready"));
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
-    LimelightHelpers.PoseEstimate pose;
+    LimelightHelpers.PoseEstimate targetPose;
 
     @Override
     public void robotPeriodic() {
@@ -149,8 +163,8 @@ public class Robot extends TimedRobot {
 
         poseEstimate = visionSystem.getRobotPoseEstimate();
         if (poseEstimate.isPresent()) {
-            pose = poseEstimate.get();
-            swerve.updatePoseEstimator(pose);
+            targetPose = poseEstimate.get();
+            swerve.updatePoseEstimator(targetPose);
         }
 
         boolean isRed = isRed();
@@ -240,11 +254,18 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-        Pose2d pose = new Pose2d(swerve.getPose().getX() + 3,swerve.getPose().getY(),swerve.getPose().getRotation());
+        //Pose2d pose = new Pose2d(swerve.getPose().getX() + 3,swerve.getPose().getY(),swerve.getPose().getRotation());
 
-        Commands.defer(() -> driveToPose(pose), Set.of(swerve)).schedule();
-        swerve.getField().getObject("Target").setPose(pose);
+        //Commands.defer(() -> driveToPose(pose), Set.of(swerve)).schedule();
+        //swerve.getField().getObject("Target").setPose(pose);
       //  Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is testing"));
+
+        //swerve.swerveDrive.resetOdometry(Pose2d.kZero);
+        //driveToPose(swerve.getPose().plus(new Transform2d(2, 0, Rotation2d.kZero))).schedule();
+        // Units.inchesToMeters(3.92 - 0.061)
+        //swerve.driveSmall(2).schedule();
+        Pose2d pose = visionSystem.getPoseForReefStand(8, ReefStandRow.RIGHT);
+        driveToPoseDirect(swerve.getPose(), pose).schedule();
     }
 
     @Override
@@ -506,9 +527,8 @@ public class Robot extends TimedRobot {
                 Commands.waitSeconds(0.5),
                 new ParallelCommandGroup(
                 new CollectCoral(coralGripper),
-                new LowerCoralElevator(coralElevator)),
-                algaeRelease())
-                );
+                new LowerCoralElevator(coralElevator))
+                ));
     }
 
     private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3, double algaeWaitTime){
@@ -670,6 +690,7 @@ public class Robot extends TimedRobot {
         } else {
             pose = visionSystem.getPoseForReefStand(aprilTagId, row);
         }
+
         return driveToPose(pose);
     }
 
@@ -697,7 +718,28 @@ public class Robot extends TimedRobot {
                 }),
                 AutoBuilder.pathfindToPose(pose, RobotMap.CONSTRAINTS),
                 Commands.runOnce(() -> {
-                    swerve.getField().getObject("Target").setPoses();
+                    //swerve.getField().getObject("Target").setPoses();
+                })
+        );
+    }
+
+    private Command driveToPoseDirect(Pose2d startPose, Pose2d targetPose) {
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(startPose, targetPose);
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                RobotMap.CONSTRAINTS,
+                new IdealStartingState(0, startPose.getRotation()),
+                new GoalEndState(0, targetPose.getRotation())
+        );
+        path.preventFlipping = true;
+
+        return new SequentialCommandGroup(
+                Commands.runOnce(() -> {
+                    swerve.getField().getObject("Target").setPose(targetPose);
+                }),
+                AutoBuilder.followPath(path),
+                Commands.runOnce(() -> {
+                    //swerve.getField().getObject("Target").setPoses();
                 })
         );
     }
@@ -750,7 +792,7 @@ public class Robot extends TimedRobot {
         return new ParallelCommandGroup(
                 new RetractAlgaeArm(algaeArm),
                 new ReleaseAlgae(algaeGripper),
-                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A))
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B))
         );
     }
 }

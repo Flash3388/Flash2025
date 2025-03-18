@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public class VisionSystem extends SubsystemBase {
 
-    private static final String LL_NAME_BACK = "limelight-back";
-    private static final String LL_NANE_FRONT = "limelight-front";
+    private static final String LL_NAME_BACK = "limelight-right";
+    private static final String LL_NANE_FRONT = "limelight-left";
 
     private final Limelight limelightBack;
     private final Limelight limelightFront;
@@ -27,7 +27,7 @@ public class VisionSystem extends SubsystemBase {
         layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         layout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
 
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             while(!Thread.currentThread().isInterrupted()){
                 try{
                     double distanceToTargetFront = limelightFront.hasDetectedTarget() ? limelightFront.getDistanceToTarget() : 10;
@@ -50,7 +50,9 @@ public class VisionSystem extends SubsystemBase {
                     Thread.currentThread().interrupt();
                 }
             }
-        }, "VisionThread").start();
+        }, "VisionThing");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Optional<LimelightHelpers.PoseEstimate> getRobotPoseEstimate() {
