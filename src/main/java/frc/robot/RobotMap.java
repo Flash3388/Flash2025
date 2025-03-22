@@ -59,9 +59,9 @@ public class RobotMap {
     public static final int ALGEA_ARM_FORWARD_PISTON_REVERSE_CHANNEL = 14;
 
     //vision system
-    public static final double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 1.41;
-    public static final double OFFSET_ON_STAND_REEF_RIGHT = 0.30338;
-    public static final double OFFSET_ON_STAND_REEF_LEFT = 0.094338;
+    public static double LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2;
+    public static final double OFFSET_ON_STAND_REEF_RIGHT = 0.17338;
+    public static final double OFFSET_ON_STAND_REEF_LEFT = 0.174338;
     public static final double OFFSET_ON_STAND_FEEDER_R = 0.66;
     public static final double OFFSET_ON_STAND_FEEDER_L = 0.66;
     public static final double OFFSET_REEF = 0.87 / 2 - 0.05;

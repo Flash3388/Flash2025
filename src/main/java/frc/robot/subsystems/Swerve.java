@@ -161,7 +161,7 @@ public class Swerve extends SubsystemBase {
             module.getAngleMotor().setMotorBrake(false);
         }
 
-        swerveDrive.resetOdometry(new Pose2d(8,6,Rotation2d.fromDegrees(0)));
+        swerveDrive.resetOdometry(new Pose2d(3,3,Rotation2d.kZero));
 
         PathPlannerLogging.setLogActivePathCallback((poses)-> {
             swerveDrive.field.getObject("trajectory").setPoses(poses);

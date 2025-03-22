@@ -51,7 +51,6 @@ public class Robot extends TimedRobot {
     private LEDPattern newPattern;
     private boolean isGoingToFeeder = false;
     private int swerveDriveDir;
-  //  private SendableChooser<String> feederAuto;
     private SendableChooser<Command> autoChooser;
 
     @Override
@@ -98,25 +97,20 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().setActiveButtonLoop(redTeamLoop);
         SmartDashboard.putString("AllianceMode", "Red");
 
-//        feederAuto = new SendableChooser<>();
-//        feederAuto.setDefaultOption("center", "CENTER");
-//        feederAuto.addOption("left", "LEFT");
-//        feederAuto.addOption("right", "RIGHT");
-//        SmartDashboard.putData("feederAutomation", feederAuto);
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("twoHighCoralsLeft", Commands.defer(()-> twoHighCoral(true),Set.of(swerve)));
         autoChooser.addOption("twoHighCoralsRight",Commands.defer(()-> twoHighCoral(false),Set.of(swerve)));
         autoChooser.addOption("orbitAuto", Commands.defer(this::orbitAuto,Set.of(swerve)));
-        autoChooser.addOption("twoLowCoralsLeft",Commands.defer(() -> twoLowCorals(true),Set.of(swerve)));
-        autoChooser.addOption("twoLowCoralsRight",Commands.defer(() -> twoLowCorals(false),Set.of(swerve)));
-        autoChooser.addOption("oneConveyorOneCoralLeft",Commands.defer(() -> oneConveyorOneLowCoral(true),Set.of(swerve)));
-        autoChooser.addOption("oneConveyorOneCoralRight",Commands.defer(() -> oneConveyorOneLowCoral(false),Set.of(swerve)));
-        autoChooser.addOption("oneHighAndTwoLowCoralsLeft", Commands.defer(()->oneHighAndTwoLow(true),Set.of(swerve)));
-        autoChooser.addOption("oneHighAndTwoLowCoralsRight",Commands.defer(()-> oneHighAndTwoLow(false),Set.of(swerve)));
-        autoChooser.addOption("twoHighCoralsAndAlgaeLeft", Commands.defer(()-> algaeAuto(true),Set.of(swerve)));
-        autoChooser.addOption("twoHighCoralsAndAlgaeRight", Commands.defer(()-> algaeAuto(false),Set.of(swerve)));
-        autoChooser.addOption("oneHighOneLowAndAlgaeLeft", Commands.defer(()-> oneHighOneLowAndAlgae(true),Set.of(swerve)));
-        autoChooser.addOption("oneHighOneLowAndAlgaeRight", Commands.defer(()-> oneHighOneLowAndAlgae(false),Set.of(swerve)));
+//        autoChooser.addOption("twoLowCoralsLeft",Commands.defer(() -> twoLowCorals(true),Set.of(swerve)));
+//        autoChooser.addOption("twoLowCoralsRight",Commands.defer(() -> twoLowCorals(false),Set.of(swerve)));
+//        autoChooser.addOption("oneConveyorOneCoralLeft",Commands.defer(() -> oneConveyorOneLowCoral(true),Set.of(swerve)));
+//        autoChooser.addOption("oneConveyorOneCoralRight",Commands.defer(() -> oneConveyorOneLowCoral(false),Set.of(swerve)));
+//        autoChooser.addOption("oneHighAndTwoLowCoralsLeft", Commands.defer(()->oneHighAndTwoLow(true),Set.of(swerve)));
+//        autoChooser.addOption("oneHighAndTwoLowCoralsRight",Commands.defer(()-> oneHighAndTwoLow(false),Set.of(swerve)));
+//        autoChooser.addOption("twoHighCoralsAndAlgaeLeft", Commands.defer(()-> algaeAuto(true),Set.of(swerve)));
+//        autoChooser.addOption("twoHighCoralsAndAlgaeRight", Commands.defer(()-> algaeAuto(false),Set.of(swerve)));
+//        autoChooser.addOption("oneHighOneLowAndAlgaeLeft", Commands.defer(()-> oneHighOneLowAndAlgae(true),Set.of(swerve)));
+//        autoChooser.addOption("oneHighOneLowAndAlgaeRight", Commands.defer(()-> oneHighOneLowAndAlgae(false),Set.of(swerve)));
         SmartDashboard.putData("autoChooser", autoChooser);
         SmartDashboard.putBoolean("isLeft", true);
 
@@ -134,7 +128,6 @@ public class Robot extends TimedRobot {
             System.out.printf("COMMAND INTERRUPT %s.%s\n", command.getName(), command.getClass().getSimpleName());
         });
 
-       // Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is ready"));
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
@@ -142,8 +135,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        //SmartDashboard.putNumber("pressure", compressor.getPressure());
-
 
         if (isGoingToFeeder) {
             newPattern = LEDPattern.solid(Color.kRed).breathe(Second.of(1));
@@ -189,7 +180,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         isGoingToFeeder = false;
-       // Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is disabled"));
+        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 5;
     }
 
     @Override
@@ -199,11 +190,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledExit() {
+        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2;
     }
 
     @Override
     public void teleopInit() {
-      //  Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is manual"));
     }
 
     @Override
@@ -264,8 +255,8 @@ public class Robot extends TimedRobot {
         //driveToPose(swerve.getPose().plus(new Transform2d(2, 0, Rotation2d.kZero))).schedule();
         // Units.inchesToMeters(3.92 - 0.061)
         //swerve.driveSmall(2).schedule();
-        Pose2d pose = visionSystem.getPoseForReefStand(8, ReefStandRow.RIGHT);
-        driveToPoseDirect(swerve.getPose(), pose).schedule();
+       // Pose2d pose = visionSystem.getPoseForReefStand(8, ReefStandRow.RIGHT);
+        //driveToPoseDirect(swerve.getPose(), pose).schedule();
     }
 
     @Override
@@ -398,48 +389,48 @@ public class Robot extends TimedRobot {
         int sideIndexReef = isRed() ? 0 : 1;
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][5], true),
+                        reefAutoDirect(ReefStandRow.RIGHT, aprilTags[sideIndexReef][5], true,swerve.getPose()),
                         algaeCollect(4.6)),
-                ProcessorAuto()
+                ProcessorAuto(visionSystem.getPoseForReefStand(aprilTags[sideIndexReef][5],ReefStandRow.RIGHT))
         );
     }
 
-    private Command oneHighOneLowAndAlgae(boolean isLeft) {
-        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
-        int sideIndexReef = isRed() ? 0 : 1;
-        int sideIndexFeeder = isRed() ? 2 : 3;
-        int indexReef = isLeft ? 1 : 3;
-        int indexFeeder = isLeft ? 1 : 0;
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect(4.6)),
-                feederAuto(FeederSide.CENTER, aprilTags[sideIndexFeeder][indexFeeder]),
-                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
-                ProcessorAuto()
-        );
-    }
-
-    private Command oneHighAndTwoLow(boolean isLeft) {
-        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
-        int sideIndexReef = isRed() ? 0 : 1;
-        int sideIndexFeeder = isRed() ? 2 : 3;
-        int indexReef = isLeft ? 1 : 3;
-        int indexFeeder = isLeft ? 1 : 0;
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect(4.6)),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false)
-        );
-    }
+//    private Command oneHighOneLowAndAlgae(boolean isLeft) {
+//        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+//        int sideIndexReef = isRed() ? 0 : 1;
+//        int sideIndexFeeder = isRed() ? 2 : 3;
+//        int indexReef = isLeft ? 1 : 3;
+//        int indexFeeder = isLeft ? 1 : 0;
+//        return new SequentialCommandGroup(
+//                new ParallelCommandGroup(
+//                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
+//                        algaeCollect(4.6)),
+//                feederAuto(FeederSide.CENTER, aprilTags[sideIndexFeeder][indexFeeder]),
+//                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
+//                ProcessorAuto()
+//        );
+//    }
+//
+//    private Command oneHighAndTwoLow(boolean isLeft) {
+//        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+//        int sideIndexReef = isRed() ? 0 : 1;
+//        int sideIndexFeeder = isRed() ? 2 : 3;
+//        int indexReef = isLeft ? 1 : 3;
+//        int indexFeeder = isLeft ? 1 : 0;
+//        return new SequentialCommandGroup(
+//                new ParallelCommandGroup(
+//                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
+//                        algaeCollect(4.6)),
+//                Commands.none(),
+//                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+//                Commands.none(),
+//                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
+//                Commands.none(),
+//                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+//                Commands.none(),
+//                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false)
+//        );
+//    }
 
     private Command twoHighCoral(boolean isLeft) {
         int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
@@ -448,80 +439,92 @@ public class Robot extends TimedRobot {
         int indexReef = isLeft ? 1 : 3;
         int indexFeeder = isLeft ? 1 : 0;
         return new SequentialCommandGroup(
-                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
+                reefAutoDirect(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true,swerve.getPose()),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+                feederAutoDirect(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder],visionSystem.getPoseForReefStand(aprilTags[sideIndexReef][indexReef],ReefStandRow.RIGHT)),
                 Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true,0),
+                reefAutoDirect(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true,0,visionSystem.getPoseForFeeder(aprilTags[sideIndexFeeder][indexFeeder],FeederSide.CENTER)),
                 Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
+                feederAutoDirect(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder],visionSystem.getPoseForFeeder(aprilTags[sideIndexReef][indexReef],FeederSide.LEFT))
         );
     }
 
-    private Command twoLowCorals(boolean isLeft) {
-        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
-        int sideIndexReef = isRed() ? 0 : 1;
-        int sideIndexFeeder = isRed() ? 2 : 3;
-        int indexReef = isLeft ? 0 : 4;
-        int indexFeeder = isLeft ? 1 : 0;
-        return new SequentialCommandGroup(
-                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
-        );
-    }
+//    private Command twoLowCorals(boolean isLeft) {
+//        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+//        int sideIndexReef = isRed() ? 0 : 1;
+//        int sideIndexFeeder = isRed() ? 2 : 3;
+//        int indexReef = isLeft ? 0 : 4;
+//        int indexFeeder = isLeft ? 1 : 0;
+//        return new SequentialCommandGroup(
+//                reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], false),
+//                Commands.none(),
+//                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+//                Commands.none(),
+//                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
+//                Commands.none(),
+//                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
+//        );
+//    }
+//
+//    private Command oneConveyorOneLowCoral(boolean isLeft) {
+//        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+//        int sideIndexReef = isRed() ? 0 : 1;
+//        int sideIndexFeeder = isRed() ? 2 : 3;
+//        int indexReef = isLeft ? 0 : 4;
+//        int indexFeeder = isLeft ? 1 : 0;
+//        return new SequentialCommandGroup(
+//                reefAutoLowDirect(aprilTags[sideIndexReef][indexReef]),
+//                Commands.none(),
+//                feederAutoDirect(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+//                Commands.none(),
+//                reefAutoDirect(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
+//                Commands.none(),
+//                feederAutoDirect(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
+//        );
+//    }
+//
+//    private Command algaeAuto(boolean isLeft) {
+//        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
+//        int sideIndexReef = isRed() ? 0 : 1;
+//        int sideIndexFeeder = isRed() ? 2 : 3;
+//        int indexReef = isLeft ? 1 : 3;
+//        int indexFeeder = isLeft ? 1 : 0;
+//        return new SequentialCommandGroup(
+//                new ParallelCommandGroup(
+//                        reefAutoDirect(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
+//                        algaeCollect(4.6)),
+//                Commands.none(),
+//                feederAutoDirect(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
+//                Commands.none(),
+//                reefAutoDirect(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
+//                ProcessorAuto()
+//        );
+//    }
 
-    private Command oneConveyorOneLowCoral(boolean isLeft) {
-        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
-        int sideIndexReef = isRed() ? 0 : 1;
-        int sideIndexFeeder = isRed() ? 2 : 3;
-        int indexReef = isLeft ? 0 : 4;
-        int indexFeeder = isLeft ? 1 : 0;
-        return new SequentialCommandGroup(
-                reefAutoLow(aprilTags[sideIndexReef][indexReef]),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], false),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
-        );
-    }
-
-    private Command algaeAuto(boolean isLeft) {
-        int[][] aprilTags = RobotMap.REEF_APRIL_TAGS_BY_ALLIANCE;
-        int sideIndexReef = isRed() ? 0 : 1;
-        int sideIndexFeeder = isRed() ? 2 : 3;
-        int indexReef = isLeft ? 1 : 3;
-        int indexFeeder = isLeft ? 1 : 0;
+    private Command ProcessorAuto(Pose2d startingPose) {
         return new SequentialCommandGroup(
                 new ParallelCommandGroup(
-                        reefAuto(ReefStandRow.RIGHT, aprilTags[sideIndexReef][indexReef], true),
-                        algaeCollect(4.6)),
-                Commands.none(),
-                feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
-                Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
-                ProcessorAuto()
-        );
-    }
-
-    private Command ProcessorAuto() {
-        return new SequentialCommandGroup(
-                new ParallelCommandGroup(
-                        driveToProcessor(),
+                        driveToProcessorDirect(startingPose),
                         new LowerCoralElevator(coralElevator)),
                 algaeRelease()
         );
     }
 
-    private Command feederAuto(FeederSide side, int aprilTagId) {
+    private Command feederAutoDirect(FeederSide side, int aprilTagId, Pose2d startingPose) {
         return  new ParallelCommandGroup(
-                driveToFeeder(aprilTagId, side),
+                driveToFeederDirect(aprilTagId, side,startingPose),
+                Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
+                new SequentialCommandGroup(
+                        Commands.waitSeconds(0.5),
+                        new ParallelCommandGroup(
+                                new CollectCoral(coralGripper),
+                                new LowerCoralElevator(coralElevator))
+                ));
+    }
+
+    private Command feederAuto(FeederSide side, int aprilTagId, Pose2d startingPose) {
+        return  new ParallelCommandGroup(
+                driveToFeederDirect(aprilTagId, side,startingPose),
                 Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_B)),
                 new SequentialCommandGroup(
                 Commands.waitSeconds(0.5),
@@ -529,6 +532,20 @@ public class Robot extends TimedRobot {
                 new CollectCoral(coralGripper),
                 new LowerCoralElevator(coralElevator))
                 ));
+    }
+
+    private Command reefAutoDirect(ReefStandRow row, int aprilTagId, boolean level3, double algaeWaitTime, Pose2d startingPose){
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        driveToReefDirect(aprilTagId, row,startingPose),
+                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A)),
+                        new SequentialCommandGroup(
+                                new DistanceDelay(visionSystem, swerve, aprilTagId, 3),
+                                level3 ? new ParallelCommandGroup(
+                                        new RaiseCoralElevator(coralElevator),
+                                        algaeCollect(algaeWaitTime)) : Commands.none())),
+                new ReleaseCoral(coralGripper)
+        );
     }
 
     private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3, double algaeWaitTime){
@@ -545,8 +562,22 @@ public class Robot extends TimedRobot {
         );
     }
 
+    private Command reefAutoDirect(ReefStandRow row, int aprilTagId, boolean level3, Pose2d startingPose) {
+        return reefAutoDirect(row,aprilTagId,level3,4,startingPose);
+    }
+
     private Command reefAuto(ReefStandRow row, int aprilTagId, boolean level3) {
         return reefAuto(row,aprilTagId,level3,4);
+    }
+
+    private Command reefAutoLowDirect(int aprilTagId,Pose2d startingPose) {
+        return new SequentialCommandGroup(
+                new ParallelCommandGroup(
+                        goToReefL1Direct(aprilTagId,startingPose),
+                        Commands.runOnce(() -> coralArmCommand.setNewTargetPosition(RobotMap.ARM_CORAL_ANGLE_A))
+                ),
+                new ReleaseCoral(coralGripper)
+        );
     }
 
     private Command reefAutoLow(int aprilTagId) {
@@ -557,6 +588,17 @@ public class Robot extends TimedRobot {
                 ),
                 new ReleaseCoral(coralGripper)
         );
+    }
+
+    private Command goToReefL1Direct(int id, Pose2d startingPose){
+        double offsetRight =1.225-RobotMap.OFFSET_REEF;
+        double offsetOther =-0.22;
+        double offsetAngle =73;
+
+        Pose2d pose = visionSystem.getPoseForReefStandWithOffset(id,ReefStandRow.RIGHT,offsetRight,offsetOther);
+        double rotDegrees = pose.getRotation().getDegrees()+offsetAngle;
+        Pose2d targetPose = new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(rotDegrees));
+        return driveToPoseDirect(startingPose,targetPose);
     }
 
     private Command goToReefL1(int id){
@@ -683,6 +725,17 @@ public class Robot extends TimedRobot {
         );
     }
 
+    public Command driveToReefDirect(int aprilTagId, ReefStandRow row,Pose2d startingPose) {
+        Pose2d pose;
+        if (row == null) {
+            pose = visionSystem.getPoseForReefAlgae(aprilTagId);
+        } else {
+            pose = visionSystem.getPoseForReefStand(aprilTagId, row);
+        }
+
+        return driveToPoseDirect(startingPose,pose);
+    }
+
     public Command driveToReef(int aprilTagId, ReefStandRow row) {
         Pose2d pose;
         if (row == null) {
@@ -694,14 +747,31 @@ public class Robot extends TimedRobot {
         return driveToPose(pose);
     }
 
+    private Command driveToProcessorDirect(Pose2d startingPose) {
+        int aprilTagId = isRed() ? 3 : 16;
+        return driveToProcessorDirect(aprilTagId,startingPose);
+    }
+
     private Command driveToProcessor() {
         int aprilTagId = isRed() ? 3 : 16;
         return driveToProcessor(aprilTagId);
     }
 
+    private Command driveToProcessorDirect(int aprilTagId, Pose2d startingPose) {
+        Pose2d pose = visionSystem.getPoseToProcessor(aprilTagId);
+        return driveToPoseDirect(startingPose,pose);
+    }
+
     private Command driveToProcessor(int aprilTagId) {
         Pose2d pose = visionSystem.getPoseToProcessor(aprilTagId);
         return driveToPose(pose);
+    }
+
+    private Command driveToFeederDirect(int aprilTagId, FeederSide side, Pose2d startingPose) {
+        Pose2d pose = visionSystem.getPoseForFeeder(aprilTagId, side);
+
+        Pose2d rotated = new Pose2d(pose.getX(), pose.getY(), pose.getRotation().rotateBy(Rotation2d.k180deg));
+        return driveToPoseDirect(startingPose,rotated);
     }
 
     private Command driveToFeeder(int aprilTagId, FeederSide side) {
