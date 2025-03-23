@@ -98,11 +98,6 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().setActiveButtonLoop(redTeamLoop);
         SmartDashboard.putString("AllianceMode", "Red");
 
-//        feederAuto = new SendableChooser<>();
-//        feederAuto.setDefaultOption("center", "CENTER");
-//        feederAuto.addOption("left", "LEFT");
-//        feederAuto.addOption("right", "RIGHT");
-//        SmartDashboard.putData("feederAutomation", feederAuto);
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("twoHighCoralsLeft", Commands.defer(()-> twoHighCoral(true),Set.of(swerve)));
         autoChooser.addOption("twoHighCoralsRight",Commands.defer(()-> twoHighCoral(false),Set.of(swerve)));
@@ -134,7 +129,6 @@ public class Robot extends TimedRobot {
             System.out.printf("COMMAND INTERRUPT %s.%s\n", command.getName(), command.getClass().getSimpleName());
         });
 
-       // Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is ready"));
     }
 
     Optional<LimelightHelpers.PoseEstimate> poseEstimate = Optional.empty();
@@ -142,8 +136,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        //SmartDashboard.putNumber("pressure", compressor.getPressure());
-
 
         if (isGoingToFeeder) {
             newPattern = LEDPattern.solid(Color.kRed).breathe(Second.of(1));
@@ -189,7 +181,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         isGoingToFeeder = false;
-       // Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is disabled"));
+        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 4;
     }
 
     @Override
@@ -199,11 +191,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledExit() {
+        RobotMap.LIMELIGHT_DISTANCE_TO_TARGET_LIMIT = 2.41;
     }
 
     @Override
     public void teleopInit() {
-      //  Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot is manual"));
     }
 
     @Override
@@ -225,14 +217,6 @@ public class Robot extends TimedRobot {
         if (autoCommand != null) {
             autoCommand.schedule();
         }
-
-/*
-        swerve.driveA(
-                () -> 0.3,
-                () -> 0,
-                () -> 0
-        ).schedule();
- */
 
         compressor.disable();
     }
@@ -452,7 +436,7 @@ public class Robot extends TimedRobot {
                 Commands.none(),
                 feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder]),
                 Commands.none(),
-                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true,0),
+                reefAuto(ReefStandRow.LEFT, aprilTags[sideIndexReef][indexReef], true),
                 Commands.none(),
                 feederAuto(FeederSide.valueOf("CENTER"), aprilTags[sideIndexFeeder][indexFeeder])
         );
@@ -649,7 +633,6 @@ public class Robot extends TimedRobot {
                         Commands.runOnce(() -> xboxMain.setRumble(GenericHID.RumbleType.kRightRumble,0.75)),
                         createSwerveDriveCommand()
                 )
-               // Commands.runOnce(()->Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot put coral")))
         );
     }
 
@@ -671,7 +654,6 @@ public class Robot extends TimedRobot {
                             ),
                             createSwerveDriveCommand()
                     )
-                //    Commands.runOnce(()->Elastic.sendNotification(new Elastic.Notification(Elastic.Notification.NotificationLevel.INFO,"robot-State","robot put algae")))
             );
         }, Set.of(swerve, algaeArm, coralElevator, coralGripper, algaeGripper));
     }
